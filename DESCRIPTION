@@ -1,0 +1,14 @@
+Package: iotc.data.common.workflow
+Type: Package
+Title: IOTC data workflow (common)
+Version: 0.1.0
+Author: Fabio Fiorellato
+Maintainer: Fabio Fiorellato <fabio.fiorellato@fao.org>
+Description: The IOTC base package to implement data validation and import workflow
+License: Proprietary
+Encoding: UTF-8
+LazyData: true
+Depends:
+  data.table,
+  iotc.base.common.data
+RoxygenNote: 7.1.1
