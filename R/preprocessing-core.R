@@ -48,6 +48,28 @@ load_species = function() {
   )
 }
 
+load_iotc_fisheries = function() {
+  return(
+    query("
+      SELECT DISTINCT
+        F.CODE AS    IOTC_FISHERY_CODE,
+        F.NAME_EN AS IOTC_FISHERY_NAME,
+        FG.CODE AS   FISHERY_GROUP_CODE,
+        FT.CODE AS   FISHERY_TYPE_CODE
+      FROM
+        CL_FISHERIES F
+      LEFT JOIN
+        CL_FISHERY_GROUPS FG
+      ON
+        F.CL_FISHERY_GROUP_ID = FG.ID
+      LEFT JOIN
+        CL_FISHERY_TYPES FT
+      ON
+        F.CL_FISHERY_TYPE_ID = FT.ID
+    ", connection = DB_IOTCSTATISTICS())
+  )
+}
+
 load_gear_mappings = function() {
   GEAR_MAPPING_QUERY = "
     WITH MAPPED AS (
@@ -122,4 +144,15 @@ fix_repeated_species = function(data, repeated_species) {
   }
 
   return(data)
+}
+
+fleet_code_for = function(flag_country, reporting_country) {
+  FLEETS = query(paste0("SELECT DISTINCT LTRIM(RTRIM(DSFleetCode)) AS FLEET_CODE FROM CountryStratVsFleet WHERE Country = '", flag_country, "' AND ReportingCo = '", reporting_country, "'"), connection = DB_IOTDB())
+
+  FLEETS = FLEETS$FLEET_CODE
+
+  if(length(FLEETS) == 0) stop(paste0("Unable to identify any fleet code with the flag (", flag_country, ") and reporting country (", reporting_country, ") provided"))
+  if(length(FLEETS) > 1) stop(paste0("Multiple fleet codes (", paste(FLEETS, sep=","), ") identified by the flag (", flag_country, ") and reporting country (", reporting_country, ") provided"))
+
+  return(FLEETS[1])
 }
