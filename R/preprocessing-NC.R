@@ -301,7 +301,7 @@ read_form_NC_old = function(filename) {
     COMMENTS = comments
   )
 
-  data = data.table(FLAG_COUNTRY_CODE = flag, REP_COUNTRY_CODE = rep_flag, YEAR = year, data)
+  data = data.table(FLAG_COUNTRY_CODE = flag_country, REP_COUNTRY_CODE = rep_country, YEAR = year, data)
 
   data =
     melt(
