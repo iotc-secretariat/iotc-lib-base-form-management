@@ -1,4 +1,4 @@
-is_form_new = function(filename) {
+is_form_1_RC_temp = function(filename) {
     tryCatch({
       as.data.table(read.xlsx(filename, sheet = "Metadata", detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
 
@@ -6,52 +6,56 @@ is_form_new = function(filename) {
     }, error = function(e) { return(FALSE) })
 }
 
-is_form_last = function(filename) {
+is_form_1_RC_Rev20 = function(filename) {
   tryCatch({
     DATA = as.data.table(read.xlsx(filename, sheet = "NC", detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
 
-    FORM = DATA[2][[6]]
+    FORM = str_to_upper(DATA[2][[6]])
     return(!is.na(FORM) & FORM == "IOTC FORM 1: NOMINAL CATCH")
   }, error = function(e) { return(FALSE) })
 }
 
-is_form_old = function(filename) {
+is_form_1_RC_Rev18 = function(filename) {
   tryCatch({
     DATA = as.data.table(read.xlsx(filename, sheet = "NC", detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
 
-    FORM = DATA[2][[26]]
-    QUARTER = DATA[12][[1]]
+    FORM        = str_to_upper(DATA[2][[26]])
+    QUARTER     = DATA[12][[1]]
+    QUARTER_ALT = DATA[22][[1]]
 
-    return(!is.na(FORM)    & FORM    == "IOTC FORM 1: NOMINAL CATCH" &
-           !is.na(QUARTER) & str_to_upper(QUARTER) %in% c("QUARTER", "TRIMESTER"))
-
+    return(
+      !is.na(FORM) & FORM == "IOTC FORM 1: NOMINAL CATCH" & (
+        ( !is.na(QUARTER)     & str_to_upper(QUARTER)     %in% c("QUARTER", "TRIMESTER") ) |
+        ( !is.na(QUARTER_ALT) & str_to_upper(QUARTER_ALT) %in% c("QUARTER", "TRIMESTER") )
+      )
+    )
   }, error = function(e) { return(FALSE) })
 }
 
-is_form_old_no_quarter = function(filename) {
+is_form_1_RC_Rev15 = function(filename) {
   tryCatch({
     DATA = as.data.table(read.xlsx(filename, sheet = "NC", detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
 
-    FORM    = DATA[2][[26]]
+    FORM = str_to_upper(DATA[2][[26]])
 
     return(!is.na(FORM) & FORM == "IOTC FORM 1: NOMINAL CATCH")
   }, error = function(e) { return(FALSE) })
 }
 
-#'Reads a form 1-RC (intermediate format) and returns the information contained in its METADATA and DATA sections
+#'Reads a form 1-RC and returns the metadata and data contained within
 #'@export
 read_form_NC = function(filename) {
   if(is.na(filename) | filename == "") return(list(META = NA, DATA = NA))
 
-  if(is_form_new(filename))                 return(read_form_NC_new           (filename))
-  else if(is_form_last(filename))           return(read_form_NC_last          (filename))
-  else if(is_form_old(filename))            return(read_form_NC_old           (filename))
-  else if(is_form_old_no_quarter(filename)) return(read_form_NC_old_no_quarter(filename))
+  if     (is_form_1_RC_temp(filename))  return(read_form_1_RC_temp(filename))
+  else if(is_form_1_RC_Rev20(filename)) return(read_form_1_RC_Rev20(filename))
+  else if(is_form_1_RC_Rev18(filename)) return(read_form_1_RC_Rev18(filename))
+  else if(is_form_1_RC_Rev15(filename)) return(read_form_1_RC_Rev15(filename))
 
   stop("Unable to process input file: format is not recognized")
 }
 
-read_form_NC_new = function(filename) {
+read_form_1_RC_temp = function(filename) {
   meta = as.data.table(read.xlsx(filename, sheet = "Metadata",               detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
   data = as.data.table(read.xlsx(filename, sheet = "Data",     startRow = 2, detectDates = TRUE, skipEmptyRows = TRUE,  skipEmptyCols = TRUE))
 
@@ -131,9 +135,13 @@ read_form_NC_new = function(filename) {
   data[, CATCH_UNIT_CODE     := unit]
 
   SPECIES   = load_species()
+
+  SPECIES$IOTDB_CODE = NULL
+  SPECIES = unique(SPECIES)
+
   FISHERIES = load_iotc_fisheries()
 
-  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "CODE", all.x = TRUE)
+  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "IOTC_CODE", all.x = TRUE)
   data = merge(data, FISHERIES, by.x = "IOTC_FISHERY_CODE", by.y = "IOTC_FISHERY_CODE", all.x = TRUE)[!is.na(CATCH)]
 
   data$CATCH = round(as.numeric(data$CATCH), 3)
@@ -155,7 +163,7 @@ read_form_NC_new = function(filename) {
   )
 }
 
-read_form_NC_last = function(filename) {
+read_form_1_RC_Rev20 = function(filename) {
   all  = as.data.table(read.xlsx(filename, sheet = "NC", detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
   data = all[27:nrow(all)]
 
@@ -164,7 +172,9 @@ read_form_NC_last = function(filename) {
 
   data_columns = c("QUARTER", "IOTC_FISHERY_CODE", "FISHING_GROUND_CODE", "PRELIMINARY", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE", "TARGET_SPECIES_CODE", "COVERAGE_CODE", "RETAINED_REASON_CODE")
   species_data_columns = all[25, 10:length(colnames(all))]
+
   colnames(species_data_columns) = NULL
+
   species_data_columns = unlist(species_data_columns)
 
   columns = append(data_columns, species_data_columns)
@@ -234,9 +244,13 @@ read_form_NC_last = function(filename) {
   data[, CATCH_UNIT_CODE     := unit]
 
   SPECIES   = load_species()
+
+  SPECIES$IOTDB_CODE = NULL
+  SPECIES = unique(SPECIES)
+
   FISHERIES = load_iotc_fisheries()
 
-  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "CODE", all.x = TRUE)
+  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "IOTC_CODE", all.x = TRUE)
   data = merge(data, FISHERIES, by.x = "IOTC_FISHERY_CODE", by.y = "IOTC_FISHERY_CODE", all.x = TRUE)[!is.na(CATCH)]
 
   data$CATCH = round(as.numeric(data$CATCH), 3)
@@ -258,7 +272,7 @@ read_form_NC_last = function(filename) {
   )
 }
 
-read_form_NC_old = function(filename) {
+read_form_1_RC_Rev18 = function(filename) {
   all  = as.data.table(read.xlsx(filename, sheet = "NC", detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
   data = all[26:nrow(all)]
 
@@ -288,14 +302,14 @@ read_form_NC_old = function(filename) {
   fp_name   = all[ 9][[2]]
   fp_mail   = all[10][[2]]
 
-  org_name   = all[ 9][[17]]
-  org_mail   = all[10][[17]]
+  org_name  = all[ 9][[17]]
+  org_mail  = all[10][[17]]
 
   finalization_date = as.Date(NA)
   submission_date   = as.Date(NA)
 
-  year      = as.integer(   all[13][[19]])
-  unit      = sanitize_code(all[14][[19]])
+  year         = as.integer(   all[13][[19]])
+  unit         = sanitize_code(all[14][[19]])
   flag_country = sanitize_code(all[14][[ 3]])
   rep_country  = sanitize_code(all[13][[ 3]])
 
@@ -337,14 +351,17 @@ read_form_NC_old = function(filename) {
   data[, RETAINED_REASON_CODE:= "RFL"]
 
   SPECIES   = load_species()
+
+  SPECIES$IOTDB_CODE = NULL
+  SPECIES = unique(SPECIES)
+
   FISHERIES = load_iotc_fisheries()
 
-  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "CODE", all.x = TRUE)
+  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "IOTC_CODE", all.x = TRUE)
   data = merge(data, FISHERIES, by.x = "IOTC_FISHERY_CODE", by.y = "IOTC_FISHERY_CODE", all.x = TRUE)[!is.na(CATCH)]
 
   data$CATCH = round(as.numeric(data$CATCH), 3)
 
-  #data = data[CATCH > 0][order(IOTC_FISHERY_CODE, QUARTER, SPECIES_CODE)]
   data = data[order(IOTC_FISHERY_CODE, QUARTER, SPECIES_CODE)]
 
   data$YEAR    = as.integer(data$YEAR)
@@ -361,7 +378,7 @@ read_form_NC_old = function(filename) {
   )
 }
 
-read_form_NC_old_no_quarter = function(filename) {
+read_form_1_RC_Rev15 = function(filename) {
   all  = as.data.table(read.xlsx(filename, sheet = "NC", detectDates = TRUE, skipEmptyRows = FALSE, skipEmptyCols = FALSE))
   data = all[25:nrow(all)]
 
@@ -441,9 +458,13 @@ read_form_NC_old_no_quarter = function(filename) {
   data[, RETAINED_REASON_CODE:= "RFL"]
 
   SPECIES   = load_species()
+
+  SPECIES$IOTDB_CODE = NULL
+  SPECIES = unique(SPECIES)
+
   FISHERIES = load_iotc_fisheries()
 
-  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "CODE", all.x = TRUE)
+  data = merge(data, SPECIES,   by.x = "SPECIES_CODE",      by.y = "IOTC_CODE", all.x = TRUE)
   data = merge(data, FISHERIES, by.x = "IOTC_FISHERY_CODE", by.y = "IOTC_FISHERY_CODE", all.x = TRUE)[!is.na(CATCH)]
 
   data$CATCH = round(as.numeric(data$CATCH), 3)
@@ -562,6 +583,13 @@ output_IOTDB = function(processed_data, flag_country, rep_country, source = "LO"
 
   FLEET_CODE = fleet_code_for(flag_country, rep_country)
 
+  SPECIES   = species_mappings_IOTDB(load_species())[, .(IOTC_CODE, IOTDB_CODE)]
+
+  processed_data = merge(processed_data, SPECIES, by.x = SPECIES_CODE, by.y = "IOTC_CODE", all.x = TRUE)
+
+  processed_data[, SPECIES_CODE := IOTDB_CODE]
+  processed_data[is.na(SPECIES_CODE), SPECIES_CODE := "UNCL"]
+
   DATA_IOTDB =
     data.table(
       YEAR             = processed_data$YEAR,
@@ -609,14 +637,14 @@ output_IOTDB = function(processed_data, flag_country, rep_country, source = "LO"
   DATA_IOTDB =
     DATA_IOTDB[, .(Country, ReportingCountry, TimeIntervalStart, TimeIntervalEnd, Grid, Gear = GEAR_CODE, Species, Catch, CatchUnit)]
 
-  DATA_IOTDB[, .(Catch = sum(Catch)), keyby = .(Country, ReportingCountry, TimeIntervalStart, TimeIntervalEnd, Grid, Gear, Species, CatchUnit)]
+  DATA_IOTDB = DATA_IOTDB[, .(Catch = sum(Catch)), keyby = .(Country, ReportingCountry, TimeIntervalStart, TimeIntervalEnd, Grid, Gear, Species, CatchUnit)]
 
   DATA_IOTDB$Source = source
   DATA_IOTDB$QualityCode = quality
   DATA_IOTDB$EComments = comment
   DATA_IOTDB$FComments = comment
 
-  return(DATA_IOTDB)
+  return(DATA_IOTDB[!is.na(Catch) & Catch > 0])
 }
 
 #'Exports the results of processing the form 1-RC in the format used by the IOTC libraries
@@ -625,6 +653,12 @@ output_IOTC = function(processed_data, flag_country, rep_country, LLTU = "LL") {
   if(is.null(LLTU)) LLTU = "LL"
 
   DATA_IOTC = processed_data
+
+  SPECIES   = unique(load_species()[, .(CODE, IOTC_CODE)])
+  DATA_IOTC = merge(DATA_IOTC, SPECIES, by.x = SPECIES_CODE, by.y = "IOTC_CODE", all.x = TRUE)
+
+  DATA_IOTC[, SPECIES_CODE := CODE]
+  DATA_IOTC[is.na(CODE), SPECIES_CODE := "UNCL"]
 
   GEAR_MAPPINGS = load_gear_mappings()[, .(IOTC_FISHERY_CODE, GEAR_CODE)]
 
@@ -673,12 +707,27 @@ output_IOTC = function(processed_data, flag_country, rep_country, LLTU = "LL") {
 
   DATA_IOTC = DATA_IOTC[GEAR_CODE %in% c("PSFS", "PSLS"), GEAR_CODE := "PS"]
 
-  DATA_IOTC = decorate(DATA_IOTC, factorize = TRUE, remove_non_standard_columns = TRUE)
+  DATA_IOTC = decorate(DATA_IOTC, factorize = FALSE, remove_non_standard_columns = TRUE)
 
   #The 'QUARTER' column is added by the 'decorate' method... It has to be removed, as it is not really used...
   DATA_IOTC$QUARTER = NULL
 
+  DATA_IOTC = DATA_IOTC[SPECIES_CODE == "UNCL", `:=`(SPECIES_SCIENTIFIC = NA,
+                                                     SPECIES_FAMILY = NA,
+                                                     SPECIES_ORDER = NA,
+                                                     IS_IOTC_SPECIES = FALSE,
+                                                     IS_SPECIES_AGGREGATE = TRUE,
+                                                     IS_SSI = FALSE,
+                                                     IUCN_STATUS_CODE = NA,
+                                                     IUCN_STATUS = NA,
+                                                     SPECIES_WP_CODE = NA,
+                                                     SPECIES_WP = NA,
+                                                     SPECIES_GROUP_CODE = NA,
+                                                     SPECIES_GROUP = NA,
+                                                     SPECIES_CATEGORY_CODE = NA,
+                                                     SPECIES_CATEGORY = NA)]
+
   DATA_IOTC = DATA_IOTC[, .(CATCH = sum(CATCH)), keyby = setdiff(names(DATA_IOTC), "CATCH")]
 
-  return(DATA_IOTC)
+  return(DATA_IOTC[!is.na(CATCH) & CATCH > 0])
 }

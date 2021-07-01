@@ -43,7 +43,53 @@ check_and_remove_extra_rows = function(data, min_num_non_NA = 3, remove_rows = T
 load_species = function() {
   return(
     unique(
-      all_codes("SPECIES")[, .(CODE, NAME_LT, NAME_EN, IS_IOTC, IS_AGGREGATE, IS_SSI, IS_BAIT, WP_CODE, SPECIES_GROUP_CODE, SPECIES_CATEGORY_CODE, ASFIS_FAMILY, ASFIS_ORDER, IUCN_STATUS)]
+      all_codes("SPECIES")[, .(CODE, IOTC_CODE, IOTDB_CODE, NAME_LT, NAME_EN, IS_IOTC, IS_AGGREGATE, IS_SSI, IS_BAIT, WP_CODE, SPECIES_GROUP_CODE, SPECIES_CATEGORY_CODE, ASFIS_FAMILY, ASFIS_ORDER, IUCN_STATUS)]
+    )
+  )
+}
+
+load_fishing_grounds = function() {
+  return(
+    query("
+      SELECT DISTINCT
+        CODE AS FISHING_GROUND_CODE
+      FROM
+        CL_FISHING_GROUNDS",
+      connection = DB_IOTCSTATISTICS()
+    )
+  )
+}
+
+species_mappings_IOTDB = function(species) {
+  species = species[, NUM_MAPPINGS := .N, by = .(IOTC_CODE)]
+
+  species = species[!is.na(IOTC_CODE) & ( IOTDB_CODE == 'UNCL' | NUM_MAPPINGS == 1 | IOTDB_CODE == IOTC_CODE )]
+
+  species$NUM_MAPPINGS = NULL
+
+  return(species)
+}
+
+load_iotdb_species = function() {
+  return(
+    query("
+      SELECT DISTINCT
+        ACode AS IOTDB_SPECIES_CODE
+      FROM
+        cdeSpecies",
+      connection = DB_IOTDB()
+    )
+  )
+}
+
+load_iotc_species = function() {
+  return(
+    query("
+      SELECT DISTINCT
+        CODE AS IOTC_SPECIES_CODE
+      FROM
+        CL_SPECIES",
+      connection = DB_IOTCSTATISTICS()
     )
   )
 }
