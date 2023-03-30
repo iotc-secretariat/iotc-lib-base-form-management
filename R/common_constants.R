@@ -1,0 +1,4 @@
+### COMMON CONSTANTS
+
+METADATA_SHEET = "Metadata"
+DATA_SHEET     = "Data"
