@@ -1,54 +1,114 @@
 ### COMMON FIELD CHECKS (SCALAR)
 
-mandatory = function(value, field) {
-  if(is.null(value) || is.na(value) || ( is.character(value) && trim(value) == "" ))
-    stop(paste0("Missing mandatory value for '", field, "'"))
+is_provided = function(value) {
+  return(
+    !is.null(value) &&
+    !is.na(value) &&
+   (!is.character(value) || trim(value) != "")
+  )
+}
+
+is_integer = function(value) {
+  return(
+    is_provided(value) & is.integer(value)
+  )
+}
+
+is_double = function(value) {
+  return(
+    is_provided(value) & is.double(value)
+  )
+}
+
+is_year_valid = function(year) {
+  current_year = as.integer(format(Sys.time(), "%Y"))
+
+  return(
+    is_integer(year) &&
+    year <= current_year
+  )
+}
+
+is_quarter_valid = function(quarter) {
+  return(
+    is_integer(quarter) &&
+    quarter %in% 0:4
+  )
+}
+
+is_month_valid = function(month) {
+  return(
+    is_integer(month) &&
+    month %in% 1:12
+  )
+}
+
+is_percentage_valid = function(percentage) {
+  return(
+    is_double(percentage) &&
+    percentage >=0 &&
+    percentage <= 100
+  )
+}
+
+is_value_positive = function(value) {
+  return(
+    is_double(value) &&
+    value >= 0
+  )
+}
+
+is_value_strictly_positive = function(value) {
+  return(
+    is_double(value) &&
+      value > 0
+  )
+}
+
+check_mandatory = function(value, field) {
+  if(!is_provided(value)) stop(paste0("Missing mandatory value for '", field, "'"))
 
   return(value)
 }
 
-is_integer = function(value, field) {
-  if(!is.na(value) && !is.null(value) && !is.integer(value))
-    stop(paste0("Value for '", field, "' is not an integer"))
+should_be_integer = function(value, field) {
+  if(!is_integer(value)) stop(paste0("Value for '", field, "' is not an integer"))
 
   return(value)
 }
 
-is_double = function(value, field) {
-  if(!is.na(value) && !is.null(value) && !is.double(value))
-    stop(paste0("Value for '", field, "' is not a double"))
+should_be_double = function(value, field) {
+  if(!is_double(value)) stop(paste0("Value for '", field, "' is not a double"))
 
   return(value)
 }
 
 validate_year = function(year) {
-  current_year = as.integer(format(Sys.time(), "%Y"))
+  if(!is_year_valid(year)) stop(paste0("The reporting year value (", year, ") should not be NULL or set in the future"))
 
-  if(year <= current_year) return(year)
-
-  stop(paste0("The reporting year value (", year, ") should not be set in the future"))
+  return(year)
 }
 
 validate_quarter = function(quarter) {
-  if(quarter %in% 0:4) return(quarter)
+  if(!is_quarter_valid(quarter)) stop(paste0("Quarter value (", quarter, ") should not be NULL and be one among { ", paste0(seq(0, 4, 1), collapse = ", "), " }"))
 
-  stop(paste0("Quarter value (", quarter, ") should be one among { ", paste0(seq(0, 4, 1), collapse = ", "), " }"))
+  return(quarter)
 }
 
 validate_percentage = function(percentage) {
-  if(percentage >=0 && percentage <= 100) return(percentage)
+  if(!is_percentage_valid(percentage)) stop(paste0("Percentage value (", percentage, ") should not be NULL and between 0 and 100 (included)"))
 
-  stop(paste0("Percentage value (", percentage, ") should be between 0 and 100 (included)"))
+  return(percentage)
 }
 
 positive_value = function(value) {
-  if(value >= 0) return(value)
+  if(!is_value_positive(value)) stop(paste0("Value (", value, ") should not be NULL and greater than or equal to zero"))
 
-  stop(paste0("Value (", value, ") should be greater than or equal to zero"))
+  return(value)
 }
 
 strictly_positive_value = function(value) {
-  if(value > 0) return(value)
+  if(!is_value_strictly_positive(value)) stop(paste0("Value (", value, ") shouldnot be NULL and greater than zero"))
 
-  stop(paste0("Value (", value, ") should be strictly positive"))
+  return(value)
 }

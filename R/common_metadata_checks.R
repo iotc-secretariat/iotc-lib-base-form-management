@@ -14,11 +14,11 @@ validate_common_metadata = function(form_metadata) {
 
   general_information = general_information(form_metadata)
 
-  validate_year(mandatory(general_information$reporting_year,    "Reporting year"))
+  validate_year(check_mandatory(general_information$reporting_year, "Reporting year"))
 
   validate_fleet(
-    mandatory(general_information$reporting_entity,              "Reporting entity"),
-    mandatory(general_information$flag_country,                  "Flag country")
+    check_mandatory(general_information$reporting_entity,        "Reporting entity"),
+    check_mandatory(general_information$flag_country,            "Flag country")
   )
 
   return(form_metadata)
