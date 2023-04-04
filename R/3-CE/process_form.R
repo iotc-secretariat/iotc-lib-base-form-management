@@ -1,3 +1,16 @@
+verify_form_3CE = function(form) {
+  form_details = extract_metadata_1DI(form)$form_details
+
+  form_type    = form_details$type
+  form_version = form_details$version
+
+  if(check_mandatory(form_type, "Form type") != "3-CE")
+    stop(paste0("Please provide a valid form 3-CE (current form type: ", form_type, " - required: 3-CE)"))
+
+  if(check_mandatory(form_version, "Form version") != "1.0.0")
+    stop(paste0("Please provide a valid form 3-CE (current form version: ", form_version, " - required: 1.0.0)"))
+}
+
 extract_metadata_3CE = function(form) {
   metadata = common_metadata(form$form_metadata)
 
@@ -59,7 +72,7 @@ extract_strata_and_records_3CE = function(form) {
       strata  = strata,
       records = list(
         codes = list(
-          species_codes    = species_codes
+          species = species_codes
         ),
         data = list(
           efforts = records[, 1:3],

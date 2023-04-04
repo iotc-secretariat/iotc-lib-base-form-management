@@ -3,45 +3,45 @@
 initialize_messages = function() {
   return(
     list(
-      INFO  = data.table(SHEET = character(), ROW = integer(), COLUMN = integer(), TEXT = character()),
-      WARN  = data.table(SHEET = character(), ROW = integer(), COLUMN = integer(), TEXT = character()),
-      ERROR = data.table(SHEET = character(), ROW = integer(), COLUMN = integer(), TEXT = character()),
-      FATAL = data.table(SHEET = character(), ROW = integer(), COLUMN = integer(), TEXT = character())
+      INFO  = data.table(sheet = character(), row = integer(), column = integer(), message = character()),
+      WARN  = data.table(sheet = character(), row = integer(), column = integer(), message = character()),
+      ERROR = data.table(sheet = character(), row = integer(), column = integer(), message = character()),
+      FATAL = data.table(sheet = character(), row = integer(), column = integer(), message = character())
     )
   )
 }
 
-create_message = function(text, sheet = METADATA_SHEET, row = NA, column = NA) {
+create_message = function(message, sheet = NA, row = NA, column = NA) {
   return(
     data.table(
-      SHEET  = sheet,
-      ROW    = row,
-      COLUMN = column,
-      TEXT   = text
+      sheet   = sheet,
+      row     = row,
+      column  = column,
+      message = message
     )
   )
 }
 
-add_info = function(messages, message_info) {
-  messages$INFO = rbind(messages$INFO, message_info)
+add_info = function(messages, message) {
+  messages$INFO = rbind(messages$INFO, message)
 
   return(messages)
 }
 
-add_warning = function(messages, message_warn) {
-  messages$WARN = rbind(messages$WARN, message_warn)
+add_warning = function(messages, message) {
+  messages$WARN = rbind(messages$WARN, message)
 
   return(messages)
 }
 
-add_error = function(messages, message_error) {
-  messages$ERROR = rbind(messages$ERROR, message_error)
+add_error = function(messages, message) {
+  messages$ERROR = rbind(messages$ERROR, message)
 
   return(messages)
 }
 
-add_fatal = function(messages, message_fatal) {
-  messages$FATAL = rbind(messages$FATAL, message_fatal)
+add_fatal = function(messages, message) {
+  messages$FATAL = rbind(messages$FATAL, message)
 
   return(messages)
 }

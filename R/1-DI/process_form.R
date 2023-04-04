@@ -1,3 +1,16 @@
+verify_form_1DI = function(form) {
+  form_details = extract_metadata_1DI(form)$form_details
+
+  form_type    = form_details$type
+  form_version = form_details$version
+
+  if(check_mandatory(form_type, "Form type") != "1-DI")
+    stop(paste0("Please provide a valid form 1-DI (current form type: ", form_type, " - required: 1-DI)"))
+
+  if(check_mandatory(form_version, "Form version") != "1.0.0")
+    stop(paste0("Please provide a valid form 1-DI (current form version: ", form_version, " - required: 1.0.0)"))
+}
+
 extract_metadata_1DI = function(form) {
   metadata = common_metadata(form$form_metadata)
 
@@ -32,11 +45,11 @@ extract_strata_and_records_1DI = function(form) {
     list(
       strata  = strata,
       records = list(
-        codes = list(
-          species_codes    = species_codes,
-          condition_codes  = condition_codes,
-          raising_codes    = raising_codes,
-          catch_unit_codes = raising_codes
+        codes = data.table(
+          species     = species_codes,
+          conditions  = condition_codes,
+          raisings    = raising_codes,
+          catch_units = raising_codes
         ),
         data = list(
           discards = records

@@ -90,6 +90,8 @@ IN_SEX                  = biological_domain("SEX")
 
 IN_TYPES_OF_FATE        = biological_domain("TYPES_OF_FATE")
 
+IN_FATES                = biological_domain("FATES")
+
 IN_DISCARD_REASONS      = biological_domain("V_DISCARD_REASONS")
 IN_RETAIN_REASONS       = biological_domain("V_RETAIN_REASONS")
 IN_CONDITIONS           = biological_domain("INDIVIDUAL_CONDITIONS")

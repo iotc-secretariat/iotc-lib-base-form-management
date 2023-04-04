@@ -83,8 +83,8 @@ should_be_double = function(value, field) {
   return(value)
 }
 
-validate_year = function(year) {
-  if(!is_year_valid(year)) stop(paste0("The reporting year value (", year, ") should not be NULL or set in the future"))
+validate_year = function(year, field = "Reporting year") {
+  if(!is_year_valid(year)) stop(paste0("The ", field, " value (", year, ") should not be NULL or set in the future"))
 
   return(year)
 }
@@ -96,19 +96,19 @@ validate_quarter = function(quarter) {
 }
 
 validate_percentage = function(percentage) {
-  if(!is_percentage_valid(percentage)) stop(paste0("Percentage value (", percentage, ") should not be NULL and between 0 and 100 (included)"))
+  if(!is_percentage_valid(percentage)) stop(paste0("Percentage value (", percentage, ") should not be NULL and must be between 0 and 100 (included)"))
 
   return(percentage)
 }
 
 positive_value = function(value) {
-  if(!is_value_positive(value)) stop(paste0("Value (", value, ") should not be NULL and greater than or equal to zero"))
+  if(!is_value_positive(value)) stop(paste0("Value (", value, ") should not be NULL and must be greater than or equal to zero"))
 
   return(value)
 }
 
 strictly_positive_value = function(value) {
-  if(!is_value_strictly_positive(value)) stop(paste0("Value (", value, ") shouldnot be NULL and greater than zero"))
+  if(!is_value_strictly_positive(value)) stop(paste0("Value (", value, ") should not be NULL and must be greater than zero"))
 
   return(value)
 }
