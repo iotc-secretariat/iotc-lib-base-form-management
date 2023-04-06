@@ -10,6 +10,16 @@ trim = function(string) {
   return(trimmed)
 }
 
+### REFERENCE DATA LINKS
+
+reference_codes = function(domain, codelist) {
+  return(
+    paste0(
+      "https://data.iotc.org/reference/latest/domain/", domain, "/#", codelist
+    )
+  )
+}
+
 ### DATA TABLES
 
 find_empty_rows = function(data_table) {

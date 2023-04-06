@@ -1,11 +1,11 @@
 ### COMMON FORMS FUNCTIONS
 
-read_form = function(file_name, original_name = NA) {
-  display_filename = basename(ifelse(is.na(original_name), file_name, original_name))
+read_form = function(path_to_file, original_name = NA) {
+  display_filename = basename(ifelse(is.na(original_name), path_to_file, original_name))
 
   form_meta = tryCatch({
     as.data.table(
-      read.xlsx(xlsxFile = file_name, sheet = METADATA_SHEET, skipEmptyRows = FALSE, skipEmptyCols = FALSE, detectDates = TRUE)
+      read.xlsx(xlsxFile = path_to_file, sheet = METADATA_SHEET, skipEmptyRows = FALSE, skipEmptyCols = FALSE, detectDates = TRUE)
     )
   },
   error = function(e) {
@@ -14,7 +14,7 @@ read_form = function(file_name, original_name = NA) {
 
   form_data = tryCatch({
     as.data.table(
-      read.xlsx(xlsxFile = file_name, sheet = DATA_SHEET, skipEmptyRows = FALSE, skipEmptyCols = FALSE, detectDates = TRUE)
+      read.xlsx(xlsxFile = path_to_file, sheet = DATA_SHEET, skipEmptyRows = FALSE, skipEmptyCols = FALSE, detectDates = TRUE)
     )
   },
   error = function(e) {

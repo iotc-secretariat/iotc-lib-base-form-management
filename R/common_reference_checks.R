@@ -21,7 +21,7 @@ validate_entity = function(entity_code, field = "Reporting entity") {
 
   entities = entities_for(entity_code)
 
-  if(nrow(entities) == 0) stop(paste0("Unable to identify any valid entity by code '", entity_code, "'"))
+  if(nrow(entities) == 0) stop(paste0("Unable to identify any valid entity by code '", entity_code, "'. Please refer to ", reference_codes("admin", "entities"), " for a list of valid reporting entity codes."))
   if(nrow(entities) >  1) stop(paste0("Multiple entities identified by code '", entity_code, "'")) # This should never happen...
 
   return(entities)
@@ -49,7 +49,7 @@ validate_country = function(country_code, field = "Flag country") {
 
   countries = entities_for(country_code)
 
-  if(nrow(countries) == 0) stop(paste0("Unable to identify any valid country by code '", country_code, "'"))
+  if(nrow(countries) == 0) stop(paste0("Unable to identify any valid country by code '", country_code, "'. Please refer to ", reference_codes("admin", "countries"), " for a list of valid flag country codes."))
   if(nrow(countries) >  1) stop(paste0("Multiple countries identified by code '", country_code, "'")) # This should never happen...
 
   return(countries)
@@ -70,7 +70,7 @@ fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = I
 is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = IN_FLEETS_FLAGS) {
   fleets = fleets_for(reporting_entity_code, flag_country_code, valid_fleets)
 
-  return(nrow(fleet) == 1)
+  return(nrow(fleets) == 1)
 }
 
 validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = IN_FLEETS_FLAGS) {
@@ -106,7 +106,7 @@ validate_fishery = function(fishery_code, field = "Fishery") {
 
   fisheries = fisheries_for(fishery_code)
 
-  if(nrow(fisheries) == 0) stop(paste0("Unable to identify any valid fishery by code '", fishery_code, "'"))
+  if(nrow(fisheries) == 0) stop(paste0("Unable to identify any valid fishery by code '", fishery_code, "'. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes."))
   if(nrow(fisheries) >  1) stop(paste0("Multiple fisheries identified by code '", fishery_code, "'")) # This should never happen...
 
   return(fisheries)
@@ -140,7 +140,7 @@ validate_IOTC_main_area = function(IOTC_main_area_code, field = "IOTC main area"
 
   IOTC_main_areas = IOTC_main_areas_for(IOTC_main_area_code)
 
-  if(nrow(IOTC_main_areas) == 0) stop(paste0("Unable to identify any valid IOTC main area by code '", IOTC_main_area_code, "'"))
+  if(nrow(IOTC_main_areas) == 0) stop(paste0("Unable to identify any valid IOTC main area by code '", IOTC_main_area_code, "'. Please refer to ", reference_codes("admin", "IOTCareasMain"), " for a list of valid reporting entity codes."))
   if(nrow(IOTC_main_areas) >  1) stop(paste0("Multiple IOTC main areas identified by code '", IOTC_main_area_code, "'")) # This should never happen...
 
   return(IOTC_main_areas)
