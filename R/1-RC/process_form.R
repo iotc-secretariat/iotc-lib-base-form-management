@@ -72,8 +72,11 @@ validate_form_1RC_metadata = function(metadata) {
   reference_dates_available_finalization = is_provided(reference_dates$finalization)
   reference_dates_available_submission   = is_provided(reference_dates$submission)
 
-  reference_dates_coherent = reference_dates_available_finalization &
-                             reference_dates_available_submission &
+  reference_dates_valid_finalization = reference_dates_available_finalization & reference_dates$finalization <= format(Sys.time())
+  reference_dates_valid_submission   = reference_dates_available_submission   & reference_dates$submission   <= format(Sys.time())
+
+  reference_dates_coherent = reference_dates_valid_finalization &
+                             reference_dates_valid_submission &
                              reference_dates$finalization >= reference_dates$submission
 
   reporting_year_available   = is_provided(general_information$reporting_year)
@@ -88,6 +91,12 @@ validate_form_1RC_metadata = function(metadata) {
                 flag_country_valid &
                 is_fleet_valid(general_information$reporting_entity,
                                general_information$flag_country)
+
+  fleet = NA
+
+  if(fleet_valid)
+    fleet = fleets_for(general_information$reporting_entity,
+                       general_information$flag_country)
 
   return(
     list(
@@ -105,9 +114,15 @@ validate_form_1RC_metadata = function(metadata) {
           )
         ),
         reference_dates = list(
-          available = list(
-            finalization = is_provided(reference_dates$finalization),
-            submission   = is_provided(reference_dates$submission)
+          finalization = list(
+            available = is_provided(reference_dates$finalization),
+            value     = reference_dates$finalization,
+            valid     = reference_dates_valid_finalization
+          ),
+          submission = list(
+            available = is_provided(reference_dates$submission),
+            value     = reference_dates$submission,
+            valid     = reference_dates_valid_submission
           ),
           checks = list(
             dates_are_coherent = reference_dates_coherent
@@ -115,21 +130,30 @@ validate_form_1RC_metadata = function(metadata) {
         )
       ),
       general_information = list(
-        available = list(
-          reporting_year   = reporting_year_available,
-          reporting_entity = reporting_entity_available,
-          flag_country     = flag_country_available
+        reporting_year = list(
+          available = reporting_year_available,
+          value     = general_information$reporting_year,
+          valid     = reporting_year_valid
         ),
-        valid = list(
-          reporting_year   = reporting_year_valid,
-          reporting_entity = reporting_entity_valid,
-          flag_country     = flag_country_valid,
-          fleet            = fleet_valid
+        reporting_entity = list(
+          available = reporting_entity_available,
+          code      = general_information$reporting_entity,
+          valid     = reporting_entity_valid
+        ),
+        flag_country = list(
+          available = flag_country_available,
+          code      = general_information$flag_country,
+          valid     = flag_country_valid
+        ),
+        fleet = list(
+          valid     = fleet_valid,
+          code      = fleet
         )
       )
     )
   )
 
+  # TO BE REMOVED
   if(FALSE) {
     check_mandatory(focal_point$full_name,  "Metadata / Focal point full name")
     check_mandatory(focal_point$e_mail,     "Metadata / Focal point e-mail")
@@ -562,14 +586,18 @@ summary_form_1RC_metadata = function(metadata_validation_results) {
 
   ## Reference dates
 
-  if(!submission_information$reference_dates$available$finalization)
+  if(!submission_information$reference_dates$finalization$available)
     validation_messages = add_error(validation_messages, message = create_message(sheet = "Metadata", message = "The finalization date is mandatory"))
+  else if(!submission_information$reference_dates$finalization$valid)
+    validation_messages = add_error(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The finalization date (", submission_information$reference_dates$finalization$value, ") is not valid")))
 
-  if(!submission_information$reference_dates$available$submission)
+  if(!submission_information$reference_dates$submission$available)
     validation_messages = add_error(validation_messages, message = create_message(sheet = "Metadata", message = "The submission date is mandatory"))
+  else if(!submission_information$reference_dates$submission$valid)
+    validation_messages = add_error(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The submission date (", submission_information$reference_dates$submission$value, ") is not valid")))
 
-  if( submission_information$reference_dates$available$finalization &
-      submission_information$reference_dates$available$submission &
+  if( submission_information$reference_dates$finalization$available &
+      submission_information$reference_dates$submission$available &
       !submission_information$reference_dates$checks$dates_are_coherent)
     validation_messages = add_error(validation_messages, message = create_message(sheet = "Metadata", message = "The submission date preceeds the finalization date"))
 
@@ -577,30 +605,31 @@ summary_form_1RC_metadata = function(metadata_validation_results) {
 
   ## Reporting year
 
-  if(!general_information$available$reporting_year)
+  if(!general_information$reporting_year$available)
     validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = "The reporting year is mandatory"))
-  else if(!general_information$valid$reporting_year)
-    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = "The reporting year must not be in the future"))
+  else if(!general_information$reporting_year$valid)
+    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The reporting year (", general_information$reporting_year$value, ") must not be in the future")))
 
   ## Reporting entity
 
-  if(!general_information$available$reporting_entity)
+  if(!general_information$reporting_entity$available)
     validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = "The reporting entity is mandatory"))
-  else if(!general_information$valid$reporting_entity)
-    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The provided reporting entity is not valid. Please refer to ", reference_codes("admin", "entities"), " for a list of valid entity codes")))
+  else if(!general_information$reporting_entity$valid)
+    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") is not valid. Please refer to ", reference_codes("admin", "entities"), " for a list of valid entity codes")))
 
   ## Flag country
 
-  if(!general_information$available$flag_country)
+  if(!general_information$flag_country$available)
     validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = "The flag country is mandatory"))
-  else if(!general_information$valid$flag_country)
-    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The provided flag country is not valid. Please refer to ", reference_codes("admin", "countries"), " for a list of valid country codes")))
+  else if(!general_information$flag_country$valid)
+    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The provided flag country (", general_information$flag_country$code, ") is not valid. Please refer to ", reference_codes("admin", "countries"), " for a list of valid country codes")))
 
-  if( general_information$valid$reporting_entity &
-      general_information$valid$flag_country &
-      !general_information$valid$fleet)
-    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The provided reporting entity and flag country do not identify any valid fleet")))
-
+  if( general_information$reporting_entit$valid &
+      general_information$flag_country$valid &
+      !general_information$fleet$valid)
+    validation_messages = add_fatal(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") do not identify any valid fleet")))
+  else
+    validation_messages = add_info(validation_messages, message = create_message(sheet = "Metadata", message = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") identify ", general_information$fleet$code, " as fleet")))
   return(
     validation_messages
   )
