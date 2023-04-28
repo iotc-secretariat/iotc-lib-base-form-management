@@ -21,10 +21,10 @@ setMethod("validate_data",
             catch_data_original = records$data$catches_original
             catch_data          = records$data$catches
 
-            strata_empty_rows    = find_empty_rows(strata)
-            strata_empty_columns = find_empty_columns(strata)
+            #strata_empty_rows    = find_empty_rows(strata)
+            #strata_empty_columns = find_empty_columns(strata)
 
-            strata[, IS_EMPTY := .I %in% strata_empty_rows]
+            #strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
             total_strata     = nrow(strata)
             non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]

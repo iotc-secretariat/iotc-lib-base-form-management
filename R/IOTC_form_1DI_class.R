@@ -97,7 +97,9 @@ setMethod("validate_data",
             catch_data_original = records$data$catches_original
 
             strata_empty_rows    = find_empty_rows(strata)
+            strata_empty_columns = find_empty_columns(strata)
 
+            strata[, IS_EMPTY := .I %in% strata_empty_rows]
             strata[, OCCURRENCES := .N, by = .(QUARTER, FISHERY_CODE, IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
             non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]

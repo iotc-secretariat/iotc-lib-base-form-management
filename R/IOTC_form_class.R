@@ -42,17 +42,17 @@ setGeneric("form_type", function(form) {
   standardGeneric("form_type")
 })
 
-setMethod("form_type", "IOTCForm", function(form) {
-  return("generic_IOTC_form")
-})
+#setMethod("form_type", "IOTCForm", function(form) {
+#  return("generic_IOTC_form")
+#})
 
 setGeneric("form_version", function(form) {
   standardGeneric("form_version")
 })
 
-setMethod("form_version", "IOTCForm", function(form) {
-  return("0.0.0")
-})
+#setMethod("form_version", "IOTCForm", function(form) {
+#  return("0.0.0")
+#})
 
 setGeneric("form_comment_cell_row", function(form) {
   standardGeneric("form_comment_cell_row")

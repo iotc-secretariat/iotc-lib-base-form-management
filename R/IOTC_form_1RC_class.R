@@ -70,7 +70,7 @@ setMethod("validate_quarters",
 
             return(
               list(
-                overlapping_quarters = all_year_quarter_strata,
+                overlapping_quarters = overlapping_quarters,
                 incomplete_quarters  = incomplete_quarters
               )
             )
@@ -90,9 +90,10 @@ setMethod("validate_data",
             catch_data_original = records$data$catches_original
 
             strata_empty_rows    = find_empty_rows(strata)
+            strata_empty_columns = find_empty_columns(strata)
 
+            strata[, IS_EMPTY := .I %in% strata_empty_rows]
             strata[, OCCURRENCES := .N, by = .(QUARTER, FISHERY_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
-
 
             # If all quarters are provided and valid, we check that they're also consistent...
             all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
