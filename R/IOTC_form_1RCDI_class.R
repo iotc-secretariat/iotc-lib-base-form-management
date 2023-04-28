@@ -403,7 +403,7 @@ setMethod("common_data_validation_summary",
             empty_rows = records$empty_rows
 
             if(empty_rows$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data record(s) detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
 
             empty_columns = records$empty_columns
 
