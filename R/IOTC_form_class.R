@@ -138,7 +138,7 @@ setMethod("validate_metadata", "IOTCForm", function(form) {
   reference_dates_coherent =
     reference_dates_valid_finalization &
     reference_dates_valid_submission &
-    reference_dates$finalization >= reference_dates$submission
+    reference_dates$submission >= reference_dates$finalization
 
   reporting_year_available   = is_provided(general_information$reporting_year)
   reporting_entity_available = is_provided(general_information$reporting_entity)
@@ -288,7 +288,7 @@ setMethod("metadata_validation_summary",
             if( submission_information$reference_dates$finalization$available &
                 submission_information$reference_dates$submission$available &
                 !submission_information$reference_dates$checks$dates_are_coherent)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The submission date preceeds the finalization date"))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") should follow the finalization date (", submission_information$reference_dates$finalization$value, ")")))
 
             # General information
 
