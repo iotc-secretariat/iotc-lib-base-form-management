@@ -27,7 +27,7 @@ setMethod("extract_data", "IOTCForm1DI", function(form) {
   strata[, QUARTER    := as.integer(QUARTER)]
   strata[, COVERAGE   := round(as.numeric(COVERAGE),   0)]
 
-  records = form_data[3:nrow(form_data), 12:ncol(form_data)]
+  records = form_data[2:nrow(form_data), 12:ncol(form_data)]
 
   species_codes   = unlist(lapply(records[1], trim), use.names = FALSE)
   condition_codes = unlist(lapply(records[2], trim), use.names = FALSE)
@@ -108,7 +108,7 @@ setMethod("validate_data",
             unique_strata    = non_empty_strata[ ! non_empty_strata %in% duplicate_strata ]
 
             missing_discard_reasons = which(sapply(strata$DISCARD_REASON_CODE, is.na))
-            invalid_discard_reasons = which(!sapply(strata$DISCARD_REASON_CODE, is_retain_reason_valid))
+            invalid_discard_reasons = which(!sapply(strata$DISCARD_REASON_CODE, is_discard_reason_valid))
             invalid_discard_reasons = invalid_discard_reasons[ ! invalid_discard_reasons %in% missing_discard_reasons ]
             missing_discard_reasons = missing_discard_reasons[ ! missing_discard_reasons %in% strata_empty_rows ]
 
@@ -235,7 +235,29 @@ setMethod("data_validation_summary",
             checks_strata  = strata$checks
             checks_records = records$checks
 
+
+            ## Main strata
+
+            checks_strata_main = checks_strata$main
+
+            # Part of the validation comes from the superclass
+
+            discard_reasons = checks_strata_main$discard_reasons
+
+            if(discard_reasons$missing$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing discard reason in row(s) #", paste0(discard_reasons$missing$row_indexes, collapse = ", "))))
+
+            if(discard_reasons$invalid$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid discard reason in row(s) #", paste0(discard_reasons$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "discardReasons"), " for a list of valid discard reason codes")))
+
+            ## Original data
+
+            # Validation comes from the superclass
+
+            ###
+
             # Data issues / summary
+
 
             conditions = checks_records$conditions
 
