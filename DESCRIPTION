@@ -9,6 +9,21 @@ License: Proprietary
 Encoding: UTF-8
 LazyData: true
 Depends:
-  data.table,
-  iotc.base.common.data
+    data.table,
+    iotc.base.common.data,
+    iotc.data.reference.codelists,
+    R (>= 2.10)
 RoxygenNote: 7.1.1
+Collate: 
+    'Message_class.R'
+    'IOTC_form_class.R'
+    'IOTC_form_1RCDI_class.R'
+    'IOTC_form_1RC_class.R'
+    'IOTC_form_1DI_class.R'
+    'constants.R'
+    'data_checks.R'
+    'field_checks.R'
+    'forms.R'
+    'metadata.R'
+    'reference_checks.R'
+    'utilities.R'

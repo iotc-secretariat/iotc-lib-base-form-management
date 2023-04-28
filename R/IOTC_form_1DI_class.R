@@ -1,0 +1,269 @@
+#' @include IOTC_form_1RC_class.R
+#' @export IOTCForm1DI
+IOTCForm1DI = setClass(
+  "IOTCForm1DI",
+  contains = "IOTCForm1RCDI"
+)
+
+setMethod("form_type", "IOTCForm1DI", function(form) {
+  return("1-DI")
+})
+
+setMethod("form_version", "IOTCForm1DI", function(form) {
+  return("1.0.0")
+})
+
+setMethod("extract_data", "IOTCForm1DI", function(form) {
+  # Based on the same method from IOTCForm1RC
+
+  form_metadata = form@original_metadata
+  form_data     = form@original_data
+
+  strata = form_data[6:nrow(form_data)][, 2:10]
+  colnames(strata) = c("QUARTER", "FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "DISCARD_REASON_CODE",
+                       "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE",
+                       "COVERAGE_TYPE_CODE", "COVERAGE")
+
+  strata[, QUARTER    := as.integer(QUARTER)]
+  strata[, COVERAGE   := round(as.numeric(COVERAGE),   0)]
+
+  records = form_data[3:nrow(form_data), 12:ncol(form_data)]
+
+  species_codes   = unlist(lapply(records[1], trim), use.names = FALSE)
+  condition_codes = unlist(lapply(records[2], trim), use.names = FALSE)
+  raising_codes   = unlist(lapply(records[3], trim), use.names = FALSE)
+  catch_unit_codes= unlist(lapply(records[4], trim), use.names = FALSE)
+
+  # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
+  records_original = records[5:nrow(records)]
+  records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+
+  return(
+    list(
+      strata = strata,
+      records =
+        list(
+          codes = list(
+            species     = species_codes,
+            conditions  = condition_codes,
+            raisings    = raising_codes,
+            catch_units = catch_unit_codes
+          ),
+          data = list(
+            catches_original = records_original,
+            catches          = records
+          )
+        )
+    )
+  )
+})
+
+setMethod("validate_quarters",
+          list(form = "IOTCForm1DI", strata = "data.table"),
+          function(form, strata) {
+            l_info("IOTCForm1DI.validate_quarters")
+
+            all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
+            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+
+            overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "DISCARD_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            incomplete_quarters_strata  = valid_quarters_strata[NUM_QUARTERS < 4]
+
+            overlapping_quarters = merge(strata, overlapping_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "DISCARD_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            overlapping_quarters = which(!is.na(overlapping_quarters$NUM_QUARTERS))
+
+            incomplete_quarters  = merge(strata, incomplete_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "DISCARD_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            incomplete_quarters  = which(!is.na(incomplete_quarters$NUM_QUARTERS))
+
+            return(
+              list(
+                overlapping_quarters = overlapping_quarters,
+                incomplete_quarters  = incomplete_quarters
+              )
+            )
+          }
+)
+
+setMethod("validate_data",
+          "IOTCForm1DI",
+          function(form) {
+            l_info("IOTCForm1DI.validate_data")
+
+            data_validation_results = callNextMethod(form)
+
+            strata  = form@data$strata
+            records = form@data$records
+
+            catch_data_original = records$data$catches_original
+
+            strata_empty_rows    = find_empty_rows(strata)
+
+            strata[, OCCURRENCES := .N, by = .(QUARTER, FISHERY_CODE, IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+
+            non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
+            duplicate_strata = which(strata$OCCURRENCES > 1)   #which(strata_duplicated$COUNT > 1)
+            duplicate_strata = duplicate_strata[ ! duplicate_strata %in% strata_empty_rows ]
+            unique_strata    = non_empty_strata[ ! non_empty_strata %in% duplicate_strata ]
+
+            missing_discard_reasons = which(sapply(strata$DISCARD_REASON_CODE, is.na))
+            invalid_discard_reasons = which(!sapply(strata$DISCARD_REASON_CODE, is_retain_reason_valid))
+            invalid_discard_reasons = invalid_discard_reasons[ ! invalid_discard_reasons %in% missing_discard_reasons ]
+            missing_discard_reasons = missing_discard_reasons[ ! missing_discard_reasons %in% strata_empty_rows ]
+
+            missing_conditions   = which( sapply(records$codes$conditions, is.na))
+            invalid_conditions   = which(!sapply(records$codes$conditions, is_condition_valid))
+            invalid_conditions   = invalid_conditions[ ! invalid_conditions %in% missing_conditions ]
+
+            missing_data_raisings   = which( sapply(records$codes$raisings, is.na))
+            invalid_data_raisings   = which(!sapply(records$codes$raisings, is_data_raising_valid))
+            invalid_data_raisings   = invalid_data_raisings[ ! invalid_data_raisings %in% missing_data_raisings ]
+
+            missing_catch_units   = which( sapply(records$codes$catch_units, is.na))
+            invalid_catch_units   = which(!sapply(records$codes$catch_units, is_catch_unit_valid))
+            invalid_catch_units   = invalid_catch_units[ ! invalid_catch_units %in% missing_catch_units ]
+
+            max_length = max(length(records$codes$species),
+                             length(records$codes$conditions),
+                             length(records$codes$raisings),
+                             length(records$codes$catch_units))
+
+            species     = pad(records$codes$species,     max_length)
+            conditions  = pad(records$codes$conditions,  max_length)
+            raisings    = pad(records$codes$raisings,    max_length)
+            catch_units = pad(records$codes$catch_units, max_length)
+
+            data_stratification = paste(species, conditions, raisings, catch_units, sep = "-")
+
+            stratification_occurrences = as.data.table(table(data_stratification))
+            colnames(stratification_occurrences) = c("STRATIFICATION_CODE", "NUM_OCCURRENCES")
+
+            stratification_occurrences_multiple = stratification_occurrences[NUM_OCCURRENCES > 1]
+            stratifications_multiple = which(data_stratification %in% stratification_occurrences_multiple$STRATIFICATION_CODE)
+
+            data_validation_results$strata$duplicate =
+              list(
+                number = length(duplicate_strata),
+                row_indexes = duplicate_strata
+              )
+
+            data_validation_results$strata$unique =
+              list(
+                number = length(unique_strata),
+                row_indexes = unique_strata
+              )
+
+            data_validation_results$strata$checks$main$discard_reasons = list(
+              invalid = list(
+                number       = length(invalid_discard_reasons),
+                row_indexes  = invalid_discard_reasons,
+                codes        = strata[invalid_discard_reasons]$DISCARD_REASON_CODE,
+                codes_unique = unique(strata[invalid_discard_reasons]$DISCARD_REASON_CODE)
+              ),
+              missing = list(
+                number      = length(missing_discard_reasons),
+                row_indexes = missing_discard_reasons
+              )
+            )
+
+            data_validation_results$records$checks$conditions =
+              list(
+                missing = list(
+                  number      = length(missing_conditions),
+                  col_indexes = missing_conditions
+                ),
+                invalid = list(
+                  number       = length(invalid_conditions),
+                  col_indexes  = invalid_conditions,
+                  codes        = records$codes$conditions[invalid_conditions],
+                  codes_unique = unique(records$codes$conditions[invalid_conditions])
+                )
+              )
+
+            data_validation_results$records$checks$data_raisings =
+              list(
+                missing = list(
+                  number      = length(missing_data_raisings),
+                  col_indexes = missing_data_raisings
+                ),
+                invalid = list(
+                  number       = length(invalid_data_raisings),
+                  col_indexes  = invalid_data_raisings,
+                  codes        = records$codes$raisings[invalid_data_raisings],
+                  codes_unique = unique(records$codes$raisings[invalid_data_raisings])
+                )
+              )
+
+            data_validation_results$records$checks$catch_units =
+              list(
+                missing = list(
+                  number      = length(missing_catch_units),
+                  col_indexes = missing_catch_units
+                ),
+                invalid = list(
+                  number       = length(invalid_catch_units),
+                  col_indexes  = invalid_catch_units,
+                  codes        = records$codes$catch_units[invalid_catch_units],
+                  codes_unique = unique(records$codes$catch_units[invalid_catch_units])
+                )
+              )
+
+            data_validation_results$records$checks$stratifications =
+              list(
+                multiple = list(
+                  number       = length(stratifications_multiple),
+                  col_indexes  = stratifications_multiple,
+                  codes_unique = stratification_occurrences_multiple$STRATIFICATION_CODE
+                )
+              )
+
+            return(data_validation_results)
+          }
+)
+
+setMethod("data_validation_summary",
+          "IOTCForm1DI",
+          function(form, data_validation_results) {
+            l_info("IOTCForm1DI.data_validation_summary")
+
+            validation_messages = common_data_validation_summary(form, data_validation_results)
+
+            strata  = data_validation_results$strata
+            records = data_validation_results$records
+
+            checks_strata  = strata$checks
+            checks_records = records$checks
+
+            # Data issues / summary
+
+            conditions = checks_records$conditions
+
+            if(conditions$missing$number > 0)    # Missing
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing conditions in column(s) #", paste0(conditions$missing$col_indexes, collapse = ", "))))
+
+            if(conditions$invalid$number > 0)    # Invalid
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid conditions in column(s) #", paste0(conditions$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes")))
+
+            raisings = checks_records$data_raisings
+
+            if(raisings$missing$number > 0)    # Missing
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing data raising in column(s) #", paste0(raisings$missing$col_indexes, collapse = ", "))))
+
+            if(raisings$invalid$number > 0)    # Invalid
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid data raising in column(s) #", paste0(raisings$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
+
+            catch_units = checks_records$catch_units
+
+            if(catch_units$missing$number > 0)    # Missing
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing catch unit in column(s) #", paste0(catch_units$missing$col_indexes, collapse = ", "))))
+
+            if(catch_units$invalid$number > 0)    # Invalid
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid catch unit in column(s) #", paste0(catch_units$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes")))
+
+            stratifications = checks_records$stratifications
+
+            if(stratifications$multiple$number > 0)   # Multiple
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Repeated species-condition-raising-catch units in column(s) #", paste0(stratifications$multiple$col_indexes, collapse = ", "))))
+
+            return(validation_messages)
+          }
+)

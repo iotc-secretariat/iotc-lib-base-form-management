@@ -1,5 +1,6 @@
 ### COMMON FORMS FUNCTIONS
 
+#' @export
 read_form = function(path_to_file, original_name = NA) {
   display_filename = basename(ifelse(is.na(original_name), path_to_file, original_name))
 

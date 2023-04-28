@@ -2,7 +2,7 @@
 
 entities_for = function(entity_code) {
   return(
-    IN_ENTITIES[CODE == trim(entity_code)]
+    iotc.data.reference.codelists::ENTITIES[CODE == trim(entity_code)]
   )
 }
 
@@ -30,7 +30,7 @@ validate_entity = function(entity_code, field = "Reporting entity") {
 
 countries_for = function(country_code) {
   return(
-    IN_COUNTRIES[CODE == trim(country_code)]
+    iotc.data.reference.codelists::COUNTRIES[CODE == trim(country_code)]
   )
 }
 
@@ -55,7 +55,7 @@ validate_country = function(country_code, field = "Flag country") {
   return(countries)
 }
 
-fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = IN_FLEETS_FLAGS) {
+fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {
   valid_fleets = unique(valid_fleets[, .(FLAG_CODE, REPORTING_ENTITY_CODE, FLEET_CODE, NAME_EN, NAME_FR)])
 
   reporting_entity_code = trim(reporting_entity_code)
@@ -67,13 +67,13 @@ fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = I
   return(fleets)
 }
 
-is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = IN_FLEETS_FLAGS) {
+is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {
   fleets = fleets_for(reporting_entity_code, flag_country_code, valid_fleets)
 
   return(nrow(fleets) == 1)
 }
 
-validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = IN_FLEETS_FLAGS) {
+validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {
   reporting_entity_code = validate_entity(reporting_entity_code)$CODE
   flag_country_code     = validate_country(flag_country_code)$CODE
 
@@ -87,7 +87,7 @@ validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets
 
 fisheries_for = function(fishery_code) {
   return(
-    IN_FISHERIES[CODE == trim(fishery_code)]
+    iotc.data.reference.codelists::FISHERIES[CODE == trim(fishery_code)]
   )
 }
 
@@ -121,7 +121,7 @@ is_multiple_gear_fishery = function(fishery_code) {
 
 IOTC_main_areas_for = function(IOTC_main_area_code) {
   return(
-    IN_IOTC_AREA[CODE == trim(IOTC_main_area_code)]
+    iotc.data.reference.codelists::IOTC_AREA[CODE == trim(IOTC_main_area_code)]
   )
 }
 
@@ -140,7 +140,7 @@ validate_IOTC_main_area = function(IOTC_main_area_code, field = "IOTC main area"
 
   IOTC_main_areas = IOTC_main_areas_for(IOTC_main_area_code)
 
-  if(nrow(IOTC_main_areas) == 0) stop(paste0("Unable to identify any valid IOTC main area by code '", IOTC_main_area_code, "'. Please refer to ", reference_codes("admin", "IOTCareasMain"), " for a list of valid reporting entity codes."))
+  if(nrow(IOTC_main_areas) == 0) stop(paste0("Unable to identify any valid IOTC main area by code '", IOTC_main_area_code, "'. Please refer to ", reference_codes("admin", "IOTCareasMain"), " for a list of valid IOTC main area codes."))
   if(nrow(IOTC_main_areas) >  1) stop(paste0("Multiple IOTC main areas identified by code '", IOTC_main_area_code, "'")) # This should never happen...
 
   return(IOTC_main_areas)
@@ -148,7 +148,7 @@ validate_IOTC_main_area = function(IOTC_main_area_code, field = "IOTC main area"
 
 species_for = function(species_code) {
   return(
-    IN_SPECIES[CODE == trim(species_code)]
+    iotc.data.reference.codelists::SPECIES[CODE == trim(species_code)]
   )
 }
 
@@ -181,7 +181,7 @@ is_species_aggregate = function(species_code) {
 
 data_type_for = function(data_type_code) {
   return(
-    IN_DATA_TYPES[CODE == trim(data_type_code)]
+    iotc.data.reference.codelists::DATA_TYPES[CODE == trim(data_type_code)]
   )
 }
 
@@ -211,8 +211,8 @@ data_source_for = function(dataset_code, data_source_code) {
   data_source_code = trim(data_source_code)
 
   return(
-    IN_DATA_SOURCES[DATASET_CODE == dataset_code &
-                    CODE == data_source_code]
+    iotc.data.reference.codelists::DATA_SOURCES[DATASET_CODE == dataset_code &
+                                                CODE == data_source_code]
   )
 }
 
@@ -241,8 +241,8 @@ validate_data_source = function(dataset_code, data_source_code, field = "Data so
 
 data_processing_for = function(dataset_code, data_processing_code) {
   return(
-    IN_DATA_PROCESSINGS[DATASET_CODE == trim(dataset_code) &
-                        CODE == trim(data_processing_code)]
+    iotc.data.reference.codelists::DATA_PROCESSINGS[DATASET_CODE == trim(dataset_code) &
+                                                    CODE == trim(data_processing_code)]
   )
 }
 
@@ -271,7 +271,7 @@ validate_data_processing = function(dataset_code, data_processing_code, field = 
 
 data_coverage_type_for = function(data_coverage_type_code) {
   return(
-    IN_DATA_COVERAGE_TYPES[CODE == trim(data_coverage_type_code)]
+    iotc.data.reference.codelists::DATA_COVERAGE_TYPES[CODE == trim(data_coverage_type_code)]
   )
 }
 
@@ -301,8 +301,8 @@ fate_for = function(type_of_fate_code, fate_code) {
   fate_code         = trim(fate_code)
 
   return(
-    IN_FATES[TYPE_OF_FATE_CODE == type_of_fate_code &
-             CODE              == fate_code]
+    iotc.data.reference.codelists::FATES[TYPE_OF_FATE_CODE == type_of_fate_code &
+                                         CODE              == fate_code]
   )
 }
 
@@ -363,4 +363,85 @@ validate_discard_reason = function(discard_reason_code, field = "Discard reason"
       field
     )
   )
+}
+
+data_raising_for = function(data_raising_code) {
+  return(
+    iotc.data.reference.codelists::DATA_RAISINGS[CODE == trim(data_raising_code)]
+  )
+}
+
+is_data_raising_valid = function(data_raising_code) {
+  return(
+    nrow(
+      data_raising_for(
+        data_raising_code
+      )
+    ) == 1
+  )
+}
+
+validate_data_raising = function(data_raising_code, field = "Data raising") {
+  data_raising_code = check_mandatory(trim(data_raising_code), field)
+
+  data_raisings = data_raising_for(data_raising_code)
+
+  if(nrow(data_raisings) == 0) stop(paste0("Unable to identify any valid data raising by code '", data_raising_code, "'. Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes."))
+  if(nrow(data_raisings) >  1) stop(paste0("Multiple data raisings identified by code '", data_raising_code, "'")) # This should never happen...
+
+  return(data_raisings)
+}
+
+condition_for = function(condition_code) {
+  return(
+    iotc.data.reference.codelists::CONDITIONS[CODE == trim(condition_code)]
+  )
+}
+
+is_condition_valid = function(condition_code) {
+  return(
+    nrow(
+      condition_for(
+        condition_code
+      )
+    ) == 1
+  )
+}
+
+validate_condition = function(condition_code, field = "Condition") {
+  condition_code = check_mandatory(trim(condition_code), field)
+
+  conditions = condition_for(condition_code)
+
+  if(nrow(conditions) == 0) stop(paste0("Unable to identify any valid condition by code '", condition_code, "'. Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes."))
+  if(nrow(conditions) >  1) stop(paste0("Multiple conditions identified by code '", condition_code, "'")) # This should never happen...
+
+  return(conditions)
+}
+
+catch_unit_for = function(catch_unit_code) {
+  return(
+    iotc.data.reference.codelists::CATCH_UNITS[CODE == trim(catch_unit_code)]
+  )
+}
+
+is_catch_unit_valid = function(catch_unit_code) {
+  return(
+    nrow(
+      catch_unit_for(
+        catch_unit_code
+      )
+    ) == 1
+  )
+}
+
+validate_catch_unit = function(catch_unit_code, field = "Catch unit") {
+  catch_unit_code = check_mandatory(trim(catch_unit_code), field)
+
+  catch_units = catch_unit_for(catch_unit_code)
+
+  if(nrow(catch_units) == 0) stop(paste0("Unable to identify any valid catch unit by code '", catch_unit_code, "'. Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes."))
+  if(nrow(catch_units) >  1) stop(paste0("Multiple catch units identified by code '", catch_unit_code, "'")) # This should never happen...
+
+  return(conditions)
 }

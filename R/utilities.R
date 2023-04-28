@@ -5,9 +5,21 @@
 trim = function(string) {
   trimmed = str_trim(string)
 
-  if(is.null(trimmed) | is.na(trimmed) | trimmed == "") trimmed = NA
+  if(is.null(trimmed) | is.na(trimmed) | trimmed == "") trimmed = NA_character_
 
   return(trimmed)
+}
+
+### VECTORS
+
+pad = function(original_vector, target_length, padding_values = NA) {
+  current_length = length(original_vector)
+
+  if(target_length < current_length) stop("Provided length is smaller than current length")
+
+  return(
+    c(original_vector, rep(padding_values, target_length - current_length))
+  )
 }
 
 ### REFERENCE DATA LINKS
