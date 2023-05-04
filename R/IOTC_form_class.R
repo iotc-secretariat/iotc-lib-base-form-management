@@ -369,6 +369,7 @@ setMethod("validation_summary", "IOTCForm", function(form) {
 
     validation_results = validate(current_form)
   }, error = function(e) {
+    print(e)
     validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = e$message))
   })
 

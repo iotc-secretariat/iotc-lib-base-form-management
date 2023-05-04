@@ -13,6 +13,12 @@ source("R/data_checks.R")
 source("R/metadata.R")
 source("R/forms.R")
 
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/Message_class.R", echo=TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_class.R", echo=TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1RCDI_class.R", echo=TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1RC_class.R", echo=TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1DI_class.R", echo=TRUE)
+
 FORM_1RC =
   new("IOTCForm1RC",
       path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-1RC - legacy OK.xlsx",
@@ -23,7 +29,7 @@ validation_summary(FORM_1RC)
 
 FORM_1DI =
   new("IOTCForm1DI",
-      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-1DI_test.xlsx",
+      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-1DI - legacy.xlsx",
       original_name = "Form-1DI.xlsx"
   )
 

@@ -10,7 +10,7 @@ setMethod("form_type", "IOTCForm1DI", function(form) {
 })
 
 setMethod("form_version", "IOTCForm1DI", function(form) {
-  return("1.0.0")
+  return("1.0.0-legacy")
 })
 
 setMethod("extract_data", "IOTCForm1DI", function(form) {
@@ -19,7 +19,7 @@ setMethod("extract_data", "IOTCForm1DI", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
-  strata = form_data[6:nrow(form_data)][, 2:10]
+  strata = form_data[6:nrow(form_data)][, 2:11]
   colnames(strata) = c("QUARTER", "FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "DISCARD_REASON_CODE",
                        "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE",
                        "COVERAGE_TYPE_CODE", "COVERAGE")
@@ -64,7 +64,7 @@ setMethod("validate_quarters",
             l_info("IOTCForm1DI.validate_quarters")
 
             all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
-            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
             overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "DISCARD_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             incomplete_quarters_strata  = valid_quarters_strata[NUM_QUARTERS < 4]
