@@ -2,6 +2,7 @@ library(RCurl)
 library(stringr)
 
 SERVER_ROOT = "/var/www/static/reference"
+FORMS_FOLDER = "legacy-forms"
 
 DATA_IOTC_SERVER_IP = Sys.getenv("DATA_IOTC_SERVER_IP")
 DATA_IOTC_USERNAME  = Sys.getenv("DATA_IOTC_USERNAME")
@@ -104,12 +105,12 @@ initialize_version = function(version) {
 }
 
 initialize_forms = function(version) {
-  initialize_folder(version, "forms")
+  initialize_folder(version, FORMS_FOLDER)
 }
 
 upload_forms = function(version) {
   for(form in list.files("./forms", pattern = "*.xlsx")) {
-    folder = full_folder(version, "forms")
+    folder = full_folder(version, FORMS_FOLDER)
 
     print(paste0("Uploading form '", form, "' in ", folder, "..."))
 

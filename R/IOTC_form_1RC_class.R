@@ -11,15 +11,15 @@ setMethod("form_type", "IOTCForm1RC", function(form) {
 })
 
 setMethod("form_version", "IOTCForm1RC", function(form) {
-  return("1.0.0")
+  return("1.0.0-legacy")
 })
 
 setMethod("extract_data", "IOTCForm1RC", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
-  strata = form_data[4:nrow(form_data)][, 2:10]
-  colnames(strata) = c("QUARTER", "FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE",
+  strata = form_data[4:nrow(form_data)][, 2:11]
+  colnames(strata) = c("QUARTER", "FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE",
                        "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE",
                        "COVERAGE_TYPE_CODE", "COVERAGE")
 
@@ -56,16 +56,16 @@ setMethod("validate_quarters",
           function(form, strata) {
             l_info("IOTCForm1RC.validate_quarters")
 
-            all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
-            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+            all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
+            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
-            overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             incomplete_quarters_strata  = valid_quarters_strata[NUM_QUARTERS < 4]
 
-            overlapping_quarters = merge(strata, overlapping_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            overlapping_quarters = merge(strata, overlapping_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             overlapping_quarters = which(!is.na(overlapping_quarters$NUM_QUARTERS))
 
-            incomplete_quarters  = merge(strata, incomplete_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            incomplete_quarters  = merge(strata, incomplete_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             incomplete_quarters  = which(!is.na(incomplete_quarters$NUM_QUARTERS))
 
             return(
@@ -93,19 +93,19 @@ setMethod("validate_data",
             strata_empty_columns = find_empty_columns(strata)
 
             strata[, IS_EMPTY := .I %in% strata_empty_rows]
-            strata[, OCCURRENCES := .N, by = .(QUARTER, FISHERY_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+            strata[, OCCURRENCES := .N, by = .(QUARTER, FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
             # If all quarters are provided and valid, we check that they're also consistent...
-            all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
-            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+            all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
+            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
-            overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             incomplete_quarters_strata  = valid_quarters_strata[NUM_QUARTERS < 4]
 
-            overlapping_quarters = merge(strata, overlapping_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            overlapping_quarters = merge(strata, overlapping_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             overlapping_quarters = which(!is.na(overlapping_quarters$NUM_QUARTERS))
 
-            incomplete_quarters  = merge(strata, incomplete_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+            incomplete_quarters  = merge(strata, incomplete_quarters_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             incomplete_quarters  = which(!is.na(incomplete_quarters$NUM_QUARTERS))
 
             non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]

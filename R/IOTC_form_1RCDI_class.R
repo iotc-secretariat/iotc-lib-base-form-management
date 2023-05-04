@@ -48,6 +48,11 @@ setMethod("validate_data",
 
             fishery_aggregates = which(unlist(sapply(strata$FISHERY_CODE, function(value) { return(ifelse(is.na(value), FALSE, is_multiple_gear_fishery(value))) }, USE.NAMES = FALSE)))
 
+            missing_target_species = which( sapply(strata$TARGET_SPECIES_CODE, is.na))
+            invalid_target_species = which(!sapply(strata$TARGET_SPECIES_CODE, is_species_valid))
+            invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
+            missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
+
             missing_IOTC_areas = which( sapply(strata$IOTC_MAIN_AREA_CODE, is.na))
             invalid_IOTC_areas = which(!sapply(strata$IOTC_MAIN_AREA_CODE, is_IOTC_main_area_valid))
             invalid_IOTC_areas = invalid_IOTC_areas[ ! invalid_IOTC_areas %in% missing_IOTC_areas ]
@@ -154,6 +159,18 @@ setMethod("validate_data",
                           row_indexes  = fishery_aggregates,
                           codes        = strata[fishery_aggregates]$FISHERY_CODE,
                           codes_unique = unique(strata[fishery_aggregates]$FISHERY_CODE)
+                        )
+                      ),
+                      target_species = list(
+                        invalid = list(
+                          number       = length(invalid_target_species),
+                          row_indexes  = invalid_target_species,
+                          codes        = strata$TARGET_SPECIES_CODE[invalid_species],
+                          codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_species])
+                        ),
+                        missing = list(
+                          number      = length(missing_target_species),
+                          row_indexes = missing_target_speciesmissing_fisheries
                         )
                       ),
                       IOTC_main_areas = list(
@@ -339,7 +356,15 @@ setMethod("common_data_validation_summary",
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing fishery in row(s) #", paste0(fisheries$missing$row_indexes, collapse = ", "))))
 
             if(fisheries$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid fishery in row(s) #", paste0(fisheries$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid fishery in row(s) #", paste0(fisheries$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid legacy fishery codes")))
+
+            target_species = checks_strata_main$target_species
+
+            if(target_species$missing$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing target species in row(s) #", paste0(target_species$missing$row_indexes, collapse = ", "))))
+
+            if(target_species$invalid$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid target in row(s) #", paste0(target_species$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
 
             areas = checks_strata_main$IOTC_main_areas
 
@@ -421,7 +446,7 @@ setMethod("common_data_validation_summary",
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) #", paste0(species$missing$col_indexes, collapse = ", "))))
 
             if(species$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) #", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid species codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) #", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "speciess"), " for a list of valid legacy species codes")))
 
             ## Catches
 

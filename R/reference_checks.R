@@ -55,7 +55,7 @@ validate_country = function(country_code, field = "Flag country") {
   return(countries)
 }
 
-fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {
+fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::LEGACY_FLEETS) {
   valid_fleets = unique(valid_fleets[, .(FLAG_CODE, REPORTING_ENTITY_CODE, FLEET_CODE, NAME_EN, NAME_FR)])
 
   reporting_entity_code = trim(reporting_entity_code)
@@ -87,7 +87,7 @@ validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets
 
 fisheries_for = function(fishery_code) {
   return(
-    iotc.data.reference.codelists::FISHERIES[CODE == trim(fishery_code)]
+    iotc.data.reference.codelists::LEGACY_FISHERIES[CODE == trim(fishery_code)]
   )
 }
 
@@ -114,7 +114,8 @@ validate_fishery = function(fishery_code, field = "Fishery") {
 
 is_multiple_gear_fishery = function(fishery_code) {
   return(
-    grepl("\\+", fisheries_for(fishery_code)$CODE)
+    fisheries_for(fishery_CODE)$IS_AGGREGATE
+    #grepl("\\+", fisheries_for(fishery_code)$CODE)
     #grepl("\\+", fishery_code)
   )
 }
@@ -148,7 +149,7 @@ validate_IOTC_main_area = function(IOTC_main_area_code, field = "IOTC main area"
 
 species_for = function(species_code) {
   return(
-    iotc.data.reference.codelists::SPECIES[CODE == trim(species_code)]
+    iotc.data.reference.codelists::LEGACY_SPECIES[CODE == trim(species_code)]
   )
 }
 
