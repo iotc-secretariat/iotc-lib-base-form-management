@@ -170,7 +170,7 @@ setMethod("validate_data",
                         ),
                         missing = list(
                           number      = length(missing_target_species),
-                          row_indexes = missing_target_speciesmissing_fisheries
+                          row_indexes = missing_target_species
                         )
                       ),
                       IOTC_main_areas = list(
