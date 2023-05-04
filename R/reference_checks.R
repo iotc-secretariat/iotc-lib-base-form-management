@@ -70,7 +70,7 @@ fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = i
 is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {
   fleets = fleets_for(reporting_entity_code, flag_country_code, valid_fleets)
 
-  return(nrow(fleets) == 1)
+  return(nrow(fleets) == 1 && is.na(fleets))
 }
 
 validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {

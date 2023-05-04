@@ -364,7 +364,7 @@ setMethod("common_data_validation_summary",
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing target species in row(s) #", paste0(target_species$missing$row_indexes, collapse = ", "))))
 
             if(target_species$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid target in row(s) #", paste0(target_species$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid target species in row(s) #", paste0(target_species$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
 
             areas = checks_strata_main$IOTC_main_areas
 

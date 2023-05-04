@@ -26,7 +26,7 @@ setMethod("extract_data", "IOTCForm1RC", function(form) {
   strata[, QUARTER    := as.integer(QUARTER)]
   strata[, COVERAGE   := round(as.numeric(COVERAGE),   0)]
 
-  records = form_data[3:nrow(form_data), 11:ncol(form_data)]
+  records = form_data[3:nrow(form_data), 12:ncol(form_data)]
 
   species_codes = unlist(lapply(records[1], trim), use.names = FALSE)
 
