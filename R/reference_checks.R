@@ -114,7 +114,7 @@ validate_fishery = function(fishery_code, field = "Fishery") {
 
 is_multiple_gear_fishery = function(fishery_code) {
   return(
-    fisheries_for(fishery_CODE)$IS_AGGREGATE
+    fisheries_for(fishery_code)$IS_AGGREGATE
     #grepl("\\+", fisheries_for(fishery_code)$CODE)
     #grepl("\\+", fishery_code)
   )
