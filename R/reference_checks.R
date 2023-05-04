@@ -67,13 +67,13 @@ fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = i
   return(fleets)
 }
 
-is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {
+is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::LEGACY_FLEETS) {
   fleets = fleets_for(reporting_entity_code, flag_country_code, valid_fleets)
 
-  return(nrow(fleets) == 1 && is.na(fleets))
+  return(nrow(fleets) == 1 && !is.na(fleets))
 }
 
-validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS_FLAGS) {
+validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::LEGACY_FLEETS) {
   reporting_entity_code = validate_entity(reporting_entity_code)$CODE
   flag_country_code     = validate_country(flag_country_code)$CODE
 

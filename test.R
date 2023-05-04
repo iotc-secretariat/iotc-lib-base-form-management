@@ -1,4 +1,4 @@
-#library(iotc.data.common.workflow.legacy)
+library(iotc.data.common.workflow.legacy)
 library(data.table)
 library(openxlsx)
 library(stringr)
@@ -15,7 +15,7 @@ source("R/forms.R")
 
 FORM_1RC =
   new("IOTCForm1RC",
-      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow\\forms\\Form-1RC - legacy.xlsx",
+      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-1RC - legacy OK.xlsx",
       original_name = "Form-1RC - legacy.xlsx"
   )
 
