@@ -1,5 +1,9 @@
 ### COMMON UTILITIES
 
+is_numeric = function(value) {
+  str_detect(value, "^\\s*\\-?[0-9]+\\.?[0-9]*(E\\-?[0-9]+)?\\s*$")
+}
+
 ### STRINGS
 
 trim = function(string) {

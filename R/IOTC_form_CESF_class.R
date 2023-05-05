@@ -1,23 +1,220 @@
-
 #' @include IOTC_form_class.R
-#' @export IOTCForm1RCDI
-IOTCForm1RCDI = setClass(
-  "IOTCForm1RCDI",
+#' @export IOTCFormCESF
+IOTCFormCESF = setClass(
+  "IOTCFormCESF",
   contains = "IOTCForm"
 )
 
-setGeneric("validate_quarters", function(form, strata) {
-  standardGeneric("validate_quarters")
+setMethod("form_comment_cell_row", "IOTCFormCESF", function(form) {
+  return(34) #Default for CE / SF
+})
+
+setMethod("extract_metadata", list(form = "IOTCFormCESF", common_metadata = "list"), function(form, common_metadata) {
+  l_info("IOTCFormCESF.extract_metadata")
+
+  metadata_sheet = form@metadata
+
+  common_metadata$general_information$fishery        = trim(as.character(metadata_sheet[16, 5]))
+  common_metadata$general_information$target_species = trim(as.character(metadata_sheet[17, 5]))
+
+  data_specifications = list(
+    type_of_data    = trim(as.character(metadata_sheet[23, 4])),
+    data_source     = trim(as.character(metadata_sheet[25, 4])),
+    data_processing = trim(as.character(metadata_sheet[26, 4])),
+    data_raising    = trim(as.character(metadata_sheet[27, 4])),
+    coverage_type   = trim(as.character(metadata_sheet[28, 4])),
+    coverage_value  = trim(as.character(metadata_sheet[29, 4]))
+  )
+
+  common_metadata$data_specifications = data_specifications
+
+  return(common_metadata)
+})
+
+setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_validation_results = "list"), function(form, common_metadata_validation_results) {
+  l_info("IOTCFormCESF.validate_metadata")
+
+  fishery_available        = is_provided(general_information$fishery)
+  fishery_valid            = fishery_available & is_fishery_valid(general_information$fishery)
+  fishery_multiple         = fishery_valid & is_multiple_gear_fishery(general_information$fishery)
+  fishery_valid            = fishery_valid & !fishery_multiple
+
+  common_metadata_validation_results$general_information$fishery =
+    list(
+      available = fishery_available,
+      code      = general_information$fishery,
+      multiple  = fishery_multiple,
+      valid     = fishey_valid
+    )
+
+  target_species_available = is_provided(general_information$target_species)
+  target_species_valid     = target_species_available & is_species_valid(general_information$target_species)
+  target_species_multiple  = target_species_valid & is_species_aggregate(general_information$target_species)
+  target_species_valid     = target_species_valid & !target_species_multiple
+
+  common_metadata_validation_results$general_information$target_species =
+    list(
+      available = target_species_available,
+      code      = general_information$target_species,
+      multiple  = target_species_multiple,
+      valid     = target_species_valid
+    )
+
+  common_metadata_validation_results$data_specifications = list()
+
+  data_type_available = is_provided(data_specifications$type_of_data)
+  data_type_valid     = data_type_available & is_data_type_valid(data_specifications$type_of_data)
+
+  common_metadata_validation_results$data_specifications$type_of_data =
+    list(
+      available = data_type_available,
+      code      = data_specifications$type_of_data,
+      valid     = data_type_valid
+    )
+
+  data_source_available = is_provided(data_specifications$data_source)
+  data_source_valid     = data_source_available & is_data_source_valid(form_dataset_code(form), data_specifications$data_source)
+
+  common_metadata_validation_results$data_specifications$source =
+    list(
+      available = data_source_available,
+      dataset   = form_dataset_code(form),
+      code      = data_specifications$data_source,
+      valid     = data_source_valid
+    )
+
+  data_processing_available = is_provided(data_specifications$data_processing)
+  data_processing_valid     = data_processing_available & is_data_processing_valid(form_dataset_code(form), data_specifications$data_processing)
+
+  common_metadata_validation_results$data_specifications$processing =
+    list(
+      available = data_processing_available,
+      dataset   = form_dataset_code(form),
+      code      = data_specifications$data_processing,
+      valid     = data_processing_valid
+    )
+
+  data_raising_available = is_provided(data_specifications$data_raising)
+  data_raising_valid     = data_raising_available & is_data_raising_valid(data_specifications$data_raising)
+
+  common_metadata_validation_results$data_specifications$raising =
+    list(
+      available = data_raising_available,
+      code      = data_specifications$data_raising,
+      valid     = data_raising_valid
+    )
+
+  common_metadata_validation_results$data_specifications$coverage = list()
+
+  coverage_type_available = is_provided(data_specifications$coverage_type)
+  coverage_type_valid     = coverage_type_available & is_data_coverage_type_valid(data_specifications$coverage_type)
+
+  coverage_available      = is_provided(data_specifications$coverage_value)
+  coverage_valid          = coverage_available & coverage > 0 & coverage <= 100
+
+  common_metadata_validation_results$data_specifications$coverage$type =
+    list(
+      available = coverage_type_available,
+      code      = data_specifications$coverage_type,
+      valid     = coverage_type_valid
+    )
+
+  common_metadata_validation_results$data_specifications$coverage$value =
+    list(
+      value = data_specifications$coverage_value,
+      valid = coverage_valid
+    )
+
+  return(common_metadata_validation_results)
+})
+
+setMethod("metadata_validation_summary", list(form = "IOTCFormCESF", metadata_validation_results = "list"), function(form, metadata_validation_results) {
+  l_info("IOTCFormCESF.metadata_validation_summary")
+
+  validation_messages = metadata_validation_results #new("MessageList")
+
+  general_information    = metadata_validation_results$general_information
+  data_specifications    = metadata_validation_results$data_specifications
+
+  # General information
+
+  ## Fishery
+
+  if(!general_information$fishery$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The fishery is mandatory"))
+  else {
+    if(general_information$fishery$multiple)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fishery (", general_information$fishery$code, ") is a fishery aggregate")))
+
+    if(!general_information$fishery$valid)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fishery (", general_information$fishery$code, ") is not valid. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes")))
+  }
+
+  ## Species
+
+  if(!general_information$target_species$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The target species is mandatory"))
+  else if(!general_information$target_species$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided target species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid species codes")))
+
+  # Data specifications
+
+  ## Type of data
+
+  if(!data_specifications$type_of_data$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The type of data is mandatory"))
+  else if(!data_specifications$type_of_data$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided type of data (", data_specifications$type_of_data$code, ") is not valid. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
+
+  ## Data source
+
+  if(!data_specifications$source$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The data source is mandatory"))
+  else if(!data_specifications$source$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided data source (", data_specifications$source$dataset, " / ", data_specifications$source$code, ") is not valid. Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes for the ", data_specifications$source$dataset, " dataset")))
+
+  ## Data processing
+
+  if(!data_specifications$processing$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The data processing is mandatory"))
+  else if(!data_specifications$processing$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided data processing (", data_specifications$source$dataset, " / ", data_specifications$processing$code, ") is not valid. Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes for the ", data_specifications$processing$dataset, " dataset")))
+
+  ## Raising
+
+  if(!data_specifications$raising$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The data raising is mandatory"))
+  else if(!data_specifications$raising$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided data raising (", data_specifications$raising$code, ") is not valid. Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
+
+  ## Coverage
+
+  if(!data_specifications$coverage$type$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The coverage type is mandatory"))
+  else if(!data_specifications$coverage$type$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided coverage type (", data_specifications$coverage$type$code, ") is not valid. Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid data coverage type codes")))
+
+  if(!data_specifications$coverage$value$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The coverage value is mandatory"))
+  else if(!data_specifications$coverage$value$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided coverage value (", data_specifications$coverage$value$value, ") is not valid, as it should be numeric, higher than 0 and less than (or equal) to 100%")))
+
+  return(validation_messages)
+})
+
+setGeneric("validate_months", function(form, strata) {
+  standardGeneric("validate_months")
 })
 
 setMethod("validate_data",
-          "IOTCForm1RCDI",
+          "IOTCFormCESF",
           function(form) {
-            l_info("IOTCForm1RCDI.validate_data")
+            l_info("IOTCFormCESF.validate_data")
 
             strata  = form@data$strata
             records = form@data$records
 
+            ### TO BE MOVED TO SUBCLASSES
             catch_data_original = records$data$catches_original
             catch_data          = records$data$catches
 
@@ -29,79 +226,27 @@ setMethod("validate_data",
             total_strata     = nrow(strata)
             non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
 
+            ### TO BE MOVED TO SUBCLASSES
             data_empty_rows    = find_empty_rows(catch_data)
             data_empty_columns = find_empty_columns(catch_data)
 
-            missing_quarters   = which( sapply(strata$QUARTER, is.na))
-            invalid_quarters   = which(!sapply(strata$QUARTER, is_quarter_valid))
-            invalid_quarters   = invalid_quarters[ ! invalid_quarters %in% missing_quarters ]
-            missing_quarters   = missing_quarters[ ! missing_quarters %in% strata_empty_rows]
+            missing_months   = which( sapply(strata$MONTH, is.na))
+            invalid_months   = which(!sapply(strata$MONTH, is_month_valid))
+            invalid_months   = invalid_months[ ! invalid_months %in% missing_months ]
+            missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
 
             # If all quarters are provided and valid, we check that they're also consistent...
+            months_check = validate_months(form, strata)
 
-            quarters_check = validate_quarters(form, strata)
+            missing_grids  = which( sapply(strata$GRID_CODE, is.na))
+            invalid_grids  = which(!sapply(strata$GRID_CODE, is_grid_CE_SF_valid))
+            invalid_grids  = invalid_grids[ ! invalid_grids %in% missing_grids ]
+            missing_grids  = missing_grids[ ! missing_grids %in% strata_empty_rows]
 
-            missing_fisheries  = which( sapply(strata$FISHERY_CODE, is.na))
-            invalid_fisheries  = which(!sapply(strata$FISHERY_CODE, is_fishery_valid))
-            invalid_fisheries  = invalid_fisheries[ ! invalid_fisheries %in% missing_fisheries ]
-            missing_fisheries  = missing_fisheries[ ! missing_fisheries %in% strata_empty_rows]
-
-            fishery_aggregates = which(unlist(sapply(strata$FISHERY_CODE, function(value) { return(ifelse(is.na(value), FALSE, is_multiple_gear_fishery(value))) }, USE.NAMES = FALSE)))
-
-            missing_target_species = which( sapply(strata$TARGET_SPECIES_CODE, is.na))
-            invalid_target_species = which(!sapply(strata$TARGET_SPECIES_CODE, is_species_valid))
-            invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
-            missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
-
-            missing_IOTC_areas = which( sapply(strata$IOTC_MAIN_AREA_CODE, is.na))
-            invalid_IOTC_areas = which(!sapply(strata$IOTC_MAIN_AREA_CODE, is_IOTC_main_area_valid))
-            invalid_IOTC_areas = invalid_IOTC_areas[ ! invalid_IOTC_areas %in% missing_IOTC_areas ]
-            missing_IOTC_areas = missing_IOTC_areas[ ! missing_IOTC_areas %in% strata_empty_rows ]
-
-            missing_types_of_data    = which( sapply(strata$DATA_TYPE_CODE, is.na))
-            invalid_types_of_data    = which(!sapply(strata$DATA_TYPE_CODE, is_data_type_valid))
-            invalid_types_of_data    = invalid_types_of_data[ ! invalid_types_of_data %in% missing_types_of_data ]
-            missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
-
-            missing_data_sources     = which( sapply(strata$DATA_SOURCE_CODE, is.na))
-            invalid_data_sources     = which(!sapply(strata$DATA_SOURCE_CODE, function(code) { return(is_data_source_valid("RC", code)) }))
-            invalid_data_sources     = invalid_data_sources[ ! invalid_data_sources %in% missing_data_sources ]
-            missing_data_sources     = missing_data_sources[ ! missing_data_sources %in% strata_empty_rows ]
-
-            missing_data_processings = which( sapply(strata$DATA_PROCESSING_CODE, is.na))
-            invalid_data_processings = which(!sapply(strata$DATA_PROCESSING_CODE, function(code) { return(is_data_processing_valid("RC", code)) }))
-            invalid_data_processings = invalid_data_processings[ ! invalid_data_processings %in% missing_data_processings ]
-            missing_data_processings = missing_data_processings[ ! missing_data_processings %in% strata_empty_rows ]
-
-            missing_coverage_types   = which( sapply(strata$COVERAGE_TYPE_CODE, is.na))
-            invalid_coverage_types   = which(!sapply(strata$COVERAGE_TYPE_CODE, is_data_coverage_type_valid))
-            invalid_coverage_types   = invalid_coverage_types[ ! invalid_coverage_types %in% missing_coverage_types ]
-            missing_coverage_types   = missing_coverage_types[ ! missing_coverage_types %in% strata_empty_rows ]
-
-            missing_coverages        = which( sapply(strata$COVERAGE, is.na))
-            invalid_coverages        = which(!sapply(strata$COVERAGE, is_percentage_valid))
-            invalid_coverages        = invalid_coverages[ ! invalid_coverages %in% missing_coverages ]
-            missing_coverages        = missing_coverages[ ! missing_coverages %in% strata_empty_rows ]
-
-            missing_species    = which( sapply(records$codes$species, is.na))
-            invalid_species    = which(!sapply(records$codes$species, is_species_valid))
-            invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
-
-            species_aggregates = which(unlist(sapply(records$codes$species, function(value) { return(ifelse(is.na(value), FALSE, is_species_aggregate(value))) }, USE.NAMES = FALSE)))
-
-            is_numeric = function(value) {
-              str_detect(value, "^\\s*\\-?[0-9]+\\.?[0-9]*(E\\-?[0-9]+)?\\s*$")
-            }
-
-            numeric_catch_data =
-              catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
-
-            non_num_catches  = sum(numeric_catch_data == FALSE, na.rm = TRUE)
-
-            na_catches       = sum(numeric_catch_data == TRUE & is.na(catch_data), na.rm = TRUE)
-            zero_catches     = sum(numeric_catch_data == TRUE & catch_data == 0,   na.rm = TRUE)
-            negative_catches = sum(numeric_catch_data == TRUE & catch_data < 0,    na.rm = TRUE)
-            positive_catches = sum(numeric_catch_data == TRUE & catch_data > 0,    na.rm = TRUE)
+            missing_estimations = which( sapply(strata$ESTIMATION_CODE, is.na))
+            invalid_estimations = which(!sapply(strata$ESTIMATION_CODE, is_data_estimation_valid))
+            invalid_estimations = invalid_estimations[ ! invalid_estimations %in% missing_estimations ]
+            missing_estimations = missing_estimations[ ! missing_estimations %in% strata_empty_rows]
 
             return(
               list(
@@ -123,129 +268,44 @@ setMethod("validate_data",
                   ),
                   checks = list(
                     main = list(
-                      quarters = list(
+                      months = list(
                         missing = list(
-                          number      = length(missing_quarters),
+                          number      = length(missing_months),
                           row_indexes = missing_quarters
                         ),
                         invalid = list(
-                          number        = length(invalid_quarters),
-                          row_indexes   = invalid_quarters,
-                          values        = strata$QUARTER[invalid_quarters],
-                          values_unique = unique(strata$QUARTER[invalid_quarters])
-                        ),
-                        overlapping = list(
-                          number = length(quarters_check$overlapping_quarters),
-                          row_indexes = quarters_check$overlapping_quarters
+                          number        = length(missing_months),
+                          row_indexes   = missing_months,
+                          values        = strata$MONTH[missing_months],
+                          values_unique = unique(strata$MONTH[missing_months])
                         ),
                         incomplete = list(
-                          number = length(quarters_check$incomplete_quarters),
-                          row_indexes = quarters_check$incomplete_quarters
+                          number = length(quarters_check$incomplete_months),
+                          row_indexes = quarters_check$incomplete_months
                         )
                       ),
-                      fisheries = list(
+                      grids = list(
                         invalid = list(
-                          number       = length(invalid_fisheries),
-                          row_indexes  = invalid_fisheries,
-                          codes        = strata$FISHERY_CODE[invalid_fisheries],
-                          codes_unique = unique(strata$FISHERY_CODE[invalid_fisheries])
+                          number       = length(invalid_grids),
+                          row_indexes  = invalid_grids,
+                          codes        = strata[invalid_grids]$GRID_CODE,
+                          codes_unique = unique(strata[invalid_grids]$GRID_CODE)
                         ),
                         missing = list(
-                          number      = length(missing_fisheries),
-                          row_indexes = missing_fisheries
-                        ),
-                        aggregates = list(
-                          number       = length(fishery_aggregates),
-                          row_indexes  = fishery_aggregates,
-                          codes        = strata[fishery_aggregates]$FISHERY_CODE,
-                          codes_unique = unique(strata[fishery_aggregates]$FISHERY_CODE)
+                          number      = length(missing_grids),
+                          row_indexes = missing_grids
                         )
                       ),
-                      target_species = list(
+                      estimations = list(
                         invalid = list(
-                          number       = length(invalid_target_species),
-                          row_indexes  = invalid_target_species,
-                          codes        = strata$TARGET_SPECIES_CODE[invalid_species],
-                          codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_species])
+                          number       = length(invalid_estimations),
+                          row_indexes  = invalid_estimations,
+                          codes        = strata[invalid_estimations]$ESTIMATION_CODE,
+                          codes_unique = unique(strata[invalid_estimations]$ESTIMATION_CODE)
                         ),
                         missing = list(
-                          number      = length(missing_target_species),
-                          row_indexes = missing_target_species
-                        )
-                      ),
-                      IOTC_main_areas = list(
-                        invalid = list(
-                          number       = length(invalid_IOTC_areas),
-                          row_indexes  = invalid_IOTC_areas,
-                          codes        = strata[invalid_IOTC_areas]$IOTC_MAIN_AREA_CODE,
-                          codes_unique = unique(strata[invalid_IOTC_areas]$IOTC_MAIN_AREA_CODE)
-                        ),
-                        missing = list(
-                          number      = length(missing_IOTC_areas),
-                          row_indexes = missing_IOTC_areas
-                        )
-                      )
-                    ),
-                    original_data = list(
-                      type = list(
-                        invalid = list(
-                          number       = length(invalid_types_of_data),
-                          row_indexes  = invalid_types_of_data,
-                          codes        = strata[invalid_types_of_data]$DATA_TYPE_CODE,
-                          codes_unique = unique(strata[invalid_types_of_data]$DATA_TYPE_CODE)
-                        ),
-                        missing = list(
-                          number      = length(missing_types_of_data),
-                          row_indexes = missing_types_of_data
-                        )
-                      ),
-                      source = list(
-                        invalid = list(
-                          number       = length(invalid_data_sources),
-                          row_indexes  = invalid_data_sources,
-                          codes        = strata[invalid_data_sources]$DATA_SOURCE_CODE,
-                          codes_unique = unique(strata[invalid_data_sources]$DATA_SOURCE_CODE)
-                        ),
-                        missing = list(
-                          number      = length(missing_data_sources),
-                          row_indexes = missing_data_sources
-                        )
-                      ),
-                      processing = list(
-                        invalid = list(
-                          number       = length(invalid_data_processings),
-                          row_indexes  = invalid_data_processings,
-                          codes        = strata[invalid_data_processings]$DATA_PROCESSING_CODE,
-                          codes_unique = unique(strata[invalid_data_processings]$DATA_PROCESSING_CODE)
-                        ),
-                        missing = list(
-                          number      = length(missing_data_processings),
-                          row_indexes = missing_data_processings
-                        )
-                      )
-                    ),
-                    coverage = list(
-                      type = list(
-                        invalid = list(
-                          number       = length(invalid_coverage_types),
-                          row_indexes  = invalid_coverage_types,
-                          codes        = strata[invalid_coverage_types]$COVERAGE_TYPE_CODE,
-                          codes_unique = unique(strata[invalid_coverage_types]$COVERAGE_TYPE_CODE)
-                        ),
-                        missing = list(
-                          number      = length(missing_coverage_types),
-                          row_indexes = missing_coverage_types
-                        )
-                      ),
-                      value = list(
-                        invalid = list(
-                          number      = length(invalid_coverages),
-                          row_indexes = invalid_coverages,
-                          values      = strata[invalid_coverages]$COVERAGE
-                        ),
-                        missing = list(
-                          number      = length(missing_coverages),
-                          row_indexes = missing_coverages
+                          number      = length(missing_estimations),
+                          row_indexes = missing_estimations
                         )
                       )
                     )
@@ -293,14 +353,10 @@ setMethod("validate_data",
           }
 )
 
-setGeneric("common_data_validation_summary", function(form, data_validation_results) {
-  standardGeneric("common_data_validation_summary")
-})
-
 setMethod("common_data_validation_summary",
-          list(form = "IOTCForm1RCDI", data_validation_results = "list"),
+          list(form = "IOTCFormCESF", data_validation_results = "list"),
           function(form, data_validation_results) {
-            l_info("IOTCForm1RCDI.common_data_validation_summary")
+            l_info("IOTCFormCESF.common_data_validation_summary")
 
             validation_messages = new("MessageList")
 

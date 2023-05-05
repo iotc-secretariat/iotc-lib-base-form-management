@@ -13,11 +13,13 @@ source("R/data_checks.R")
 source("R/metadata.R")
 source("R/forms.R")
 
-debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/Message_class.R", echo=TRUE)
-debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_class.R", echo=TRUE)
-debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_RCDI_class.R", echo=TRUE)
-debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1RC_class.R", echo=TRUE)
-debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1DI_class.R", echo=TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/Message_class.R",        echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_class.R",      echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_RCDI_class.R", echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1RC_class.R",  echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1DI_class.R",  echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_CESF_class.R", echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_3CE_class.R",  echo = TRUE)
 
 FORM_1RC =
   new("IOTCForm1RC",
@@ -35,4 +37,4 @@ FORM_1DI =
 
 validation_summary(FORM_1DI)
 
-
+META = read.xlsx("forms/Form-3CE.xlsx", sheet = "Metadata", skipEmptyRows = FALSE, skipEmptyCols = FALSE, detectDates = TRUE)

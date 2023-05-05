@@ -13,6 +13,10 @@ setMethod("form_version", "IOTCForm1RC", function(form) {
   return("1.0.0-legacy")
 })
 
+setMethod("form_dataset_code", "IOTCForm1RC", function(form) {
+  return("RC")
+})
+
 setMethod("extract_data", "IOTCForm1RC", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
@@ -163,7 +167,6 @@ setMethod("validate_data",
 
 setMethod("data_validation_summary",
           "IOTCForm1RC",
-          #list(form = "IOTCForm1RCDI", data_validation_results = "list"),
           function(form, data_validation_results) {
             l_info("IOTCForm1RC.data_validation_summary")
 

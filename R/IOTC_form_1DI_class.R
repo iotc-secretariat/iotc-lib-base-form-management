@@ -13,6 +13,10 @@ setMethod("form_version", "IOTCForm1DI", function(form) {
   return("1.0.0-legacy")
 })
 
+setMethod("form_dataset_code", "IOTCForm1DI", function(form) {
+  return("DI")
+})
+
 setMethod("extract_data", "IOTCForm1DI", function(form) {
   # Based on the same method from IOTCForm1RC
 

@@ -5,15 +5,25 @@ IOTCFormRCDI = setClass(
   contains = "IOTCForm"
 )
 
+setMethod("form_comment_cell_row", "IOTCFormRCDI", function(form) {
+  return(23) #Default for RC / DI
+})
+
 setMethod("extract_metadata", list(form = "IOTCFormRCDI", common_metadata = "list"), function(form, common_metadata) {
+  l_info("IOTCFormRCDI.extract_metadata")
+
   return(common_metadata)
 })
 
 setMethod("validate_metadata", list(form = "IOTCFormRCDI", common_metadata_validation_results = "list"), function(form, common_metadata_validation_results) {
+  l_info("IOTCFormRCDI.validate_metadata")
+
   return(common_metadata_validation_results)
 })
 
 setMethod("metadata_validation_summary", list(form = "IOTCFormRCDI", metadata_validation_results = "list"), function(form, metadata_validation_results) {
+  l_info("IOTCFormRCDI.metadata_validation_summary")
+
   return(new("MessageList"))
 })
 
@@ -75,12 +85,12 @@ setMethod("validate_data",
             missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
 
             missing_data_sources     = which( sapply(strata$DATA_SOURCE_CODE, is.na))
-            invalid_data_sources     = which(!sapply(strata$DATA_SOURCE_CODE, function(code) { return(is_data_source_valid("RC", code)) }))
+            invalid_data_sources     = which(!sapply(strata$DATA_SOURCE_CODE, function(code) { return(is_data_source_valid(form_dataset_code(form), code)) }))
             invalid_data_sources     = invalid_data_sources[ ! invalid_data_sources %in% missing_data_sources ]
             missing_data_sources     = missing_data_sources[ ! missing_data_sources %in% strata_empty_rows ]
 
             missing_data_processings = which( sapply(strata$DATA_PROCESSING_CODE, is.na))
-            invalid_data_processings = which(!sapply(strata$DATA_PROCESSING_CODE, function(code) { return(is_data_processing_valid("RC", code)) }))
+            invalid_data_processings = which(!sapply(strata$DATA_PROCESSING_CODE, function(code) { return(is_data_processing_valid(form_dataset_code(form), code)) }))
             invalid_data_processings = invalid_data_processings[ ! invalid_data_processings %in% missing_data_processings ]
             missing_data_processings = missing_data_processings[ ! missing_data_processings %in% strata_empty_rows ]
 
@@ -100,10 +110,6 @@ setMethod("validate_data",
 
             species_aggregates = which(unlist(sapply(records$codes$species, function(value) { return(ifelse(is.na(value), FALSE, is_species_aggregate(value))) }, USE.NAMES = FALSE)))
 
-            is_numeric = function(value) {
-              str_detect(value, "^\\s*\\-?[0-9]+\\.?[0-9]*(E\\-?[0-9]+)?\\s*$")
-            }
-
             numeric_catch_data =
               catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
 
@@ -111,8 +117,8 @@ setMethod("validate_data",
 
             na_catches       = sum(numeric_catch_data == TRUE & is.na(catch_data), na.rm = TRUE)
             zero_catches     = sum(numeric_catch_data == TRUE & catch_data == 0,   na.rm = TRUE)
-            negative_catches = sum(numeric_catch_data == TRUE & catch_data < 0,    na.rm = TRUE)
-            positive_catches = sum(numeric_catch_data == TRUE & catch_data > 0,    na.rm = TRUE)
+            negative_catches = sum(numeric_catch_data == TRUE & catch_data  < 0,   na.rm = TRUE)
+            positive_catches = sum(numeric_catch_data == TRUE & catch_data  > 0,   na.rm = TRUE)
 
             return(
               list(
@@ -303,10 +309,6 @@ setMethod("validate_data",
             )
           }
 )
-
-setGeneric("common_data_validation_summary", function(form, data_validation_results) {
-  standardGeneric("common_data_validation_summary")
-})
 
 setMethod("common_data_validation_summary",
           list(form = "IOTCFormRCDI", data_validation_results = "list"),

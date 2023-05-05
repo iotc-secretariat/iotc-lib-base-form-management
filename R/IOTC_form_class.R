@@ -279,7 +279,8 @@ setMethod("validation_summary", "IOTCForm", function(form) {
 
     validation_results = validate(current_form)
   }, error = function(e) {
-    print(e)
+    l_error(e)
+
     validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = e$message))
   })
 
@@ -345,9 +346,8 @@ setGeneric("form_comment_cell_row", function(form) {
   standardGeneric("form_comment_cell_row")
 })
 
-# The above comes with a default implementation
-setMethod("form_comment_cell_row", "IOTCForm", function(form) {
-  return(23) #Default for several forms
+setGeneric("form_dataset_code", function(form) {
+  standardGeneric("form_dataset_code")
 })
 
 ## METADATA
@@ -370,8 +370,12 @@ setGeneric("extract_data", function(form) {
   standardGeneric("extract_data")
 })
 
-setGeneric("validate_data", function(form) {
+setGeneric("validate_data", function(form, metadata_validation_results) {
   standardGeneric("validate_data")
+})
+
+setGeneric("common_data_validation_summary", function(form, data_validation_results) {
+  standardGeneric("common_data_validation_summary")
 })
 
 setGeneric("data_validation_summary", function(form, data_validation_results) {
