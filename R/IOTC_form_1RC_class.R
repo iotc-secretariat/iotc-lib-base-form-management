@@ -1,9 +1,8 @@
-
-#' @include IOTC_form_1RCDI_class.R
+#' @include IOTC_form_RCDI_class.R
 #' @export IOTCForm1RC
 IOTCForm1RC = setClass(
   "IOTCForm1RC",
-  contains = "IOTCForm1RCDI"
+  contains = "IOTCFormRCDI"
 )
 
 setMethod("form_type", "IOTCForm1RC", function(form) {

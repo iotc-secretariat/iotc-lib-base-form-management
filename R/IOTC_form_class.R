@@ -1,31 +1,3 @@
-setClass("FormDetails",   representation(type    = "character",
-                                         version = "character"),
-                          prototype     (type    = NA_character_,
-                                         version = NA_character_))
-
-setClass("FormSubmitter", representation(full_name = "character",
-                                         e_mail    = "character"),
-                          prototype     (full_name = NA_character_,
-                                         e_mail    = NA_character_))
-
-setClass("ReferenceDates", representation(finalization = "Date",
-                                          submission   = "Date"),
-                           prototype     (finalization = NA,
-                                          submission   = NA))
-
-setClass("SubmissionInformation", representation(focal_point     = "FormSubmitter",
-                                                 organization    = "FormSubmitter",
-                                                 reference_dates = "ReferenceDates"))
-
-setClass("GeneralInformation",    representation(reporting_year   = "integer",
-                                                 reporting_entity = "character",
-                                                 flag_country     = "character"))
-
-setClass("FormMetadata", representation(details                = "FormDetails",
-                                        submission_information = "SubmissionInformation",
-                                        general_information    = "GeneralInformation",
-                                        comments               = "character"))
-
 #' @include Message_class.R
 #' @export IOTCForm
 IOTCForm = setClass("IOTCForm", representation(path_to_file       = "character",
@@ -38,34 +10,11 @@ IOTCForm = setClass("IOTCForm", representation(path_to_file       = "character",
                                                original_metadata = as.data.table(NA),
                                                original_data     = as.data.table(NA)))
 
-setGeneric("form_type", function(form) {
-  standardGeneric("form_type")
-})
-
-#setMethod("form_type", "IOTCForm", function(form) {
-#  return("generic_IOTC_form")
-#})
-
-setGeneric("form_version", function(form) {
-  standardGeneric("form_version")
-})
-
-#setMethod("form_version", "IOTCForm", function(form) {
-#  return("0.0.0")
-#})
-
-setGeneric("form_comment_cell_row", function(form) {
-  standardGeneric("form_comment_cell_row")
-})
-
-setMethod("form_comment_cell_row", "IOTCForm", function(form) {
-  return(23) #Default for several forms
-})
-
 setGeneric("validate_type_and_version", function(form) {
   standardGeneric("validate_type_and_version")
 })
 
+# Doesn't need to be extended
 setMethod("validate_type_and_version", "IOTCForm", function(form) {
   form_type    = form@metadata$form_details$type
   form_version = form@metadata$form_details$version
@@ -81,6 +30,7 @@ setGeneric("read", function(form) {
   standardGeneric("read")
 })
 
+# Doesn't need to be extended
 setMethod("read", "IOTCForm", function(form) {
   current_form = read_form(form@path_to_file, form@original_name)
 
@@ -88,10 +38,9 @@ setMethod("read", "IOTCForm", function(form) {
   form@original_data     = current_form$form_data
 
   common_metadata = common_metadata(form@original_metadata)
-
   common_metadata$comments = comments(form@original_metadata, form_comment_cell_row(form))
 
-  form@metadata = common_metadata
+  form@metadata = extract_metadata(form, common_metadata)
 
   validate_type_and_version(form)
 
@@ -100,18 +49,12 @@ setMethod("read", "IOTCForm", function(form) {
   return(form)
 })
 
-#' To be implemented by extending subclasses
-setGeneric("extract_data", function(form) {
-  standardGeneric("extract_data")
+setGeneric("validate_common_metadata", function(form) {
+  standardGeneric("validate_common_metadata")
 })
 
-setGeneric("validate_metadata", function(form) {
-  standardGeneric("validate_metadata")
-})
-
-#' To be extended by subclasses, if necessary / required
-setMethod("validate_metadata", "IOTCForm", function(form) {
-  l_info("IOTCForm.validate_metadata")
+setMethod("validate_common_metadata", "IOTCForm", function(form) {
+  l_info("IOTCForm.validate_common_metadata")
 
   metadata = form@metadata
 
@@ -217,11 +160,6 @@ setMethod("validate_metadata", "IOTCForm", function(form) {
   )
 })
 
-#' To be implemented by extending subclasses
-setGeneric("validate_data", function(form) {
-  standardGeneric("validate_data")
-})
-
 setGeneric("validate", function(form) {
   standardGeneric("validate")
 })
@@ -229,7 +167,7 @@ setGeneric("validate", function(form) {
 setMethod("validate", "IOTCForm", function(form) {
   l_info("IOTCForm.validate")
 
-  metadata_validation = validate_metadata(form)
+  metadata_validation = validate_metadata(form, validate_common_metadata(form))
   data_validation     = validate_data    (form)
 
   return(
@@ -240,15 +178,14 @@ setMethod("validate", "IOTCForm", function(form) {
   )
 })
 
-setGeneric("metadata_validation_summary", function(form, metadata_validation_results) {
-  standardGeneric("metadata_validation_summary")
+setGeneric("common_metadata_validation_summary", function(form, metadata_validation_results) {
+  standardGeneric("common_metadata_validation_summary")
 })
 
-#' To be extended by subclasses, if necessary / required
-setMethod("metadata_validation_summary",
+setMethod("common_metadata_validation_summary",
           signature(form = "IOTCForm", metadata_validation_results = "list"),
           function(form, metadata_validation_results) {
-            l_info("IOTCForm.metadata_validation_summary")
+            l_info("IOTCForm.common_metadata_validation_summary")
 
             validation_messages = new("MessageList")
 
@@ -322,41 +259,14 @@ setMethod("metadata_validation_summary",
               validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") identify ", general_information$fleet$code, " ('", general_information$fleet$name, "') as fleet")))
 
             return(validation_messages)
-
-            # Doesn't work with validation_messages as a MessageList class, even though this is (basically) a data.table
-
-            #
-            #validation_messages$LEVEL =
-            #  factor(
-            #    validation_messages$LEVEL,
-            #    labels = c("INFO", "WARN", "ERROR", "FATAL"),
-            #    levels = c("INFO", "WARN", "ERROR", "FATAL"),
-            #    ordered = TRUE
-            #  )
-
-            #validation_messages$SOURCE =
-            #  factor(
-            #    validation_messages$SOURCE,
-            #    labels = c("Metadata", "Data"),
-            #    levels = c("Metadata", "Data"),
-            #    ordered = TRUE
-            #  )
-
-            #return(
-            #  validation_messages[order(SOURCE, -LEVEL, ROW, COLUMN, TEXT), .(SOURCE, LEVEL, ROW, COLUMN, TEXT)]
-            #)
           })
-
-#' To be implemented by extending subclasses
-setGeneric("data_validation_summary", function(form, data_validation_results) {
-  standardGeneric("data_validation_summary")
-})
 
 #' @export
 setGeneric("validation_summary", function(form) {
   standardGeneric("validation_summary")
 })
 
+# Doesn't need to be extended
 setMethod("validation_summary", "IOTCForm", function(form) {
   l_info("IOTCForm.validation_summary")
 
@@ -377,10 +287,12 @@ setMethod("validation_summary", "IOTCForm", function(form) {
     metadata_validation_results = validation_results$metadata
     data_validation_results     = validation_results$data
 
-    metadata_validation_messages = metadata_validation_summary(form, metadata_validation_results)
-    data_validation_messages     = data_validation_summary    (form, data_validation_results)
+    common_metadata_validation_messages = common_metadata_validation_summary(form, metadata_validation_results)
+    metadata_validation_messages        = metadata_validation_summary       (form, metadata_validation_results)
+    data_validation_messages            = data_validation_summary           (form, data_validation_results)
 
-    all_validation_messages = rbind(metadata_validation_messages@messages,
+    all_validation_messages = rbind(common_metadata_validation_messages@messages,
+                                    metadata_validation_messages@messages,
                                     data_validation_messages@messages)
   } else {
     all_validation_messages = validation_messages@messages
@@ -417,4 +329,51 @@ setMethod("validation_summary", "IOTCForm", function(form) {
       validation_messages = all_validation_messages
     )
   )
+})
+
+### METHODS TO BE IMPLEMENTED BY SUBCLASSES
+
+setGeneric("form_type", function(form) {
+  standardGeneric("form_type")
+})
+
+setGeneric("form_version", function(form) {
+  standardGeneric("form_version")
+})
+
+setGeneric("form_comment_cell_row", function(form) {
+  standardGeneric("form_comment_cell_row")
+})
+
+# The above comes with a default implementation
+setMethod("form_comment_cell_row", "IOTCForm", function(form) {
+  return(23) #Default for several forms
+})
+
+## METADATA
+
+setGeneric("extract_metadata", function(form, common_metadata) {
+  standardGeneric("extract_metadata")
+})
+
+setGeneric("validate_metadata", function(form, common_metadata_validation_results) {
+  standardGeneric("validate_metadata")
+})
+
+setGeneric("metadata_validation_summary", function(form, metadata_validation_results) {
+  standardGeneric("metadata_validation_summary")
+})
+
+## DATA
+
+setGeneric("extract_data", function(form) {
+  standardGeneric("extract_data")
+})
+
+setGeneric("validate_data", function(form) {
+  standardGeneric("validate_data")
+})
+
+setGeneric("data_validation_summary", function(form, data_validation_results) {
+  standardGeneric("data_validation_summary")
 })

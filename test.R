@@ -15,13 +15,13 @@ source("R/forms.R")
 
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/Message_class.R", echo=TRUE)
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_class.R", echo=TRUE)
-debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1RCDI_class.R", echo=TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_RCDI_class.R", echo=TRUE)
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1RC_class.R", echo=TRUE)
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1DI_class.R", echo=TRUE)
 
 FORM_1RC =
   new("IOTCForm1RC",
-      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-1RC - legacy OK.xlsx",
+      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-1RC - legacy.xlsx",
       original_name = "Form-1RC - legacy.xlsx"
   )
 
