@@ -37,7 +37,7 @@ setMethod("read", "IOTCForm", function(form) {
   form@original_metadata = current_form$form_metadata
   form@original_data     = current_form$form_data
 
-  common_metadata = common_metadata(form@original_metadata)
+  common_metadata          = common_metadata(form@original_metadata)
   common_metadata$comments = comments(form@original_metadata, form_comment_cell_row(form))
 
   form@metadata = extract_metadata(form, common_metadata)
@@ -75,8 +75,8 @@ setMethod("validate_common_metadata", "IOTCForm", function(form) {
   reference_dates_available_finalization = is_provided(reference_dates$finalization)
   reference_dates_available_submission   = is_provided(reference_dates$submission)
 
-  reference_dates_valid_finalization = reference_dates_available_finalization & reference_dates$finalization <= format(Sys.time())
-  reference_dates_valid_submission   = reference_dates_available_submission   & reference_dates$submission   <= format(Sys.time())
+  reference_dates_valid_finalization = reference_dates_available_finalization && reference_dates$finalization <= format(Sys.time())
+  reference_dates_valid_submission   = reference_dates_available_submission   && reference_dates$submission   <= format(Sys.time())
 
   reference_dates_coherent =
     reference_dates_valid_finalization &
@@ -87,9 +87,9 @@ setMethod("validate_common_metadata", "IOTCForm", function(form) {
   reporting_entity_available = is_provided(general_information$reporting_entity)
   flag_country_available     = is_provided(general_information$flag_country)
 
-  reporting_year_valid   = reporting_year_available & is_year_valid(general_information$reporting_year)
-  reporting_entity_valid = reporting_entity_available & is_entity_valid(general_information$reporting_entity)
-  flag_country_valid     = flag_country_available & is_country_valid(general_information$flag_country)
+  reporting_year_valid   = reporting_year_available && is_year_valid(general_information$reporting_year)
+  reporting_entity_valid = reporting_entity_available && is_entity_valid(general_information$reporting_entity)
+  flag_country_valid     = flag_country_available && is_country_valid(general_information$flag_country)
 
   fleet_valid =
     reporting_entity_valid &
@@ -168,7 +168,7 @@ setMethod("validate", "IOTCForm", function(form) {
   l_info("IOTCForm.validate")
 
   metadata_validation = validate_metadata(form, validate_common_metadata(form))
-  data_validation     = validate_data    (form)
+  data_validation     = validate_data    (form, metadata_validation)
 
   return(
     list(
@@ -322,7 +322,7 @@ setMethod("validation_summary", "IOTCForm", function(form) {
   return(
     list(
       summary             = summary,
-      can_be_processed    = msg_fatal == 0 & msg_error == 0,
+      can_be_processed    = msg_fatal == 0 && msg_error == 0,
       info_messages       = msg_info,
       warning_messages    = msg_warn,
       error_messages      = msg_error,

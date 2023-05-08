@@ -89,11 +89,11 @@ setMethod("validate_quarters",
 )
 
 setMethod("validate_data",
-          "IOTCForm1DI",
-          function(form) {
+          list(form = "IOTCForm1DI", metadata_validation_results = "list"),
+          function(form, metadata_validation_results) {
             l_info("IOTCForm1DI.validate_data")
 
-            data_validation_results = callNextMethod(form)
+            data_validation_results = callNextMethod(form, metadata_validation_results)
 
             strata  = form@data$strata
             records = form@data$records
@@ -140,11 +140,17 @@ setMethod("validate_data",
 
             data_stratification = paste(species, conditions, raisings, catch_units, sep = "-")
 
-            stratification_occurrences = as.data.table(table(data_stratification))
-            colnames(stratification_occurrences) = c("STRATIFICATION_CODE", "NUM_OCCURRENCES")
+            data_stratification_occurrences = as.data.table(table(data_stratification))
 
-            stratification_occurrences_multiple = stratification_occurrences[NUM_OCCURRENCES > 1]
-            stratifications_multiple = which(data_stratification %in% stratification_occurrences_multiple$STRATIFICATION_CODE)
+            if(nrow(species_table) > 0) {
+              colnames(data_stratification_occurrences) = c("STRATIFICATION_CODE", "NUM_OCCURRENCES")
+
+              data_stratification_occurrences_multiple = data_stratification_occurrences[NUM_OCCURRENCES > 1]
+              data_stratifications_multiple = which(data_stratification %in% data_stratification_occurrences_multiple$STRATIFICATION_CODE)
+            } else {
+              data_stratification_occurrences_multiple = data.table(STRATIFICATION_CODE = character(), NUM_OCCURRENCES = integer())
+              data_stratifications_multiple = as.integer(array())
+            }
 
             data_validation_results$strata$duplicate =
               list(
@@ -216,9 +222,9 @@ setMethod("validate_data",
             data_validation_results$records$checks$stratifications =
               list(
                 multiple = list(
-                  number       = length(stratifications_multiple),
-                  col_indexes  = stratifications_multiple,
-                  codes_unique = stratification_occurrences_multiple$STRATIFICATION_CODE
+                  number       = length(data_stratifications_multiple),
+                  col_indexes  = data_stratifications_multiple,
+                  codes_unique = data_stratification_occurrences_multiple$STRATIFICATION_CODE
                 )
               )
 

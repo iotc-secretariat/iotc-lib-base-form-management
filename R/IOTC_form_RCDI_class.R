@@ -32,8 +32,8 @@ setGeneric("validate_quarters", function(form, strata) {
 })
 
 setMethod("validate_data",
-          "IOTCFormRCDI",
-          function(form) {
+          list(form = "IOTCFormRCDI", metadata_validation_results = "list"),
+          function(form, metadata_validation_results) {
             l_info("IOTCFormRCDI.validate_data")
 
             strata  = form@data$strata
@@ -203,7 +203,7 @@ setMethod("validate_data",
                         )
                       )
                     ),
-                    original_data = list(
+                    original_data = list( # This is still part of the strata (in forms 1-RC and 1-DI)
                       type = list(
                         invalid = list(
                           number       = length(invalid_types_of_data),
@@ -428,10 +428,10 @@ setMethod("common_data_validation_summary",
             coverage_values = checks_strata_coverage$value
 
             if(coverage_values$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing coverage type in row(s) #", paste0(coverage_values$missing$row_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing coverage value in row(s) #", paste0(coverage_values$missing$row_indexes, collapse = ", "))))
 
             if(coverage_values$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid coverage type in row(s) #", paste0(coverage_values$invalid$row_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid coverage value in row(s) #", paste0(coverage_values$invalid$row_indexes, collapse = ", "))))
 
             ###
 

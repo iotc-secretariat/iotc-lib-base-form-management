@@ -81,11 +81,11 @@ setMethod("validate_quarters",
 )
 
 setMethod("validate_data",
-          "IOTCForm1RC",
-          function(form) {
+          list(form = "IOTCForm1RC", metadata_validation_results = "list"),
+          function(form, metadata_validation_results) {
             l_info("IOTCForm1RC.validate_data")
 
-            data_validation_results = callNextMethod(form)
+            data_validation_results = callNextMethod(form, metadata_validation_results)
 
             strata  = form@data$strata
             records = form@data$records
@@ -122,11 +122,17 @@ setMethod("validate_data",
             missing_retain_reasons = missing_retain_reasons[ ! missing_retain_reasons %in% strata_empty_rows ]
 
             species_occurrences = as.data.table(table(records$codes$species))
-            colnames(species_occurrences) = c("SPECIES_CODE", "NUM_OCCURRENCES")
 
-            species_occurrences_multiple = species_occurrences[NUM_OCCURRENCES > 1]
+            if(nrow(species_table) > 0) {
+              species_occurrences = as.data.table(species_table)
+              colnames(species_occurrences) = c("SPECIES_CODE", "NUM_OCCURRENCES")
 
-            species_multiple = which(records$codes$species %in% species_occurrences_multiple$SPECIES_CODE)
+              species_occurrences_multiple = species_occurrences[NUM_OCCURRENCES > 1]
+              species_multiple = which(records$codes$species %in% species_occurrences_multiple$SPECIES_CODE)
+            } else {
+              species_occurrences_multiple = data.table(SPECIES_CODE = character(), NUM_OCCURRENCIES = integer())
+              species_multiple = as.integer(array())
+            }
 
             data_validation_results$strata$duplicate =
               list(
