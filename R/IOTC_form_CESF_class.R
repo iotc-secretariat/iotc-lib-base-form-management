@@ -53,7 +53,7 @@ setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_valid
   target_species_available = is_provided(general_information$target_species)
   target_species_valid     = target_species_available && is_species_valid(general_information$target_species)
   target_species_multiple  = target_species_valid && is_species_aggregate(general_information$target_species)
-  target_species_valid     = target_species_valid && !target_species_multiple
+  target_species_valid     = target_species_valid
 
   common_metadata_validation_results$general_information$target_species =
     list(
@@ -154,7 +154,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCFormCESF", metadata_va
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fishery (", general_information$fishery$code, ") is a fishery aggregate")))
 
     if(!general_information$fishery$valid)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fishery (", general_information$fishery$code, ") is not valid. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes")))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fishery (", general_information$fishery$code, ") is not valid. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid fishery codes")))
   }
 
   ## Species
@@ -162,7 +162,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCFormCESF", metadata_va
   if(!general_information$target_species$available)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The target species is mandatory"))
   else if(!general_information$target_species$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided target species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid species codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided target species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
 
   # Data specifications
 
@@ -226,7 +226,7 @@ setMethod("validate_data",
             catch_data          = records$data$catches
 
             strata_empty_rows    = find_empty_rows(strata)
-            strata_empty_columns = find_empty_columns(strata)
+            #strata_empty_columns = find_empty_columns(strata)
 
             strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
@@ -262,10 +262,10 @@ setMethod("validate_data",
                     number      = length(strata_empty_rows),
                     row_indexes = strata_empty_rows
                   ),
-                  empty_columns = list(
-                    number      = length(strata_empty_columns),
-                    col_indexes = strata_empty_columns
-                  ),
+                  #empty_columns = list(
+                  #  number      = length(strata_empty_columns),
+                  #  col_indexes = strata_empty_columns
+                  #),
                   total = list(
                     number = total_strata
                   ),
@@ -358,8 +358,8 @@ setMethod("common_data_validation_summary",
             if(strata$empty_rows$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
 
-            if(strata$empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) #", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
+            #if(strata$empty_columns$number > 0)
+            #  validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) #", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
 
             # Strata checks
 

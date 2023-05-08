@@ -193,7 +193,7 @@ setMethod("validate_data",
             strata  = form@data$strata
 
             strata_empty_rows    = find_empty_rows(strata)
-            strata_empty_columns = find_empty_columns(strata)
+            strata_empty_columns = find_empty_columns(strata[, 1:3]) # Effort values shall not be considered, as some of them (either secondary, or tertiary, or both) might be left all empty
 
             strata[, IS_EMPTY := .I %in% strata_empty_rows]
             strata[, OCCURRENCES := .N, by = .(MONTH, GRID_CODE)]
