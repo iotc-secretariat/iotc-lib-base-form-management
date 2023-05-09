@@ -121,7 +121,7 @@ setMethod("validate_data",
             invalid_retain_reasons = invalid_retain_reasons[ ! invalid_retain_reasons %in% missing_retain_reasons ]
             missing_retain_reasons = missing_retain_reasons[ ! missing_retain_reasons %in% strata_empty_rows ]
 
-            species_occurrences = as.data.table(table(records$codes$species))
+            species_table       = table(records$codes$species)
 
             if(nrow(species_table) > 0) {
               species_occurrences = as.data.table(species_table)
@@ -172,11 +172,13 @@ setMethod("validate_data",
 )
 
 setMethod("data_validation_summary",
-          "IOTCForm1RC",
-          function(form, data_validation_results) {
+          list(form = "IOTCForm1RC", metadata_validation_results = "list", data_validation_results = "list"),
+          function(form, metadata_validation_results, data_validation_results) {
             l_info("IOTCForm1RC.data_validation_summary")
 
-            validation_messages = common_data_validation_summary(form, data_validation_results)
+            validation_messages = common_data_validation_summary(form,
+                                                                 metadata_validation_results,
+                                                                 data_validation_results)
 
             ### STRATA AND RECORDS
 

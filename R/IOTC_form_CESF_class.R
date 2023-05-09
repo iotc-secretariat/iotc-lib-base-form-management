@@ -42,12 +42,22 @@ setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_valid
   fishery_multiple         = fishery_valid && is_multiple_gear_fishery(general_information$fishery)
   fishery_valid            = fishery_valid && !fishery_multiple
 
+  fishery = ifelse(fishery_available && fishery_valid, fisheries_for(general_information$fishery), NA)
+  fishery = iotc.data.reference.codelists::LEGACY_FISHERIES[CODE == fishery]
+
+  fishery_group    = ifelse(fishery_valid, fishery$FISHERY_GROUP_CODE, NA)
+  fishery_type     = ifelse(fishery_valid, fishery$FISHERY_TYPE_CODE , NA)
+  fishery_category = ifelse(fishery_valid, fishery$FISHERY_CATEGORY,   NA)
+
   common_metadata_validation_results$general_information$fishery =
     list(
       available = fishery_available,
       code      = general_information$fishery,
       multiple  = fishery_multiple,
-      valid     = fishery_valid
+      valid     = fishery_valid,
+      group     = fishery_group,
+      type      = fishery_type,
+      category  = fishery_category
     )
 
   target_species_available = is_provided(general_information$target_species)
@@ -246,7 +256,7 @@ setMethod("validate_data",
             months_check = validate_months(form, strata)
 
             missing_grids  = which( sapply(strata$GRID_CODE, is.na))
-            invalid_grids  = which(!sapply(strata$GRID_CODE, is_grid_CE_SF_valid))
+            invalid_grids  = which(!sapply(strata$GRID_CODE, is_grid_AR_valid))
             invalid_grids  = invalid_grids[ ! invalid_grids %in% missing_grids ]
             missing_grids  = missing_grids[ ! missing_grids %in% strata_empty_rows]
 
@@ -281,10 +291,10 @@ setMethod("validate_data",
                           row_indexes = missing_months
                         ),
                         invalid = list(
-                          number        = length(missing_months),
-                          row_indexes   = missing_months,
-                          values        = strata$MONTH[missing_months],
-                          values_unique = unique(strata$MONTH[missing_months])
+                          number        = length(invalid_months),
+                          row_indexes   = invalid_months,
+                          values        = strata$MONTH[invalid_months],
+                          values_unique = unique(strata$MONTH[invalid_months])
                         ),
                         incomplete = list(
                           number = length(months_check$incomplete_months),
@@ -335,8 +345,8 @@ setMethod("validate_data",
 )
 
 setMethod("common_data_validation_summary",
-          list(form = "IOTCFormCESF", data_validation_results = "list"),
-          function(form, data_validation_results) {
+          list(form = "IOTCFormCESF", metadata_validation_results = "list", data_validation_results = "list"),
+          function(form, metadata_validation_results, data_validation_results) {
             l_info("IOTCFormCESF.common_data_validation_summary")
 
             validation_messages = new("MessageList")
@@ -383,8 +393,10 @@ setMethod("common_data_validation_summary",
             if(grids$missing$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing grid in row(s) #", paste0(grids$missing$row_indexes, collapse = ", "))))
 
-            if(grids$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes")))
+            # MOVED TO 3CE
+            #if(grids$invalid$number > 0) {
+            #  validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes")))
+            #}
 
             estimations = checks_strata_main$estimations
 

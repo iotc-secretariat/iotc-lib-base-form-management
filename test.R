@@ -1,4 +1,4 @@
-library(iotc.data.common.workflow.legacy)
+#library(iotc.data.common.workflow.legacy)
 library(data.table)
 library(openxlsx)
 library(stringr)
@@ -21,6 +21,14 @@ debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_CESF_class.R", echo = TRUE)
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_3CE_class.R",  echo = TRUE)
 
+FORM_3CE =
+  new("IOTCForm3CE",
+      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-3CE - legacy OKK.xlsx",
+      original_name = "Form-3CE.xlsx"
+  )
+
+validation_summary(FORM_3CE)
+
 FORM_1RC =
   new("IOTCForm1RC",
       path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-1RC - legacy.xlsx",
@@ -36,5 +44,6 @@ FORM_1DI =
   )
 
 validation_summary(FORM_1DI)
+
 
 META = read.xlsx("forms/Form-3CE.xlsx", sheet = "Metadata", skipEmptyRows = FALSE, skipEmptyCols = FALSE, detectDates = TRUE)

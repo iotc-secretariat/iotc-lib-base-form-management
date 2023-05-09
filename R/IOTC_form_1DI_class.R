@@ -233,11 +233,13 @@ setMethod("validate_data",
 )
 
 setMethod("data_validation_summary",
-          "IOTCForm1DI",
-          function(form, data_validation_results) {
+          list(form = "IOTCForm1DI", metadata_validation_results = "list", data_validation_results = "list"),
+          function(form, metadata_validation_results, data_validation_results) {
             l_info("IOTCForm1DI.data_validation_summary")
 
-            validation_messages = common_data_validation_summary(form, data_validation_results)
+            validation_messages = common_data_validation_summary(form,
+                                                                 metadata_validation_results,
+                                                                 data_validation_results)
 
             strata  = data_validation_results$strata
             records = data_validation_results$records

@@ -91,10 +91,22 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3CE", metadata_val
   validation_messages = callNextMethod(form, metadata_validation_results) #new("MessageList")
 
   general_information    = metadata_validation_results$general_information
-  effort_units           = metadata_validation_results$data_specifications$effort_units
-  catch_unit             = metadata_validation_results$data_specifications$catch_unit
+  data_specifications    = metadata_validation_results$data_specifications
+
+  effort_units           = data_specifications$effort_units
+  catch_unit             = data_specifications$catch_unit
 
   # Data specifications
+
+  ## Data raising (for surface fisheries)
+
+  fishery = general_information$fishery
+  raising = data_specifications$raising
+
+  if(fishery$valid && fishery$category == "SURFACE") {
+    if(raising$valid && raising$code != "RT")
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("Data for surface fisheries (", fishery$code, ") must be fully raised to totals, i.e., data raising shall be 'RT' (currently: ", raising$code, ")")))
+  }
 
   ## Effort units
 
@@ -205,6 +217,31 @@ setMethod("validate_data",
 
             incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("GRID_CODE"))
             incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
+
+            grid_size = function(code) {
+              if(is.na(code) || code == "") return("OTHER")
+              else if(str_sub(code, 1, 1) == "5") return("1_DEG")
+              else if(str_sub(code, 1, 1) == "6") return("5_DEG")
+              return("OTHER")
+            }
+
+            grid_status    = data.table(GRID_CODE = strata$GRID_CODE,
+                                        MISSING   = sapply(strata$GRID_CODE, is.na),
+                                        VALID     = sapply(strata$GRID_CODE, is_grid_AR_valid),
+                                        SIZE      = sapply(strata$GRID_CODE, grid_size))
+
+            if(metadata_validation_results$general_information$fishery$category == "SURFACE") {
+              wrong_grid_types = which(grid_status$SIZE != "1_DEG")
+              wrong_grid_types = wrong_grid_types[ which(wrong_grid_types %in% which(grid_status$VALID)) ]
+            } else
+              wrong_grid_types = as.integer(array())
+
+            data_validation_results$strata$checks$main$grids$wrong = list(
+              number       = length(wrong_grid_types),
+              row_indexes  = wrong_grid_types,
+              codes        = strata$GRID_CODE[wrong_grid_types],
+              codes_unique = unique(strata$GRID_CODE[wrong_grid_types])
+            )
 
             non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
             duplicate_strata = which(strata$OCCURRENCES > 1)   #which(strata_duplicated$COUNT > 1)
@@ -363,17 +400,28 @@ setMethod("validate_data",
 )
 
 setMethod("data_validation_summary",
-          "IOTCForm3CE",
-          #list(form = "IOTCForm3CEDI", data_validation_results = "list"),
-          function(form, data_validation_results) {
+          list(form = "IOTCForm3CE", metadata_validation_results = "list", data_validation_results = "list"),
+          function(form, metadata_validation_results, data_validation_results) {
             l_info("IOTCForm3CE.data_validation_summary")
 
-            validation_messages = common_data_validation_summary(form, data_validation_results)
+            validation_messages = common_data_validation_summary(form,
+                                                                 metadata_validation_results,
+                                                                 data_validation_results)
 
             ### STRATA AND RECORDS
 
             # This is only true for 3CE / surface
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = "If the provided catch data refer to an industrial surface fishery then it is assumed to be raised to total annual catches and reported in live-weight equivalent by default"))
+
+            fishery_info        = metadata_validation_results$general_information$fishery
+            data_specifications = metadata_validation_results$data_specifications
+
+            if(fishery_info$category == "SURFACE") {
+              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = "The provided fishery belongs to the 'surface' category and therefore catches are assumed to be reported in live-weight equivalent and raised to totals by default"))
+            }
+
+            if(data_specifications$catch_unit$code == "NO" && fishery_info$category != "LONGLINE") {
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = "Catches shall be provided in weight (either kg or t)"))
+            }
 
             strata  = data_validation_results$strata
             records = data_validation_results$records
@@ -388,6 +436,14 @@ setMethod("data_validation_summary",
             # Strata checks
 
             ## Main strata
+
+            if(strata$checks$main$grids$invalid$number > 0) {
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(strata$checks$main$grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid grid codes for this dataset")))
+            }
+
+            if(strata$checks$main$grids$wrong$number > 0) {
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery: see row(s) #", paste0(strata$checks$main$grids$wrong$row_indexes, collapse = ", "))))
+            }
 
             if(strata$duplicate$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))

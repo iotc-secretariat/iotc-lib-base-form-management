@@ -311,8 +311,8 @@ setMethod("validate_data",
 )
 
 setMethod("common_data_validation_summary",
-          list(form = "IOTCFormRCDI", data_validation_results = "list"),
-          function(form, data_validation_results) {
+          list(form = "IOTCFormRCDI", metadata_validation_results = "list", data_validation_results = "list"),
+          function(form, metadata_validation_results, data_validation_results) {
             l_info("IOTCFormRCDI.common_data_validation_summary")
 
             validation_messages = new("MessageList")

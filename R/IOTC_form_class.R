@@ -290,7 +290,7 @@ setMethod("validation_summary", "IOTCForm", function(form) {
 
     common_metadata_validation_messages = common_metadata_validation_summary(form, metadata_validation_results)
     metadata_validation_messages        = metadata_validation_summary       (form, metadata_validation_results)
-    data_validation_messages            = data_validation_summary           (form, data_validation_results)
+    data_validation_messages            = data_validation_summary           (form, metadata_validation_results, data_validation_results)
 
     all_validation_messages = rbind(common_metadata_validation_messages@messages,
                                     metadata_validation_messages@messages,
@@ -374,10 +374,10 @@ setGeneric("validate_data", function(form, metadata_validation_results) {
   standardGeneric("validate_data")
 })
 
-setGeneric("common_data_validation_summary", function(form, data_validation_results) {
+setGeneric("common_data_validation_summary", function(form, metadata_validation_results, data_validation_results) {
   standardGeneric("common_data_validation_summary")
 })
 
-setGeneric("data_validation_summary", function(form, data_validation_results) {
+setGeneric("data_validation_summary", function(form, metadata_validation_results, data_validation_results) {
   standardGeneric("data_validation_summary")
 })

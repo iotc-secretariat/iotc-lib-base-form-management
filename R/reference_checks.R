@@ -173,6 +173,33 @@ validate_grid_CE_SF = function(grid_code, field = "Grid") {
   return(grids)
 }
 
+grids_AR_for = function(grid_code) {
+  return(
+    iotc.data.reference.codelists::IOTC_GRIDS_AR[CODE == trim(grid_code)]
+  )
+}
+
+is_grid_AR_valid = function(grid_code) {
+  return(
+    nrow(
+      grids_AR_for(
+        grid_code
+      )
+    ) == 1
+  )
+}
+
+validate_grid_AR = function(grid_code, field = "Grid") {
+  grid_code = check_mandatory(trim(grid_code), field)
+
+  grids = grids_AR_for(grid_code)
+
+  if(nrow(grids) == 0) stop(paste0("Unable to identify any valid IOTC grid (1x1 or 5x5) or artisanal area by code '", grid_code, "'. Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid IOTC (1x1 and 5x5) grid and artisanal area codes."))
+  if(nrow(grids) >  1) stop(paste0("Multiple IOTC grids (1x1 or 5x5) or artisanal areas identified by code '", grid_code, "'")) # This should never happen...
+
+  return(grids)
+}
+
 species_for = function(species_code) {
   return(
     iotc.data.reference.codelists::LEGACY_SPECIES[CODE == trim(species_code)]
