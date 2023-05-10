@@ -67,6 +67,16 @@ setMethod("validate_data",
             invalid_fisheries  = invalid_fisheries[ ! invalid_fisheries %in% missing_fisheries ]
             missing_fisheries  = missing_fisheries[ ! missing_fisheries %in% strata_empty_rows]
 
+            find_fishery_type = function(code) {
+              if(!is.na(code) && is_fishery_valid(code)) {
+                return(fisheries_for(code)$FISHERY_TYPE_CODE)
+              }
+
+              return(NA)
+            }
+
+            fishery_types      = sapply(strata$FISHERY_CODE, find_fishery_type)
+
             fishery_aggregates = which(unlist(sapply(strata$FISHERY_CODE, function(value) { return(ifelse(is.na(value), FALSE, is_multiple_gear_fishery(value))) }, USE.NAMES = FALSE)))
 
             missing_target_species = which( sapply(strata$TARGET_SPECIES_CODE, is.na))
@@ -78,6 +88,9 @@ setMethod("validate_data",
             invalid_IOTC_areas = which(!sapply(strata$IOTC_MAIN_AREA_CODE, is_IOTC_main_area_valid))
             invalid_IOTC_areas = invalid_IOTC_areas[ ! invalid_IOTC_areas %in% missing_IOTC_areas ]
             missing_IOTC_areas = missing_IOTC_areas[ ! missing_IOTC_areas %in% strata_empty_rows ]
+
+            valid_IOTC_areas   = strata$IOTC_MAIN_AREA_CODE
+            valid_IOTC_areas   = which(!sapply(strata$IOTC_MAIN_AREA_CODE, is.na))
 
             missing_types_of_data    = which( sapply(strata$DATA_TYPE_CODE, is.na))
             invalid_types_of_data    = which(!sapply(strata$DATA_TYPE_CODE, is_data_type_valid))
@@ -176,6 +189,20 @@ setMethod("validate_data",
                           row_indexes  = fishery_aggregates,
                           codes        = strata[fishery_aggregates]$FISHERY_CODE,
                           codes_unique = unique(strata[fishery_aggregates]$FISHERY_CODE)
+                        ),
+                        types = list(
+                          artisanal = list(
+                            number      = length(which(fishery_types == "AR")),
+                            row_indexes = which(fishery_types == "AR")
+                          ),
+                          semi_industrial = list(
+                            number      = length(which(fishery_types == "SI")),
+                            row_indexes = which(fishery_types == "SI")
+                          ),
+                          industrial = list(
+                            number      = length(which(fishery_types == "IN")),
+                            row_indexes = which(fishery_types == "IN")
+                          )
                         )
                       ),
                       target_species = list(
