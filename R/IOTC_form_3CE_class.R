@@ -142,6 +142,8 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3CE", metadata_val
 })
 
 setMethod("extract_data", "IOTCForm3CE", function(form) {
+  l_info("IOTCForm3CE.extract_data")
+
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
@@ -167,8 +169,8 @@ setMethod("extract_data", "IOTCForm3CE", function(form) {
             species = species_codes
           ),
           data = list(
-            catches_original = records_original,
-            catches          = records
+            CE_SF_data_original = records_original,
+            CE_SF_data          = records
           )
         )
     )
@@ -336,8 +338,8 @@ setMethod("validate_data",
 
             records = form@data$records
 
-            catch_data_original = records$data$catches_original
-            catch_data          = records$data$catches
+            catch_data_original = records$data$CESF_data_original
+            catch_data          = records$data$CESF_data
 
             species_table       = table(records$codes$species)
 

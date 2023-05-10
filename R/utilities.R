@@ -9,7 +9,7 @@ is_numeric = function(value) {
 trim = function(string) {
   trimmed = str_trim(string)
 
-  if(is.null(trimmed) | is.na(trimmed) | trimmed == "") trimmed = NA_character_
+  if(is.null(trimmed) || is.na(trimmed) || trimmed == "") trimmed = NA_character_
 
   return(trimmed)
 }

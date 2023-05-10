@@ -1,5 +1,7 @@
 ### COMMON REFERENCE DATA CHECKS
 
+## ENTITIES
+
 entities_for = function(entity_code) {
   return(
     iotc.data.reference.codelists::ENTITIES[CODE == trim(entity_code)]
@@ -21,11 +23,13 @@ validate_entity = function(entity_code, field = "Reporting entity") {
 
   entities = entities_for(entity_code)
 
-  if(nrow(entities) == 0) stop(paste0("Unable to identify any valid entity by code '", entity_code, "'. Please refer to ", reference_codes("admin", "entities"), " for a list of valid reporting entity codes."))
+  if(nrow(entities) == 0) stop(paste0("Unable to identify any valid entity by code '", entity_code, "'. Please refer to ", reference_codes("admin", "entities"), " for a list of valid reporting entity codes"))
   if(nrow(entities) >  1) stop(paste0("Multiple entities identified by code '", entity_code, "'")) # This should never happen...
 
   return(entities)
 }
+
+## COUNTRIES
 
 countries_for = function(country_code) {
   return(
@@ -48,11 +52,13 @@ validate_country = function(country_code, field = "Flag country") {
 
   countries = entities_for(country_code)
 
-  if(nrow(countries) == 0) stop(paste0("Unable to identify any valid country by code '", country_code, "'. Please refer to ", reference_codes("admin", "countries"), " for a list of valid flag country codes."))
+  if(nrow(countries) == 0) stop(paste0("Unable to identify any valid country by code '", country_code, "'. Please refer to ", reference_codes("admin", "countries"), " for a list of valid flag country codes"))
   if(nrow(countries) >  1) stop(paste0("Multiple countries identified by code '", country_code, "'")) # This should never happen...
 
   return(countries)
 }
+
+## FLEETS
 
 fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::LEGACY_FLEETS) {
   valid_fleets = unique(valid_fleets[, .(FLAG_CODE, REPORTING_ENTITY_CODE, FLEET_CODE, NAME_EN, NAME_FR)])
@@ -84,6 +90,8 @@ validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets
   return(fleets)
 }
 
+## FISHERIES
+
 fisheries_for = function(fishery_code) {
   return(
     iotc.data.reference.codelists::LEGACY_FISHERIES[CODE == trim(fishery_code)]
@@ -105,7 +113,7 @@ validate_fishery = function(fishery_code, field = "Fishery") {
 
   fisheries = fisheries_for(fishery_code)
 
-  if(nrow(fisheries) == 0) stop(paste0("Unable to identify any valid fishery by code '", fishery_code, "'. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes."))
+  if(nrow(fisheries) == 0) stop(paste0("Unable to identify any valid fishery by code '", fishery_code, "'. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes"))
   if(nrow(fisheries) >  1) stop(paste0("Multiple fisheries identified by code '", fishery_code, "'")) # This should never happen...
 
   return(fisheries)
@@ -118,6 +126,8 @@ is_multiple_gear_fishery = function(fishery_code) {
     #grepl("\\+", fishery_code)
   )
 }
+
+## IOTC MAIN AREAS
 
 IOTC_main_areas_for = function(IOTC_main_area_code) {
   return(
@@ -140,11 +150,13 @@ validate_IOTC_main_area = function(IOTC_main_area_code, field = "IOTC main area"
 
   IOTC_main_areas = IOTC_main_areas_for(IOTC_main_area_code)
 
-  if(nrow(IOTC_main_areas) == 0) stop(paste0("Unable to identify any valid IOTC main area by code '", IOTC_main_area_code, "'. Please refer to ", reference_codes("admin", "IOTCareasMain"), " for a list of valid IOTC main area codes."))
+  if(nrow(IOTC_main_areas) == 0) stop(paste0("Unable to identify any valid IOTC main area by code '", IOTC_main_area_code, "'. Please refer to ", reference_codes("admin", "IOTCareasMain"), " for a list of valid IOTC main area codes"))
   if(nrow(IOTC_main_areas) >  1) stop(paste0("Multiple IOTC main areas identified by code '", IOTC_main_area_code, "'")) # This should never happen...
 
   return(IOTC_main_areas)
 }
+
+## GRIDS CE-SF
 
 grids_CE_SF_for = function(grid_code) {
   return(
@@ -167,11 +179,13 @@ validate_grid_CE_SF = function(grid_code, field = "Grid") {
 
   grids = grids_CE_SF_for(grid_code)
 
-  if(nrow(grids) == 0) stop(paste0("Unable to identify any valid IOTC grid (1x1 or 5x5) by code '", grid_code, "'. Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid IOTC (1x1 and 5x5) grid codes."))
+  if(nrow(grids) == 0) stop(paste0("Unable to identify any valid IOTC grid (1x1 or 5x5) by code '", grid_code, "'. Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid IOTC (1x1 and 5x5) grid codes"))
   if(nrow(grids) >  1) stop(paste0("Multiple IOTC grids (1x1 or 5x5) identified by code '", grid_code, "'")) # This should never happen...
 
   return(grids)
 }
+
+## GRIDS AR
 
 grids_AR_for = function(grid_code) {
   return(
@@ -194,11 +208,13 @@ validate_grid_AR = function(grid_code, field = "Grid") {
 
   grids = grids_AR_for(grid_code)
 
-  if(nrow(grids) == 0) stop(paste0("Unable to identify any valid IOTC grid (1x1 or 5x5) or artisanal area by code '", grid_code, "'. Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid IOTC (1x1 and 5x5) grid and artisanal area codes."))
+  if(nrow(grids) == 0) stop(paste0("Unable to identify any valid IOTC grid (1x1 or 5x5) or artisanal area by code '", grid_code, "'. Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid IOTC (1x1 and 5x5) grid and artisanal area codes"))
   if(nrow(grids) >  1) stop(paste0("Multiple IOTC grids (1x1 or 5x5) or artisanal areas identified by code '", grid_code, "'")) # This should never happen...
 
   return(grids)
 }
+
+## SPECIES
 
 species_for = function(species_code) {
   return(
@@ -221,7 +237,7 @@ validate_species = function(species_code, field = "Species") {
 
   species = species_for(species_code)
 
-  if(nrow(species) == 0) stop(paste0("Unable to identify any valid species by code '", species_code, "'. Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid species codes."))
+  if(nrow(species) == 0) stop(paste0("Unable to identify any valid species by code '", species_code, "'. Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid species codes"))
   if(nrow(species) >  1) stop(paste0("Multiple species identified by code '", species_code, "'")) # This should never happen...
 
   return(species)
@@ -232,6 +248,8 @@ is_species_aggregate = function(species_code) {
     species_for(species_code)$IS_AGGREGATE == TRUE
   )
 }
+
+## DATA TYPES
 
 data_type_for = function(data_type_code) {
   return(
@@ -254,11 +272,13 @@ validate_data_type = function(data_type_code, field = "Data type") {
 
   data_types = data_types_for(data_type_code)
 
-  if(nrow(species) == 0) stop(paste0("Unable to identify any valid data type by code '", data_type_code, "'. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes."))
+  if(nrow(species) == 0) stop(paste0("Unable to identify any valid data type by code '", data_type_code, "'. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes"))
   if(nrow(species) >  1) stop(paste0("Multiple data types identified by code '", data_type_code, "'")) # This should never happen...
 
   return(data_types)
 }
+
+## DATA SOURCES
 
 data_source_for = function(dataset_code, data_source_code) {
   dataset_code = trim(dataset_code)
@@ -287,11 +307,13 @@ validate_data_source = function(dataset_code, data_source_code, field = "Data so
 
   data_sources = data_source_for(dataset_code, data_source_code)
 
-  if(nrow(data_sources) == 0) stop(paste0("Unable to identify any valid data source by dataset '", dataset_code, "' and code '", data_source_code, "'. Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes."))
+  if(nrow(data_sources) == 0) stop(paste0("Unable to identify any valid data source by dataset '", dataset_code, "' and code '", data_source_code, "'. Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes"))
   if(nrow(data_sources) >  1) stop(paste0("Multiple data sources identified by dataset '", dataset_code, "' and code '", data_source_code, "'")) # This should never happen...
 
   return(data_sources)
 }
+
+## DATA PROCESSINGS
 
 data_processing_for = function(dataset_code, data_processing_code) {
   return(
@@ -317,11 +339,13 @@ validate_data_processing = function(dataset_code, data_processing_code, field = 
 
   data_processings = data_processing_for(dataset_code, data_processing_code)
 
-  if(nrow(data_processings) == 0) stop(paste0("Unable to identify any valid data processing by dataset '", dataset_code, "' and code '", data_processing_code, "'. Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes."))
+  if(nrow(data_processings) == 0) stop(paste0("Unable to identify any valid data processing by dataset '", dataset_code, "' and code '", data_processing_code, "'. Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes"))
   if(nrow(data_processings) >  1) stop(paste0("Multiple data processings identified by dataset '", dataset_code, "' and code '", data_processing_code, "'")) # This should never happen...
 
   return(data_processings)
 }
+
+## DATA COVERAGE TYPES
 
 data_coverage_type_for = function(data_coverage_type_code) {
   return(
@@ -344,11 +368,13 @@ validate_data_coverage_type = function(data_coverage_type_code, field = "Data co
 
   data_coverages = data_coverage_type_for(data_coverage_type_code)
 
-  if(nrow(item) == 0) stop(paste0("Unable to identify any valid data coverage type by code '", data_coverage_type_code, "'. Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid coverage type codes."))
+  if(nrow(item) == 0) stop(paste0("Unable to identify any valid data coverage type by code '", data_coverage_type_code, "'. Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid coverage type codes"))
   if(nrow(item) >  1) stop(paste0("Multiple data coverage types identified by code '", data_coverage_type_code, "'")) # This should never happen...
 
   return(data_coverages)
 }
+
+## DATA ESTIMATIONS
 
 data_estimation_for = function(data_estimation_code) {
   return(
@@ -371,11 +397,42 @@ validate_data_estimation = function(data_estimation_code, field = "Data estimati
 
   data_estimations = data_estimation_for(data_estimation_code)
 
-  if(nrow(item) == 0) stop(paste0("Unable to identify any valid data estimation type by code '", data_estimation_code, "'. Please refer to ", reference_codes("data", "estimations"), " for a list of valid data estimation codes."))
+  if(nrow(item) == 0) stop(paste0("Unable to identify any valid data estimation type by code '", data_estimation_code, "'. Please refer to ", reference_codes("data", "estimations"), " for a list of valid data estimation codes"))
   if(nrow(item) >  1) stop(paste0("Multiple data estimation types identified by code '", data_estimation_code, "'")) # This should never happen...
 
   return(data_estimations)
 }
+
+## FATE TYPES
+
+fate_type_for = function(fate_type_code) {
+  return(
+    iotc.data.reference.codelists::TYPES_OF_FATE[CODE == trim(fate_type_code)]
+  )
+}
+
+is_fate_type_valid = function(fate_type_code) {
+  return(
+    nrow(
+      fate_type_for(
+        fate_type_code
+      )
+    ) == 1
+  )
+}
+
+validate_fate_type = function(fate_type_code, field = "Fate type") {
+  fate_type_code = check_mandatory(trim(fate_type_code), field)
+
+  fate_types = fate_type_for(fate_type_code)
+
+  if(nrow(fate_types) == 0) stop(paste0("Unable to identify any valid fate type by code '", fate_type_code, "'. Please refer to ", reference_codes("biological", "typesOfFate"), " for a list of valid fate type codes"))
+  if(nrow(fate_types) >  1) stop(paste0("Multiple fate types identified by code '", fate_type_code, "'")) # This should never happen...
+
+  return(fate_types)
+}
+
+## FATES
 
 fate_for = function(type_of_fate_code, fate_code) {
   type_of_fate_code = trim(type_of_fate_code)
@@ -404,11 +461,13 @@ validate_fate = function(type_of_fate_code, fate_code, field = "Fate") {
 
   fates = fate_for(type_of_fate_code, fate_code)
 
-  if(nrow(fates) == 0) stop(paste0("Unable to identify any valid fate by type of fate '", type_of_fate_code, "' and code '", fate_code, "'. Please refer to ", reference_codes("biological", "fates"), " for a list of valid fate codes."))
+  if(nrow(fates) == 0) stop(paste0("Unable to identify any valid fate by type of fate '", type_of_fate_code, "' and code '", fate_code, "'. Please refer to ", reference_codes("biological", "fates"), " for a list of valid fate codes"))
   if(nrow(fates) >  1) stop(paste0("Multiple fates identified by type of fate '", type_of_fate_code, "' and code '", fate_code, "'")) # This should never happen...
 
   return(fates)
 }
+
+## RETAIN REASONS
 
 is_retain_reason_valid = function(retain_reason_code) {
   return(
@@ -428,6 +487,8 @@ validate_retain_reason = function(retain_reason_code, field = "Retain reason") {
   )
 }
 
+## DISCARD REASONS
+
 is_discard_reason_valid = function(discard_reason_code) {
   return(
     is_fate_valid(
@@ -445,6 +506,8 @@ validate_discard_reason = function(discard_reason_code, field = "Discard reason"
     )
   )
 }
+
+## DATA RAISINGS
 
 data_raising_for = function(data_raising_code) {
   return(
@@ -467,11 +530,13 @@ validate_data_raising = function(data_raising_code, field = "Data raising") {
 
   data_raisings = data_raising_for(data_raising_code)
 
-  if(nrow(data_raisings) == 0) stop(paste0("Unable to identify any valid data raising by code '", data_raising_code, "'. Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes."))
+  if(nrow(data_raisings) == 0) stop(paste0("Unable to identify any valid data raising by code '", data_raising_code, "'. Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes"))
   if(nrow(data_raisings) >  1) stop(paste0("Multiple data raisings identified by code '", data_raising_code, "'")) # This should never happen...
 
   return(data_raisings)
 }
+
+## CONDITIONS
 
 condition_for = function(condition_code) {
   return(
@@ -494,11 +559,43 @@ validate_condition = function(condition_code, field = "Condition") {
 
   conditions = condition_for(condition_code)
 
-  if(nrow(conditions) == 0) stop(paste0("Unable to identify any valid condition by code '", condition_code, "'. Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes."))
+  if(nrow(conditions) == 0) stop(paste0("Unable to identify any valid condition by code '", condition_code, "'. Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes"))
   if(nrow(conditions) >  1) stop(paste0("Multiple conditions identified by code '", condition_code, "'")) # This should never happen...
 
   return(conditions)
 }
+
+## SEX
+
+sex_for = function(sex_code) {
+  return(
+    iotc.data.reference.codelists::SEX[CODE == trim(sex_code)]
+  )
+}
+
+is_sex_valid = function(sex_code) {
+  return(
+    nrow(
+      sex_for(
+        sex_code
+      )
+    ) == 1
+  )
+}
+
+validate_sex = function(sex_code, field = "Sex") {
+  sex_code = check_mandatory(trim(sex_code), field)
+
+  sexes = sex_for(sex_code)
+
+  if(nrow(sexes) == 0) stop(paste0("Unable to identify any valid sex by code '", sex_code, "'. Please refer to ", reference_codes("biological", "sex"), " for a list of valid sex codes"))
+  if(nrow(sexes) >  1) stop(paste0("Multiple sexes identified by code '", sex_code, "'")) # This should never happen...
+
+  return(sexes)
+}
+
+
+## CATCH UNITS
 
 catch_unit_for = function(catch_unit_code) {
   return(
@@ -521,11 +618,13 @@ validate_catch_unit = function(catch_unit_code, field = "Catch unit") {
 
   catch_units = catch_unit_for(catch_unit_code)
 
-  if(nrow(catch_units) == 0) stop(paste0("Unable to identify any valid catch unit by code '", catch_unit_code, "'. Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes."))
+  if(nrow(catch_units) == 0) stop(paste0("Unable to identify any valid catch unit by code '", catch_unit_code, "'. Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes"))
   if(nrow(catch_units) >  1) stop(paste0("Multiple catch units identified by code '", catch_unit_code, "'")) # This should never happen...
 
   return(catch_units)
 }
+
+## EFFORT UNITS
 
 effort_unit_for = function(effort_unit_code) {
   return(
@@ -548,8 +647,107 @@ validate_effort_unit = function(effort_unit_code, field = "Effort unit") {
 
   effort_units = effort_unit_for(effort_unit_code)
 
-  if(nrow(effort_units) == 0) stop(paste0("Unable to identify any valid effort unit by code '", effort_unit_code, "'. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort unit codes."))
+  if(nrow(effort_units) == 0) stop(paste0("Unable to identify any valid effort unit by code '", effort_unit_code, "'. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort unit codes"))
   if(nrow(effort_units) >  1) stop(paste0("Multiple effort units identified by code '", effort_unit_code, "'")) # This should never happen...
 
   return(effort_units)
+}
+
+## MEASUREMENT TYPES
+
+measurement_type_for = function(measurement_type_code) {
+  return(
+    iotc.data.reference.codelists::TYPES_OF_MEASUREMENT[CODE == trim(measurement_type_code)]
+  )
+}
+
+is_measurement_type_valid = function(measurement_type_code) {
+  return(
+    nrow(
+      measurement_type_for(
+        measurement_type_code
+      )
+    ) == 1
+  )
+}
+
+validate_measurement_type = function(measurement_type_code, field = "Measurement type") {
+  measurement_type_code = check_mandatory(trim(measurement_type_code), field)
+
+  measurement_types = measurement_type_for(measurement_type_code)
+
+  if(nrow(measurement_types) == 0) stop(paste0("Unable to identify any valid measurement type by code '", measurement_type_code, "'. Please refer to ", reference_codes("biological", "typesOfMeasurement"), " for a list of valid measurement type codes"))
+  if(nrow(measurement_types) >  1) stop(paste0("Multiple measurement types identified by code '", measurement_type_code, "'")) # This should never happen...
+
+  return(measurement_types)
+}
+
+## MEASUREMENTS
+
+measurement_for = function(measurement_type_code, measurement_code) {
+  measurement_type_code = trim(measurement_type_code)
+  measurement_code      = trim(measurement_code)
+
+  return(
+    iotc.data.reference.codelists::MEASUREMENT_TYPES[TYPE_OF_MEASUREMENT_CODE  == measurement_type_code &
+                                                     CODE                      == measurement_code]
+  )
+}
+
+is_measurement_valid = function(measurement_type_code, measurement_code) {
+  return(
+    nrow(
+      measurement_for(
+        measurement_type_code,
+        measurement_code
+      )
+    ) == 1
+  )
+}
+
+validate_measurement = function(measurement_type_code, measurement_code, field = "Measurement") {
+  measurement_type_code = check_mandatory(trim(measurement_type_code), "Type of measurement")
+  measurement_code      = check_mandatory(trim(measurement_code), field)
+
+  measurements = measurement_for(measurement_type_code, measurement_code)
+
+  if(nrow(measurements) == 0) stop(paste0("Unable to identify any valid measurement by type of measurement '", measurement_type_code, "' and code '", measurement_code, "'. Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measurement codes"))
+  if(nrow(measurements) >  1) stop(paste0("Multiple measurements identified by type of measurement '", measurement_type_code, "' and code '", measurement_code, "'")) # This should never happen...
+
+  return(measurements)
+}
+
+## MEASURING TOOLS
+
+measuring_tool_for = function(measurement_type_code, measuring_tool_code) {
+  measurement_type_code = trim(measurement_type_code)
+  measuring_tool_code   = trim(measuring_tool_code)
+
+  return(
+    iotc.data.reference.codelists::MEASUREMENT_TOOLS[TYPE_OF_MEASUREMENT_CODE  == measurement_type_code &
+                                                     CODE                      == measuring_tool_code]
+  )
+}
+
+is_measuring_tool_valid = function(measurement_type_code, measuring_tool_code) {
+  return(
+    nrow(
+      measuring_tool_for(
+        measurement_type_code,
+        measuring_tool_code
+      )
+    ) == 1
+  )
+}
+
+validate_measuring_tool = function(measurement_type_code, measuring_tool_code, field = "Measuring tool") {
+  measurement_type_code = check_mandatory(trim(measurement_type_code), "Type of measurement")
+  measuring_tool_code   = check_mandatory(trim(measuring_tool_code), field)
+
+  measuring_tools = measuring_tool_for(measurement_type_code, measuring_tool_code)
+
+  if(nrow(measuring_tools) == 0) stop(paste0("Unable to identify any valid measuring tool by type of measurement '", measurement_type_code, "' and code '", measuring_tool_code, "'. Please refer to ", reference_codes("biological", "allMeasurementTool"), " for a list of valid measuring tools"))
+  if(nrow(measuring_tools) >  1) stop(paste0("Multiple measuring tools identified by type of measurement '", measurement_type_code, "' and code '", measuring_tool_code, "'")) # This should never happen...
+
+  return(measuring_tools)
 }

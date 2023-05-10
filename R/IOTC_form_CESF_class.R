@@ -63,7 +63,6 @@ setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_valid
   target_species_available = is_provided(general_information$target_species)
   target_species_valid     = target_species_available && is_species_valid(general_information$target_species)
   target_species_multiple  = target_species_valid && is_species_aggregate(general_information$target_species)
-  target_species_valid     = target_species_valid
 
   common_metadata_validation_results$general_information$target_species =
     list(
@@ -232,8 +231,8 @@ setMethod("validate_data",
             records = form@data$records
 
             ### TO BE MOVED TO SUBCLASSES
-            catch_data_original = records$data$catches_original
-            catch_data          = records$data$catches
+            CE_SF_data_original = records$data$CE_SF_data_original
+            CE_SF_data          = records$data$CE_SF_data
 
             strata_empty_rows    = find_empty_rows(strata)
             #strata_empty_columns = find_empty_columns(strata)
@@ -244,8 +243,8 @@ setMethod("validate_data",
             non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
 
             ### TO BE MOVED TO SUBCLASSES
-            data_empty_rows    = find_empty_rows(catch_data)
-            data_empty_columns = find_empty_columns(catch_data)
+            data_empty_rows    = find_empty_rows(CE_SF_data)
+            data_empty_columns = find_empty_columns(CE_SF_data)
 
             missing_months   = which( sapply(strata$MONTH, is.na))
             invalid_months   = which(!sapply(strata$MONTH, is_month_valid))
@@ -329,7 +328,7 @@ setMethod("validate_data",
                   )
                 ),
                 records = list(
-                  total = nrow(catch_data),
+                  total = nrow(CE_SF_data),
                   empty_rows = list(
                     number      = length(data_empty_rows),
                     row_indexes = data_empty_rows
