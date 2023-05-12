@@ -20,6 +20,25 @@ debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_1DI_class.R",  echo = TRUE)
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_CESF_class.R", echo = TRUE)
 debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_3CE_class.R",  echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_4SF_class.R",  echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_CESF_multiple_class.R", echo = TRUE)
+debugSource("C:/dev/git/bitbucket_workspaces/IOTC-ws/R libs/workflow/R/IOTC_form_3CE_multiple_class.R",  echo = TRUE)
+
+FORM_3CE_MUL =
+  new("IOTCForm3CEMultiple",
+      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-3CE-multiple - legacy.xlsx",
+      original_name = "Form-3CE-multiple.xlsx"
+  )
+
+validation_summary(FORM_3CE_MUL)
+
+FORM_4SF =
+  new("IOTCForm4SF",
+      path_to_file  = "C:\\dev\\git\\bitbucket_workspaces\\IOTC-ws\\R libs\\workflow - Copy\\Form-4SF - legacy.xlsx",
+      original_name = "Form-4SF.xlsx"
+  )
+
+validation_summary(FORM_4SF)
 
 FORM_3CE =
   new("IOTCForm3CE",
