@@ -142,7 +142,7 @@ setMethod("validate_data",
 
             data_stratification_occurrences = as.data.table(table(data_stratification))
 
-            if(nrow(species_table) > 0) {
+            if(nrow(data_stratification_occurrences) > 0) {
               colnames(data_stratification_occurrences) = c("STRATIFICATION_CODE", "NUM_OCCURRENCES")
 
               data_stratification_occurrences_multiple = data_stratification_occurrences[NUM_OCCURRENCES > 1]

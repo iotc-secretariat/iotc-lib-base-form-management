@@ -293,18 +293,18 @@ setMethod("validate_data",
 
             data_validation_results$strata$checks$efforts = list(
               primary = list(
-                  unit_provided   = metadata_validation_results$data_specifications$effort_units$primary$available,
-                  values_provided = primary_efforts_provided,
-                  missing = list(
-                    number      = length(missing_primary_efforts),
-                    row_indexes = missing_primary_efforts
-                  ),
-                  invalid = list(
-                    number        = length(invalid_primary_efforts),
-                    row_indexes   = invalid_primary_efforts,
-                    values        = strata$PRIMARY_EFFORT[invalid_primary_efforts],
-                    values_unique = unique(strata$PRIMARY_EFFORT[invalid_primary_efforts])
-                  )
+                unit_provided   = metadata_validation_results$data_specifications$effort_units$primary$available,
+                values_provided = primary_efforts_provided,
+                missing = list(
+                  number      = length(missing_primary_efforts),
+                  row_indexes = missing_primary_efforts
+                ),
+                invalid = list(
+                  number        = length(invalid_primary_efforts),
+                  row_indexes   = invalid_primary_efforts,
+                  values        = strata$PRIMARY_EFFORT[invalid_primary_efforts],
+                  values_unique = unique(strata$PRIMARY_EFFORT[invalid_primary_efforts])
+                )
               ),
               secondary = list(
                 unit_provided   = metadata_validation_results$data_specifications$effort_units$secondary$available,
@@ -338,8 +338,8 @@ setMethod("validate_data",
 
             records = form@data$records
 
-            catch_data_original = records$data$CESF_data_original
-            catch_data          = records$data$CESF_data
+            catch_data_original = records$data$CE_SF_data_original
+            catch_data          = records$data$CE_SF_data
 
             species_table       = table(records$codes$species)
 
@@ -358,7 +358,19 @@ setMethod("validate_data",
             invalid_species    = which(!sapply(records$codes$species, is_species_valid))
             invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
 
-            species_aggregates = which(unlist(sapply(records$codes$species, function(value) { return(ifelse(is.na(value), FALSE, is_species_aggregate(value))) }, USE.NAMES = FALSE)))
+            species_aggregates =
+              which(
+                unlist(
+                  sapply(
+                    records$codes$species,
+                    function(value) {
+                      return(!is.na(value) && is_species_aggregate(value))
+                    },
+                    USE.NAMES = FALSE
+                  ),
+                  use.names = FALSE
+                )
+              )
 
             numeric_catch_data =
               catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
@@ -372,6 +384,10 @@ setMethod("validate_data",
 
             data_validation_results$records$checks = list(
               species = list(
+                multiple = list(
+                  number      = length(species_multiple),
+                  col_indexes = species_multiple
+                ),
                 missing = list(
                   number      = length(missing_species),
                   col_indexes = missing_species
@@ -503,7 +519,7 @@ setMethod("data_validation_summary",
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) #", paste0(species$missing$col_indexes, collapse = ", "))))
 
             if(species$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) #", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "speciess"), " for a list of valid legacy species codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) #", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
 
             ## Catches
 

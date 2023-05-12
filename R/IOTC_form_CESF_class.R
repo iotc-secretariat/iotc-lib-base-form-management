@@ -294,11 +294,12 @@ setMethod("validate_data",
                           row_indexes   = invalid_months,
                           values        = strata$MONTH[invalid_months],
                           values_unique = unique(strata$MONTH[invalid_months])
-                        ),
-                        incomplete = list(
-                          number = length(months_check$incomplete_months),
-                          row_indexes = months_check$incomplete_months
                         )
+                        # REMOVED: while we expect data to be provided for all quarters in 1-RC and 1-DI, same is not the case for 3-CE or 4-SF where stratification is much finer
+                        #, incomplete = list(
+                        #  number = length(months_check$incomplete_months),
+                        #  row_indexes = months_check$incomplete_months
+                        #)
                       ),
                       grids = list(
                         invalid = list(
@@ -360,9 +361,9 @@ setMethod("common_data_validation_summary",
 
             # Strata issues / summary
 
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number, " total strata")))
+            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number,     " total strata")))
             validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$non_empty$number, " non-empty strata")))
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number, " unique strata")))
+            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number,    " unique strata")))
 
             if(strata$empty_rows$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
@@ -378,8 +379,9 @@ setMethod("common_data_validation_summary",
 
             months = checks_strata_main$months
 
-            if(months$incomplete$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all months within the strata in row(s) #", paste0(months$incomplete$row_indexes, collapse = ", "))))
+            # REMOVED, see also the comment in the validate_data above...
+            #if(months$incomplete$number > 0)
+            #  validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all months within the strata in row(s) #", paste0(months$incomplete$row_indexes, collapse = ", "))))
 
             if(months$missing$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing month in row(s) #", paste0(months$missing$row_indexes, collapse = ", "))))
@@ -397,7 +399,7 @@ setMethod("common_data_validation_summary",
             #  validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes")))
             #}
 
-            estimations = checks_strata_main$estimations
+            estimations = checks_strata_main$estimations # NOT PART OF THE STRATUM
 
             if(estimations$missing$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing estimation code in row(s) #", paste0(estimations$missing$row_indexes, collapse = ", "))))

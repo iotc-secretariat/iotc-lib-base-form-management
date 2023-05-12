@@ -490,7 +490,7 @@ setMethod("data_validation_summary",
               validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_fish$positive, " positive value(s) reported as number of fish")))
 
             if(num_fish$zero > 0)
-              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_fish$zero, " number of fish explicitly reported as zero")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$zero, " number of fish explicitly reported as zero")))
 
             if(num_fish$na > 0)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$na, " empty value(s) reported as number of fish for all strata / size class combinations")))

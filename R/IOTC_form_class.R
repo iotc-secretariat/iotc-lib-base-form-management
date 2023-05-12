@@ -64,23 +64,23 @@ setMethod("validate_common_metadata", "IOTCForm", function(form) {
   focal_point     = submission_information$focal_point
   organization    = submission_information$organization
 
-  focal_point_available_full_name = is_provided(focal_point$full_name)
-  focal_point_available_e_mail    = is_provided(focal_point$e_mail)
+  focal_point_full_name_available = is_provided(focal_point$full_name)
+  focal_point_e_mail_available    = is_provided(focal_point$e_mail)
 
-  organization_available_full_name = is_provided(organization$full_name)
-  organization_available_e_mail    = is_provided(organization$e_mail)
+  organization_full_name_available = is_provided(organization$full_name)
+  organization_e_mail_available    = is_provided(organization$e_mail)
 
   reference_dates = submission_information$reference_dates
 
-  reference_dates_available_finalization = is_provided(reference_dates$finalization)
-  reference_dates_available_submission   = is_provided(reference_dates$submission)
+  reference_dates_finalization_available = is_provided(reference_dates$finalization)
+  reference_dates_submission_available   = is_provided(reference_dates$submission)
 
-  reference_dates_valid_finalization = reference_dates_available_finalization && reference_dates$finalization <= format(Sys.time())
-  reference_dates_valid_submission   = reference_dates_available_submission   && reference_dates$submission   <= format(Sys.time())
+  reference_dates_finalization_valid = reference_dates_finalization_available && reference_dates$finalization <= format(Sys.time())
+  reference_dates_submission_valid   = reference_dates_submission_available   && reference_dates$submission   <= format(Sys.time())
 
   reference_dates_coherent =
-    reference_dates_valid_finalization &
-    reference_dates_valid_submission &
+    reference_dates_finalization_valid &
+    reference_dates_submission_valid &
     reference_dates$submission >= reference_dates$finalization
 
   reporting_year_available   = is_provided(general_information$reporting_year)
@@ -108,26 +108,26 @@ setMethod("validate_common_metadata", "IOTCForm", function(form) {
       submission_information = list(
         focal_point = list(
           available = list(
-            full_name = focal_point_available_full_name,
-            e_mail    = organization_available_e_mail
+            full_name = focal_point_full_name_available,
+            e_mail    = focal_point_e_mail_available
           )
         ),
         organization = list(
           available = list(
-            full_name = organization_available_full_name,
-            e_mail    = organization_available_e_mail
+            full_name = organization_full_name_available,
+            e_mail    = organization_e_mail_available
           )
         ),
         reference_dates = list(
           finalization = list(
             available = is_provided(reference_dates$finalization),
             value     = reference_dates$finalization,
-            valid     = reference_dates_valid_finalization
+            valid     = reference_dates_finalization_valid
           ),
           submission = list(
             available = is_provided(reference_dates$submission),
             value     = reference_dates$submission,
-            valid     = reference_dates_valid_submission
+            valid     = reference_dates_submission_valid
           ),
           checks = list(
             dates_are_coherent = reference_dates_coherent
