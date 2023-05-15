@@ -1,8 +1,10 @@
 ### COMMON UTILITIES
 
-is_numeric = function(value) {
+is_numeric_ = function(value) {
   str_detect(value, "^\\s*\\-?[0-9]+\\.?[0-9]*(E\\-?[0-9]+)?\\s*$")
 }
+
+is_numeric = memoise(is_numeric_)
 
 ### STRINGS
 

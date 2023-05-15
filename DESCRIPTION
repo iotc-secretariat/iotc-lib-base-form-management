@@ -10,6 +10,7 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     stringr,
+    memoise,
     data.table,
     openxlsx,
     iotc.core.utils.misc,
@@ -24,6 +25,8 @@ Collate:
     'IOTC_form_1RC_class.R'
     'IOTC_form_CESF_class.R'
     'IOTC_form_3CE_class.R'
+    'IOTC_form_CESF_multiple_class.R'
+    'IOTC_form_3CE_multiple_class.R'
     'IOTC_form_4SF_class.R'
     'constants.R'
     'data_checks.R'

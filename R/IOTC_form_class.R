@@ -167,8 +167,12 @@ setGeneric("validate", function(form) {
 setMethod("validate", "IOTCForm", function(form) {
   l_info("IOTCForm.validate")
 
+  start = Sys.time()
+
   metadata_validation = validate_metadata(form, validate_common_metadata(form))
   data_validation     = validate_data    (form, metadata_validation)
+
+  l_info(paste0("IOTCForm.validate: ", Sys.time() - start))
 
   return(
     list(

@@ -5,6 +5,14 @@ IOTCFormCESF = setClass(
   contains = "IOTCForm"
 )
 
+setGeneric("validate_months", function(form, strata) {
+  standardGeneric("validate_months")
+})
+
+setGeneric("allow_empty_data", function(form) {
+  standardGeneric("allow_empty_data")
+})
+
 setMethod("form_comment_cell_row", "IOTCFormCESF", function(form) {
   return(34) #Default for CE / SF
 })
@@ -218,210 +226,200 @@ setMethod("metadata_validation_summary", list(form = "IOTCFormCESF", metadata_va
   return(validation_messages)
 })
 
-setGeneric("validate_months", function(form, strata) {
-  standardGeneric("validate_months")
-})
+setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_results = "list"), function(form, metadata_validation_results) {
+  l_info("IOTCFormCESF.validate_data")
 
-setMethod("validate_data",
-          list(form = "IOTCFormCESF", metadata_validation_results = "list"),
-          function(form, metadata_validation_results) {
-            l_info("IOTCFormCESF.validate_data")
+  strata  = form@data$strata
+  records = form@data$records
 
-            strata  = form@data$strata
-            records = form@data$records
+  ### TO BE MOVED TO SUBCLASSES
+  CE_SF_data_original = records$data$CE_SF_data_original
+  CE_SF_data          = records$data$CE_SF_data
 
-            ### TO BE MOVED TO SUBCLASSES
-            CE_SF_data_original = records$data$CE_SF_data_original
-            CE_SF_data          = records$data$CE_SF_data
+  strata_empty_rows    = find_empty_rows(strata)
+  #strata_empty_columns = find_empty_columns(strata)
 
-            strata_empty_rows    = find_empty_rows(strata)
-            #strata_empty_columns = find_empty_columns(strata)
+  strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
-            strata[, IS_EMPTY := .I %in% strata_empty_rows]
+  total_strata     = nrow(strata)
+  non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
 
-            total_strata     = nrow(strata)
-            non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
+  ### TO BE MOVED TO SUBCLASSES
+  data_empty_rows    = find_empty_rows(CE_SF_data)
+  data_empty_columns = find_empty_columns(CE_SF_data)
 
-            ### TO BE MOVED TO SUBCLASSES
-            data_empty_rows    = find_empty_rows(CE_SF_data)
-            data_empty_columns = find_empty_columns(CE_SF_data)
+  missing_months   = which( sapply(strata$MONTH, is.na))
+  invalid_months   = which(!sapply(strata$MONTH, is_month_valid))
+  invalid_months   = invalid_months[ ! invalid_months %in% missing_months ]
+  missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
 
-            missing_months   = which( sapply(strata$MONTH, is.na))
-            invalid_months   = which(!sapply(strata$MONTH, is_month_valid))
-            invalid_months   = invalid_months[ ! invalid_months %in% missing_months ]
-            missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
+  # If all months are provided and valid, we check that they're also consistent...
+  months_check = validate_months(form, strata)
 
-            # If all months are provided and valid, we check that they're also consistent...
-            months_check = validate_months(form, strata)
+  missing_grids  = which( sapply(strata$GRID_CODE, is.na))
+  invalid_grids  = which(!sapply(strata$GRID_CODE, is_grid_AR_valid))
+  invalid_grids  = invalid_grids[ ! invalid_grids %in% missing_grids ]
+  missing_grids  = missing_grids[ ! missing_grids %in% strata_empty_rows]
 
-            missing_grids  = which( sapply(strata$GRID_CODE, is.na))
-            invalid_grids  = which(!sapply(strata$GRID_CODE, is_grid_AR_valid))
-            invalid_grids  = invalid_grids[ ! invalid_grids %in% missing_grids ]
-            missing_grids  = missing_grids[ ! missing_grids %in% strata_empty_rows]
+  missing_estimations = which( sapply(strata$ESTIMATION_CODE, is.na))
+  invalid_estimations = which(!sapply(strata$ESTIMATION_CODE, is_data_estimation_valid))
+  invalid_estimations = invalid_estimations[ ! invalid_estimations %in% missing_estimations ]
+  missing_estimations = missing_estimations[ ! missing_estimations %in% strata_empty_rows]
 
-            missing_estimations = which( sapply(strata$ESTIMATION_CODE, is.na))
-            invalid_estimations = which(!sapply(strata$ESTIMATION_CODE, is_data_estimation_valid))
-            invalid_estimations = invalid_estimations[ ! invalid_estimations %in% missing_estimations ]
-            missing_estimations = missing_estimations[ ! missing_estimations %in% strata_empty_rows]
-
-            return(
-              list(
-                strata = list(
-                  empty_rows = list(
-                    number      = length(strata_empty_rows),
-                    row_indexes = strata_empty_rows
-                  ),
-                  #empty_columns = list(
-                  #  number      = length(strata_empty_columns),
-                  #  col_indexes = strata_empty_columns
-                  #),
-                  total = list(
-                    number = total_strata
-                  ),
-                  non_empty = list(
-                    number = length(non_empty_strata),
-                    row_indexes = non_empty_strata
-                  ),
-                  checks = list(
-                    main = list(
-                      months = list(
-                        missing = list(
-                          number      = length(missing_months),
-                          row_indexes = missing_months
-                        ),
-                        invalid = list(
-                          number        = length(invalid_months),
-                          row_indexes   = invalid_months,
-                          values        = strata$MONTH[invalid_months],
-                          values_unique = unique(strata$MONTH[invalid_months])
-                        )
-                        # REMOVED: while we expect data to be provided for all quarters in 1-RC and 1-DI, same is not the case for 3-CE or 4-SF where stratification is much finer
-                        #, incomplete = list(
-                        #  number = length(months_check$incomplete_months),
-                        #  row_indexes = months_check$incomplete_months
-                        #)
-                      ),
-                      grids = list(
-                        invalid = list(
-                          number       = length(invalid_grids),
-                          row_indexes  = invalid_grids,
-                          codes        = strata[invalid_grids]$GRID_CODE,
-                          codes_unique = unique(strata[invalid_grids]$GRID_CODE)
-                        ),
-                        missing = list(
-                          number      = length(missing_grids),
-                          row_indexes = missing_grids
-                        )
-                      ),
-                      estimations = list(
-                        invalid = list(
-                          number       = length(invalid_estimations),
-                          row_indexes  = invalid_estimations,
-                          codes        = strata[invalid_estimations]$ESTIMATION_CODE,
-                          codes_unique = unique(strata[invalid_estimations]$ESTIMATION_CODE)
-                        ),
-                        missing = list(
-                          number      = length(missing_estimations),
-                          row_indexes = missing_estimations
-                        )
-                      )
-                    )
-                  )
-                ),
-                records = list(
-                  total = nrow(CE_SF_data),
-                  empty_rows = list(
-                    number      = length(data_empty_rows),
-                    row_indexes = data_empty_rows
-                  ),
-                  empty_columns = list(
-                    number      = length(data_empty_columns),
-                    col_indexes = data_empty_columns
-                  )
-                )
+  return(
+    list(
+      strata = list(
+        empty_rows = list(
+          number      = length(strata_empty_rows),
+          row_indexes = strata_empty_rows
+        ),
+        #empty_columns = list(
+        #  number      = length(strata_empty_columns),
+        #  col_indexes = strata_empty_columns
+        #),
+        total = list(
+          number = total_strata
+        ),
+        non_empty = list(
+          number = length(non_empty_strata),
+          row_indexes = non_empty_strata
+        ),
+        checks = list(
+          main = list(
+            months = list(
+              missing = list(
+                number      = length(missing_months),
+                row_indexes = missing_months
+              ),
+              invalid = list(
+                number        = length(invalid_months),
+                row_indexes   = invalid_months,
+                values        = strata$MONTH[invalid_months],
+                values_unique = unique(strata$MONTH[invalid_months])
+              )
+              # REMOVED: while we expect data to be provided for all quarters in 1-RC and 1-DI, same is not the case for 3-CE or 4-SF where stratification is much finer
+              #, incomplete = list(
+              #  number = length(months_check$incomplete_months),
+              #  row_indexes = months_check$incomplete_months
+              #)
+            ),
+            grids = list(
+              invalid = list(
+                number       = length(invalid_grids),
+                row_indexes  = invalid_grids,
+                codes        = strata[invalid_grids]$GRID_CODE,
+                codes_unique = unique(strata[invalid_grids]$GRID_CODE)
+              ),
+              missing = list(
+                number      = length(missing_grids),
+                row_indexes = missing_grids
+              )
+            ),
+            estimations = list(
+              invalid = list(
+                number       = length(invalid_estimations),
+                row_indexes  = invalid_estimations,
+                codes        = strata[invalid_estimations]$ESTIMATION_CODE,
+                codes_unique = unique(strata[invalid_estimations]$ESTIMATION_CODE)
+              ),
+              missing = list(
+                number      = length(missing_estimations),
+                row_indexes = missing_estimations
               )
             )
-          }
-)
+          )
+        )
+      ),
+      records = list(
+        total = nrow(CE_SF_data),
+        empty_rows = list(
+          number      = length(data_empty_rows),
+          row_indexes = data_empty_rows
+        ),
+        empty_columns = list(
+          number      = length(data_empty_columns),
+          col_indexes = data_empty_columns
+        )
+      )
+    )
+  )
+})
 
-setMethod("common_data_validation_summary",
-          list(form = "IOTCFormCESF", metadata_validation_results = "list", data_validation_results = "list"),
-          function(form, metadata_validation_results, data_validation_results) {
-            l_info("IOTCFormCESF.common_data_validation_summary")
+setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata_validation_results = "list", data_validation_results = "list"), function(form, metadata_validation_results, data_validation_results) {
+  l_info("IOTCFormCESF.common_data_validation_summary")
 
-            validation_messages = new("MessageList")
+  validation_messages = new("MessageList")
 
-            ### STRATA AND RECORDS
+  ### STRATA AND RECORDS
 
-            strata  = data_validation_results$strata
-            records = data_validation_results$records
+  strata  = data_validation_results$strata
+  records = data_validation_results$records
 
-            checks_strata  = strata$checks
-            checks_records = records$checks
+  checks_strata  = strata$checks
+  checks_records = records$checks
 
-            # Strata issues / summary
+  # Strata issues / summary
 
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number,     " total strata")))
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$non_empty$number, " non-empty strata")))
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number,    " unique strata")))
+  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number,     " total strata")))
+  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$non_empty$number, " non-empty strata")))
+  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number,    " unique strata")))
 
-            if(strata$empty_rows$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
+  if(strata$empty_rows$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
 
-            #if(strata$empty_columns$number > 0)
-            #  validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) #", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
+  #if(strata$empty_columns$number > 0)
+  #  validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) #", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
 
-            # Strata checks
+  # Strata checks
 
-            ## Main strata
+  ## Main strata
 
-            checks_strata_main = checks_strata$main
+  checks_strata_main = checks_strata$main
 
-            months = checks_strata_main$months
+  months = checks_strata_main$months
 
-            # REMOVED, see also the comment in the validate_data above...
-            #if(months$incomplete$number > 0)
-            #  validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all months within the strata in row(s) #", paste0(months$incomplete$row_indexes, collapse = ", "))))
+  # REMOVED, see also the comment in the validate_data above...
+  #if(months$incomplete$number > 0)
+  #  validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all months within the strata in row(s) #", paste0(months$incomplete$row_indexes, collapse = ", "))))
 
-            if(months$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing month in row(s) #", paste0(months$missing$row_indexes, collapse = ", "))))
+  if(months$missing$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing month in row(s) #", paste0(months$missing$row_indexes, collapse = ", "))))
 
-            if(months$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid month value in row(s) #", paste0(months$invalid$row_indexes, collapse = ", "), ". Please use only 1-12 for Jan-Dec")))
+  if(months$invalid$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid month value in row(s) #", paste0(months$invalid$row_indexes, collapse = ", "), ". Please use only 1-12 for Jan-Dec")))
 
-            grids = checks_strata_main$grids
+  grids = checks_strata_main$grids
 
-            if(grids$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing grid in row(s) #", paste0(grids$missing$row_indexes, collapse = ", "))))
+  if(grids$missing$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing grid in row(s) #", paste0(grids$missing$row_indexes, collapse = ", "))))
 
-            # MOVED TO 3CE
-            #if(grids$invalid$number > 0) {
-            #  validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes")))
-            #}
+  # MOVED TO 3CE
+  #if(grids$invalid$number > 0) {
+  #  validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes")))
+  #}
 
-            estimations = checks_strata_main$estimations # NOT PART OF THE STRATUM
+  estimations = checks_strata_main$estimations # NOT PART OF THE STRATUM
 
-            if(estimations$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing estimation code in row(s) #", paste0(estimations$missing$row_indexes, collapse = ", "))))
+  if(estimations$missing$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing estimation code in row(s) #", paste0(estimations$missing$row_indexes, collapse = ", "))))
 
-            if(estimations$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid estimation code in row(s) #", paste0(estimations$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "estimates"), " for a list of valid estimation codes")))
+  if(estimations$invalid$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid estimation code in row(s) #", paste0(estimations$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "estimates"), " for a list of valid estimation codes")))
 
-            ###
+  ###
 
-            # Data issues / summary
+  # Data issues / summary
 
-            ## Empty rows / columns
-            empty_rows = records$empty_rows
+  ## Empty rows / columns
+  empty_rows = records$empty_rows
 
-            if(empty_rows$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
+  if(empty_rows$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
 
-            empty_columns = records$empty_columns
+  empty_columns = records$empty_columns
 
-            if(empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) #", paste0(empty_columns$col_indexes, collapse = ", "))))
+  if(empty_columns$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) #", paste0(empty_columns$col_indexes, collapse = ", "))))
 
-            return(validation_messages)
-          }
-)
+  return(validation_messages)
+})
