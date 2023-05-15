@@ -17,6 +17,8 @@ setGeneric("optional_strata_columns", function(form) {
   standardGeneric("optional_strata_columns")
 })
 
+# Renamed to avoid (UNEXPLAINED!) issues with inheritance... Probably the same should happen for "allow_empty_data" and "grid_validator"
+# which have the same name as methods in IOTCFormCESF
 setGeneric("validate_months_multiple", function(form, strata) {
   standardGeneric("validate_months_multiple")
 })

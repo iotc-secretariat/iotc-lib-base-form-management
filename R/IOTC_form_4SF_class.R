@@ -167,7 +167,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm4SF", metadata_val
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The species is mandatory"))
   else if(!general_information$species$valid)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
-  else if(!general_information$species$multiple)
+  else if(general_information$species$multiple)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided species (", general_information$target_species$code, ") correspond to a species aggregate. Please refer to ", reference_codes("legacy", "species"), " for a list of valid, distinct species codes")))
 
   ## Measurements
