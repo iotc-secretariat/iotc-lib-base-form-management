@@ -25,6 +25,10 @@ setMethod("allow_empty_data", "IOTCForm3CEMultiple", function(form) {
   return(TRUE)
 })
 
+setMethod("optional_strata_columns", "IOTCForm3CEMultiple", function(form) {
+  return(14:17) # Secondary and tertiary effort codes / values
+})
+
 setMethod("validate_months", list(form = "IOTCForm3CEMultiple", strata = "data.table"), function(form, strata) {
   start = Sys.time()
 
@@ -236,7 +240,13 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   invalid_secondary_efforts = invalid_secondary_efforts[ ! invalid_secondary_efforts %in% missing_secondary_efforts ]
   missing_secondary_efforts = missing_secondary_efforts[ ! missing_secondary_efforts %in% strata_empty_rows ]
 
-  secondary_efforts_provided= length(which(!sapply(strata$SECONDARY_EFFORT, is.na))) > 0
+  missing_secondary_efforts_      = missing_secondary_efforts     [which(!missing_secondary_efforts      %in% missing_secondary_effort_codes)]
+  missing_secondary_effort_codes_ = missing_secondary_effort_codes[which(!missing_secondary_effort_codes %in% missing_secondary_efforts)]
+
+  missing_secondary_efforts      = missing_secondary_efforts_
+  missing_secondary_effort_codes = missing_secondary_effort_codes_
+
+  #secondary_efforts_provided= length(which(!sapply(strata$SECONDARY_EFFORT, is.na))) > 0
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (VI): ", Sys.time() - start))
   start = Sys.time()
@@ -256,12 +266,36 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   invalid_tertiary_efforts = invalid_tertiary_efforts[ ! invalid_tertiary_efforts %in% missing_tertiary_efforts ]
   missing_tertiary_efforts = missing_tertiary_efforts[ ! missing_tertiary_efforts %in% strata_empty_rows ]
 
-  tertiary_efforts_provided= length(which(!sapply(strata$TERTIARY_EFFORT, is.na))) > 0
+  missing_tertiary_efforts_      = missing_tertiary_efforts     [which(!missing_tertiary_efforts      %in% missing_tertiary_effort_codes)]
+  missing_tertiary_effort_codes_ = missing_tertiary_effort_codes[which(!missing_tertiary_effort_codes %in% missing_tertiary_efforts)]
+
+  missing_tertiary_efforts      = missing_tertiary_efforts_
+  missing_tertiary_effort_codes = missing_tertiary_effort_codes_
+
+  same_effort_unit_ps = which(strata[!is.na(PRIMARY_EFFORT_CODE),   SAME_EFFORT_UNITS_PS := PRIMARY_EFFORT_CODE   == SECONDARY_EFFORT_CODE]$SAME_EFFORT_UNITS_PS == TRUE)
+  same_effort_unit_pt = which(strata[!is.na(PRIMARY_EFFORT_CODE),   SAME_EFFORT_UNITS_PT := PRIMARY_EFFORT_CODE   == TERTIARY_EFFORT_CODE ]$SAME_EFFORT_UNITS_PT == TRUE)
+  same_effort_unit_st = which(strata[!is.na(SECONDARY_EFFORT_CODE), SAME_EFFORT_UNITS_ST := SECONDARY_EFFORT_CODE == TERTIARY_EFFORT_CODE ]$SAME_EFFORT_UNITS_ST == TRUE)
+
+  #tertiary_efforts_provided= length(which(!sapply(strata$TERTIARY_EFFORT, is.na))) > 0
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (VIII): ", Sys.time() - start))
   start = Sys.time()
 
   data_validation_results$strata$checks$efforts = list(
+    same_unit = list(
+      primary_secondary = list(
+        number = length(same_effort_unit_ps),
+        row_indexes = same_effort_unit_ps
+      ),
+      primary_tertiary = list(
+        number = length(same_effort_unit_pt),
+        row_indexes = same_effort_unit_pt
+      ),
+      secondary_tertiary = list(
+        number = length(same_effort_unit_st),
+        row_indexes = same_effort_unit_st
+      )
+    ),
     primary = list(
       code = list(
         missing = list(
@@ -410,10 +444,6 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   l_info(paste0("IOTCForm3CEMultiple.validate_data (XIII): ", Sys.time() - start))
   start = Sys.time()
 
-  ### FOLLOWING CHECK HAS TO BE COPIED FROM 1-DI - END
-
-  ### This shall remain
-
   numeric_catch_data =
     catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
 
@@ -530,8 +560,9 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery: see row(s) #", paste0(strata$checks$main$grids$wrong$row_indexes, collapse = ", "))))
   }
 
-  if(strata$duplicate$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
+  # Commented out as the message is handled at superclass level
+  #if(strata$duplicate$number > 0)
+  #  validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
 
   ## Efforts
 
@@ -551,35 +582,49 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
   if(effort_primary$value$invalid$number > 0)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid primary effort value in row(s) #", paste0(effort_primary$value$invalid$row_indexes, collapse = ", "))))
 
-  if(FALSE) {
-    effort_secondary = checks_strata_efforts$secondary
+  effort_secondary = checks_strata_efforts$secondary
 
-    if(effort_secondary$code$missing$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing secondary effort code in row(s) #", paste0(effort_secondary$code$missing$row_indexes, collapse = ", "))))
+  if(effort_secondary$code$missing$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing secondary effort code in row(s) #", paste0(effort_secondary$code$missing$row_indexes, collapse = ", "))))
 
-    if(effort_secondary$code$invalid$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid secondary effort code in row(s) #", paste0(effort_secondary$code$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
+  if(effort_secondary$code$invalid$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid secondary effort code in row(s) #", paste0(effort_secondary$code$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
 
-    if(effort_secondary$value$missing$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing secondary effort value in row(s) #", paste0(effort_secondary$value$missing$row_indexes, collapse = ", "))))
+  if(effort_secondary$value$missing$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing secondary effort value in row(s) #", paste0(effort_secondary$value$missing$row_indexes, collapse = ", "))))
 
-    if(effort_secondary$value$invalid$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid secondary effort value in row(s) #", paste0(effort_secondary$value$invalid$row_indexes, collapse = ", "))))
+  if(effort_secondary$value$invalid$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid secondary effort value in row(s) #", paste0(effort_secondary$value$invalid$row_indexes, collapse = ", "))))
 
-    effort_tertiary  = checks_strata_efforts$tertiary
+  effort_tertiary  = checks_strata_efforts$tertiary
 
-    if(effort_tertiary$code$missing$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing tertiary effort code in row(s) #", paste0(effort_tertiary$code$missing$row_indexes, collapse = ", "))))
+  if(effort_tertiary$code$missing$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing tertiary effort code in row(s) #", paste0(effort_tertiary$code$missing$row_indexes, collapse = ", "))))
 
-    if(effort_tertiary$code$invalid$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid tertiary effort code in row(s) #", paste0(effort_tertiary$code$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
+  if(effort_tertiary$code$invalid$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid tertiary effort code in row(s) #", paste0(effort_tertiary$code$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
 
-    if(effort_tertiary$value$missing$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing tertiary effort value in row(s) #", paste0(effort_tertiary$value$missing$row_indexes, collapse = ", "))))
+  if(effort_tertiary$value$missing$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing tertiary effort value in row(s) #", paste0(effort_tertiary$value$missing$row_indexes, collapse = ", "))))
 
-    if(effort_tertiary$value$invalid$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid tertiary effort value in row(s) #", paste0(effort_tertiary$value$invalid$row_indexes, collapse = ", "))))
-  }
+  if(effort_tertiary$value$invalid$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid tertiary effort value in row(s) #", paste0(effort_tertiary$value$invalid$row_indexes, collapse = ", "))))
+
+
+  same_effort_unit = checks_strata_efforts$same_unit
+
+  same_effort_unit_ps = same_effort_unit$primary_secondary
+  same_effort_unit_pt = same_effort_unit$primary_tertiary
+  same_effort_unit_st = same_effort_unit$secondary_tertiary
+
+  if(same_effort_unit_ps$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Same primary / secondary effort unit codes in row(s) #", paste0(same_effort_unit_ps$row_indexes, collapse = ", "))))
+
+  if(same_effort_unit_pt$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Same primary / tertiary effort unit codes in row(s) #", paste0(same_effort_unit_pt$row_indexes, collapse = ", "))))
+
+  if(same_effort_unit_st$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Same secondary / tertiary effort unit codes in row(s) #", paste0(same_effort_unit_st$row_indexes, collapse = ", "))))
 
   # Data issues / summary
 

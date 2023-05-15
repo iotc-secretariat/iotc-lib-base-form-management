@@ -13,6 +13,10 @@ setGeneric("allow_empty_data", function(form) {
   standardGeneric("allow_empty_data")
 })
 
+setGeneric("optional_strata_columns", function(form) {
+  standardGeneric("optional_strata_columns")
+})
+
 setGeneric("validate_months", function(form, strata) {
   standardGeneric("validate_months")
 })
@@ -52,6 +56,7 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
 
   strata_empty_rows    = find_empty_rows(strata)
   strata_empty_columns = find_empty_columns(strata)
+  strata_empty_columns = strata_empty_columns[which(!strata_empty_columns %in% optional_strata_columns(form))]
 
   l_info(paste0("IOTCFormCESFMultiple.validate_data (I): ", Sys.time() - start))
   start = Sys.time()
@@ -564,8 +569,8 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
   ## Empty rows / columns
   empty_rows = records$empty_rows
 
-  if(empty_rows$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = ifelse(allow_empty_data(form), "WARN", "FATAL"), source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
+  if(empty_rows$number > 0 && !allow_empty_data(form))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
 
   empty_columns = records$empty_columns
 

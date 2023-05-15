@@ -219,15 +219,15 @@ setMethod("common_metadata_validation_summary",
             if(!submission_information$reference_dates$finalization$available)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The finalization date is mandatory"))
             else if(!submission_information$reference_dates$finalization$valid)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The finalization date (", submission_information$reference_dates$finalization$value, ") is not valid")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The finalization date (", submission_information$reference_dates$finalization$value, ") is not valid or is set in the future")))
 
             if(!submission_information$reference_dates$submission$available)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The submission date is mandatory"))
             else if(!submission_information$reference_dates$submission$valid)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") is not valid")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") is not valid or is set in the future")))
 
-            if( submission_information$reference_dates$finalization$available &
-                submission_information$reference_dates$submission$available &
+            if( submission_information$reference_dates$finalization$valid &&
+                submission_information$reference_dates$submission$valid &&
                 !submission_information$reference_dates$checks$dates_are_coherent)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") should follow the finalization date (", submission_information$reference_dates$finalization$value, ")")))
 
