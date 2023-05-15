@@ -17,8 +17,8 @@ setGeneric("optional_strata_columns", function(form) {
   standardGeneric("optional_strata_columns")
 })
 
-setGeneric("validate_months", function(form, strata) {
-  standardGeneric("validate_months")
+setGeneric("validate_months_multiple", function(form, strata) {
+  standardGeneric("validate_months_multiple")
 })
 
 setMethod("form_comment_cell_row", "IOTCFormCESFMultiple", function(form) {
@@ -89,7 +89,7 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
 
   # If all months are provided and valid, we check that they're also consistent...
 
-  months_check = validate_months(form, strata)
+  months_check = validate_months_multiple(form, strata)
 
   l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.a): ", Sys.time() - start))
   start = Sys.time()

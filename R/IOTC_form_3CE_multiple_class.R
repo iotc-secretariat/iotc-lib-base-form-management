@@ -29,7 +29,7 @@ setMethod("optional_strata_columns", "IOTCForm3CEMultiple", function(form) {
   return(14:17) # Secondary and tertiary effort codes / values
 })
 
-setMethod("validate_months", list(form = "IOTCForm3CEMultiple", strata = "data.table"), function(form, strata) {
+setMethod("validate_months_multiple", list(form = "IOTCForm3CEMultiple", strata = "data.table"), function(form, strata) {
   start = Sys.time()
 
   l_info("IOTCForm3CEMultiple.validate_months")
