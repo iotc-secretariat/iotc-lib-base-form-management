@@ -28,6 +28,7 @@ Collate:
     'IOTC_form_CESF_multiple_class.R'
     'IOTC_form_3CE_multiple_class.R'
     'IOTC_form_4SF_class.R'
+    'IOTC_form_4SF_multiple_class.R'
     'constants.R'
     'data_checks.R'
     'field_checks.R'

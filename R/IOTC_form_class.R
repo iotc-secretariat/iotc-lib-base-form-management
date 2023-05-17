@@ -32,6 +32,9 @@ setGeneric("read", function(form) {
 
 # Doesn't need to be extended
 setMethod("read", "IOTCForm", function(form) {
+  start = Sys.time()
+  l_info("IOTCForm.read")
+
   current_form = read_form(form@path_to_file, form@original_name)
 
   form@original_metadata = current_form$form_metadata
@@ -46,6 +49,8 @@ setMethod("read", "IOTCForm", function(form) {
 
   form@data = extract_data(form)
 
+  l_info(paste0("IOTCForm.read: ", Sys.time() - start))
+
   return(form)
 })
 
@@ -54,6 +59,7 @@ setGeneric("validate_common_metadata", function(form) {
 })
 
 setMethod("validate_common_metadata", "IOTCForm", function(form) {
+  start = Sys.time()
   l_info("IOTCForm.validate_common_metadata")
 
   metadata = form@metadata
@@ -102,6 +108,8 @@ setMethod("validate_common_metadata", "IOTCForm", function(form) {
   if(fleet_valid)
     fleet = fleets_for(general_information$reporting_entity,
                        general_information$flag_country)
+
+  l_info(paste0("IOTCForm.validate_common_metadata: ", Sys.time() - start))
 
   return(
     list(
@@ -165,9 +173,8 @@ setGeneric("validate", function(form) {
 })
 
 setMethod("validate", "IOTCForm", function(form) {
-  l_info("IOTCForm.validate")
-
   start = Sys.time()
+  l_info("IOTCForm.validate")
 
   metadata_validation = validate_metadata(form, validate_common_metadata(form))
   data_validation     = validate_data    (form, metadata_validation)
@@ -187,6 +194,7 @@ setGeneric("common_metadata_validation_summary", function(form, metadata_validat
 })
 
 setMethod("common_metadata_validation_summary", signature(form = "IOTCForm", metadata_validation_results = "list"), function(form, metadata_validation_results) {
+  start = Sys.time()
   l_info("IOTCForm.common_metadata_validation_summary")
 
   validation_messages = new("MessageList")
@@ -260,6 +268,8 @@ setMethod("common_metadata_validation_summary", signature(form = "IOTCForm", met
   if(general_information$fleet$valid)
     validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") identify ", general_information$fleet$code, " ('", general_information$fleet$name, "') as fleet")))
 
+  l_info(paste0("IOTCForm.common_metadata_validation_summary: ", Sys.time() - start))
+
   return(validation_messages)
 })
 
@@ -270,6 +280,7 @@ setGeneric("validation_summary", function(form) {
 
 # Doesn't need to be extended
 setMethod("validation_summary", "IOTCForm", function(form) {
+  start = Sys.time()
   l_info("IOTCForm.validation_summary")
 
   validation_messages = new("MessageList")
@@ -320,6 +331,8 @@ setMethod("validation_summary", "IOTCForm", function(form) {
              )
       )
     )
+
+  l_info(paste0("IOTCForm.validation_summary: ", Sys.time() - start))
 
   return(
     list(

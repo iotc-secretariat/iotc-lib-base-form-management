@@ -29,7 +29,7 @@ setMethod("form_comment_cell_row", "IOTCFormCESFMultiple", function(form) {
 
 setMethod("extract_metadata", list(form = "IOTCFormCESFMultiple", common_metadata = "list"), function(form, common_metadata) {
   l_info("IOTCFormCESFMultiple.extract_metadata")
-
+  l_info("IOTCFormCESFMultiple.extract_metadata: 0")
   return(common_metadata)
 })
 
@@ -46,6 +46,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCFormCESFMultiple", met
 })
 
 setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validation_results = "list"), function(form, metadata_validation_results) {
+  start_VDD = Sys.time()
   l_info("IOTCFormCESFMultiple.validate_data")
 
   strata  = form@data$strata
@@ -54,63 +55,55 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
   data_CE_SF_original = records$data$CE_SF_data_original
   data_CE_SF          = records$data$CE_SF_data
 
-  start = Sys.time()
-
   strata_empty_rows    = find_empty_rows(strata)
   strata_empty_columns = find_empty_columns(strata)
   strata_empty_columns = strata_empty_columns[which(!strata_empty_columns %in% optional_strata_columns(form))]
-
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (I): ", Sys.time() - start))
-  start = Sys.time()
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
   total_strata     = nrow(strata)
   non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (II): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (I): ", Sys.time() - start_VDD))
+  start_VD = Sys.time()
 
   data_empty_rows    = find_empty_rows(data_CE_SF)
   data_empty_columns = find_empty_columns(data_CE_SF)
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (III): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (II): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_months   = which( sapply(strata$MONTH, is.na))
   invalid_months   = which(!sapply(strata$MONTH, is_month_valid))
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (IV): ", Sys.time() - start))
-  start = Sys.time()
-
   invalid_months   = invalid_months[ ! invalid_months %in% missing_months ]
   missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (V): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (III): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   # If all months are provided and valid, we check that they're also consistent...
 
   months_check = validate_months_multiple(form, strata)
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.a): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (IV): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_fisheries  = which( sapply(strata$FISHERY_CODE, is.na))
   invalid_fisheries  = which(!sapply(strata$FISHERY_CODE, is_fishery_valid))
   invalid_fisheries  = invalid_fisheries[ ! invalid_fisheries %in% missing_fisheries ]
   missing_fisheries  = missing_fisheries[ ! missing_fisheries %in% strata_empty_rows]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.b): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (V): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
-  find_fishery_type = function(code) {
+  find_fishery_type = memoise(function(code) {
     if(!is.na(code) && is_fishery_valid(code)) {
       return(fisheries_for(code)$FISHERY_TYPE_CODE)
     }
 
     return(NA)
-  }
+  })
 
   fishery_types      = sapply(strata$FISHERY_CODE, find_fishery_type)
   fishery_aggregates =
@@ -118,87 +111,84 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
       unlist(
         sapply(
           strata$FISHERY_CODE,
-          function(value) {
+          memoise(function(value) {
             return(!is.na(value) && is_multiple_gear_fishery(value))
-          },
+          }),
           USE.NAMES = FALSE
         ),
         use.names = FALSE
       )
     )
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.c): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_target_species = which( sapply(strata$TARGET_SPECIES_CODE, is.na))
   invalid_target_species = which(!sapply(strata$TARGET_SPECIES_CODE, is_species_valid))
   invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
   missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.d): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (VII): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_grids = which( sapply(strata$GRID_CODE, is.na))
   invalid_grids = which(!sapply(strata$GRID_CODE, grid_validator(form)))
   invalid_grids = invalid_grids[ ! invalid_grids %in% missing_grids ]
   missing_grids = missing_grids[ ! missing_grids %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.e): ", Sys.time() - start))
-  start = Sys.time()
-
   valid_grids   = strata$GRID_CODE
   valid_grids   = which(!sapply(strata$GRID_CODE, is.na))
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.f): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (VIII): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_estimations    = which( sapply(strata$ESTIMATION_CODE, is.na))
   invalid_estimations    = which(!sapply(strata$ESTIMATION_CODE, is_data_estimation_valid))
   invalid_estimations    = invalid_estimations[ ! invalid_estimations %in% missing_estimations ]
   missing_estimations    = missing_estimations[ ! missing_estimations %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.g): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (IX): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_types_of_data    = which( sapply(strata$DATA_TYPE_CODE, is.na))
   invalid_types_of_data    = which(!sapply(strata$DATA_TYPE_CODE, is_data_type_valid))
   invalid_types_of_data    = invalid_types_of_data[ ! invalid_types_of_data %in% missing_types_of_data ]
   missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.h): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (X): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_data_sources     = which( sapply(strata$DATA_SOURCE_CODE, is.na))
   invalid_data_sources     = which(!sapply(strata$DATA_SOURCE_CODE, function(code) { return(is_data_source_valid(form_dataset_code(form), code)) }))
   invalid_data_sources     = invalid_data_sources[ ! invalid_data_sources %in% missing_data_sources ]
   missing_data_sources     = missing_data_sources[ ! missing_data_sources %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.i): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (XI): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_data_processings = which( sapply(strata$DATA_PROCESSING_CODE, is.na))
   invalid_data_processings = which(!sapply(strata$DATA_PROCESSING_CODE, function(code) { return(is_data_processing_valid(form_dataset_code(form), code)) }))
   invalid_data_processings = invalid_data_processings[ ! invalid_data_processings %in% missing_data_processings ]
   missing_data_processings = missing_data_processings[ ! missing_data_processings %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.j): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (XII): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_data_raisings    = which( sapply(strata$DATA_RAISING_CODE, is.na))
   invalid_data_raisings    = which(!sapply(strata$DATA_RAISING_CODE, is_data_raising_valid))
   invalid_data_raisings    = invalid_data_raisings[ ! invalid_data_raisings %in% missing_data_raisings ]
   missing_data_raisings    = missing_data_raisings[ ! missing_data_raisings %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.k): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (XIII): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   missing_coverage_types   = which( sapply(strata$COVERAGE_TYPE_CODE, is.na))
   invalid_coverage_types   = which(!sapply(strata$COVERAGE_TYPE_CODE, is_data_coverage_type_valid))
   invalid_coverage_types   = invalid_coverage_types[ ! invalid_coverage_types %in% missing_coverage_types ]
   missing_coverage_types   = missing_coverage_types[ ! missing_coverage_types %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.l): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (XIV): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
 
   # Temporarily added
   strata$COVERAGE = as.double(strata$COVERAGE)
@@ -208,8 +198,10 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
   invalid_coverages        = invalid_coverages[ ! invalid_coverages %in% missing_coverages ]
   missing_coverages        = missing_coverages[ ! missing_coverages %in% strata_empty_rows ]
 
-  l_info(paste0("IOTCFormCESFMultiple.validate_data (VI.m): ", Sys.time() - start))
-  start = Sys.time()
+  l_info(paste0("IOTCFormCESFMultiple.validate_data (XV): ", Sys.time() - start_VD))
+  start_VD = Sys.time()
+
+  l_info(paste0("IOTCFormCESFMultiple.validate_data: ", Sys.time() - start_VDD))
 
   return(
     list(
@@ -410,6 +402,7 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
 })
 
 setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", metadata_validation_results = "list", data_validation_results = "list"), function(form, metadata_validation_results, data_validation_results) {
+  start = Sys.time()
   l_info("IOTCFormCESFMultiple.common_data_validation_summary")
 
   validation_messages = new("MessageList")
@@ -578,6 +571,8 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   if(empty_columns$number > 0)
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) #", paste0(empty_columns$col_indexes, collapse = ", "))))
+
+  l_info(paste0("IOTCFormCESFMultiple.common_data_validation_summary: ", Sys.time() - start))
 
   return(validation_messages)
 })

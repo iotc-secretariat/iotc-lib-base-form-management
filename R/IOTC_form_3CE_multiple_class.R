@@ -138,7 +138,7 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   grid_status    = data.table(FISHERY_CATEGORY_CODE = sapply(strata$FISHERY_CODE, fishery_category),
                               GRID_CODE = strata$GRID_CODE,
                               MISSING   = sapply(strata$GRID_CODE, is.na),
-                              VALID     = sapply(strata$GRID_CODE, is_grid_AR_valid),
+                              VALID     = sapply(strata$GRID_CODE, grid_validator(form)),
                               SIZE      = sapply(strata$GRID_CODE, grid_size))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (I.a): ", Sys.time() - start))
