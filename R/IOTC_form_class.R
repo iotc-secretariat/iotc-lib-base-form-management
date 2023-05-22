@@ -98,8 +98,8 @@ setMethod("validate_common_metadata", "IOTCForm", function(form) {
   flag_country_valid     = flag_country_available && is_country_valid(general_information$flag_country)
 
   fleet_valid =
-    reporting_entity_valid &
-    flag_country_valid &
+    reporting_entity_valid &&
+    flag_country_valid &&
     is_fleet_valid(general_information$reporting_entity,
                    general_information$flag_country)
 
