@@ -17,6 +17,22 @@ setMethod("form_dataset_code", "IOTCForm1RC", function(form) {
   return("RC")
 })
 
+setMethod("first_data_column", "IOTCForm1RC", function(form) {
+  return(which(EXCEL_COLUMNS == "L"))
+})
+
+setMethod("first_data_row", "IOTCForm1RC", function(form) {
+  return(6)
+})
+
+setMethod("first_strata_column", "IOTCForm1RC", function(form) {
+  return(which(EXCEL_COLUMNS == "B"))
+})
+
+setMethod("last_strata_column", "IOTCForm1RC", function(form) {
+  return(which(EXCEL_COLUMNS == "K"))
+})
+
 setMethod("extract_data", "IOTCForm1RC", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
@@ -137,33 +153,33 @@ setMethod("validate_data",
             data_validation_results$strata$duplicate =
               list(
                 number = length(duplicate_strata),
-                row_indexes = duplicate_strata
+                row_indexes = spreadsheet_rows_for(form, duplicate_strata)
               )
 
             data_validation_results$strata$unique =
               list(
                 number = length(unique_strata),
-                row_indexes = unique_strata
+                row_indexes = spreadsheet_rows_for(form, unique_strata)
               )
 
             data_validation_results$strata$checks$main$retain_reasons =
               list(
                 invalid = list(
                   number       = length(invalid_retain_reasons),
-                  row_indexes  = invalid_retain_reasons,
+                  row_indexes  = spreadsheet_rows_for(form, invalid_retain_reasons),
                   codes        = strata[invalid_retain_reasons]$RETAIN_REASON_CODE,
                   codes_unique = unique(strata[invalid_retain_reasons]$RETAIN_REASON_CODE)
                 ),
                 missing = list(
                   number      = length(missing_retain_reasons),
-                  row_indexes = missing_retain_reasons
+                  row_indexes = spreadsheet_rows_for(form, missing_retain_reasons)
                 )
               )
 
             data_validation_results$records$checks$species$multiple =
               list(
                   number       = length(species_multiple),
-                  col_indexes  = species_multiple,
+                  col_indexes  = spreadsheet_cols_for(form, species_multiple),
                   codes_unique = species_occurrences_multiple$SPECIES_CODE
               )
 

@@ -148,107 +148,107 @@ setMethod("validate_data",
             numeric_catch_data =
               catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
 
-            non_num_catches  = sum(numeric_catch_data == FALSE, na.rm = TRUE)
+            non_num_catches  = which(numeric_catch_data == FALSE, arr.ind = TRUE) #sum(numeric_catch_data == FALSE, na.rm = TRUE)
 
-            na_catches       = sum(numeric_catch_data == TRUE & is.na(catch_data), na.rm = TRUE)
-            zero_catches     = sum(numeric_catch_data == TRUE & catch_data == 0,   na.rm = TRUE)
-            negative_catches = sum(numeric_catch_data == TRUE & catch_data  < 0,   na.rm = TRUE)
-            positive_catches = sum(numeric_catch_data == TRUE & catch_data  > 0,   na.rm = TRUE)
+            na_catches       = which(numeric_catch_data == TRUE & is.na(catch_data), arr.ind = TRUE) #sum(numeric_catch_data == TRUE & is.na(catch_data), na.rm = TRUE)
+            zero_catches     = which(numeric_catch_data == TRUE & catch_data == 0,   arr.ind = TRUE) #sum(numeric_catch_data == TRUE & catch_data == 0,   na.rm = TRUE)
+            negative_catches = which(numeric_catch_data == TRUE & catch_data  < 0,   arr.ind = TRUE) #sum(numeric_catch_data == TRUE & catch_data  < 0,   na.rm = TRUE)
+            positive_catches = which(numeric_catch_data == TRUE & catch_data  > 0,   arr.ind = TRUE) #sum(numeric_catch_data == TRUE & catch_data  > 0,   na.rm = TRUE)
 
             return(
               list(
                 strata = list(
                   empty_rows = list(
                     number      = length(strata_empty_rows),
-                    row_indexes = strata_empty_rows
+                    row_indexes = spreadsheet_rows_for(form, strata_empty_rows)
                   ),
                   empty_columns = list(
                     number      = length(strata_empty_columns),
-                    col_indexes = strata_empty_columns
+                    col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
                   ),
                   total = list(
                     number = total_strata
                   ),
                   non_empty = list(
                     number = length(non_empty_strata),
-                    row_indexes = non_empty_strata
+                    row_indexes = spreadsheet_rows_for(form, non_empty_strata)
                   ),
                   checks = list(
                     main = list(
                       quarters = list(
                         missing = list(
                           number      = length(missing_quarters),
-                          row_indexes = missing_quarters
+                          row_indexes = spreadsheet_rows_for(form, missing_quarters)
                         ),
                         invalid = list(
                           number        = length(invalid_quarters),
-                          row_indexes   = invalid_quarters,
+                          row_indexes   = spreadsheet_rows_for(form, invalid_quarters),
                           values        = strata$QUARTER[invalid_quarters],
                           values_unique = unique(strata$QUARTER[invalid_quarters])
                         ),
                         overlapping = list(
                           number = length(quarters_check$overlapping_quarters),
-                          row_indexes = quarters_check$overlapping_quarters
+                          row_indexes = spreadsheet_rows_for(form, quarters_check$overlapping_quarters)
                         ),
                         incomplete = list(
                           number = length(quarters_check$incomplete_quarters),
-                          row_indexes = quarters_check$incomplete_quarters
+                          row_indexes = spreadsheet_rows_for(form, quarters_check$incomplete_quarters)
                         )
                       ),
                       fisheries = list(
                         invalid = list(
                           number       = length(invalid_fisheries),
-                          row_indexes  = invalid_fisheries,
+                          row_indexes  = spreadsheet_rows_for(form, invalid_fisheries),
                           codes        = strata$FISHERY_CODE[invalid_fisheries],
                           codes_unique = unique(strata$FISHERY_CODE[invalid_fisheries])
                         ),
                         missing = list(
                           number      = length(missing_fisheries),
-                          row_indexes = missing_fisheries
+                          row_indexes = spreadsheet_rows_for(form, missing_fisheries)
                         ),
                         aggregates = list(
                           number       = length(fishery_aggregates),
-                          row_indexes  = fishery_aggregates,
+                          row_indexes  = spreadsheet_rows_for(form, fishery_aggregates),
                           codes        = strata[fishery_aggregates]$FISHERY_CODE,
                           codes_unique = unique(strata[fishery_aggregates]$FISHERY_CODE)
                         ),
                         types = list(
                           artisanal = list(
                             number      = length(which(fishery_types == "AR")),
-                            row_indexes = which(fishery_types == "AR")
+                            row_indexes = spreadsheet_rows_for(form, which(fishery_types == "AR"))
                           ),
                           semi_industrial = list(
                             number      = length(which(fishery_types == "SI")),
-                            row_indexes = which(fishery_types == "SI")
+                            row_indexes = spreadsheet_rows_for(form, which(fishery_types == "SI"))
                           ),
                           industrial = list(
                             number      = length(which(fishery_types == "IN")),
-                            row_indexes = which(fishery_types == "IN")
+                            row_indexes = spreadsheet_rows_for(form, which(fishery_types == "IN"))
                           )
                         )
                       ),
                       target_species = list(
                         invalid = list(
                           number       = length(invalid_target_species),
-                          row_indexes  = invalid_target_species,
+                          row_indexes  = spreadsheet_rows_for(form, invalid_target_species),
                           codes        = strata$TARGET_SPECIES_CODE[invalid_species],
                           codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_species])
                         ),
                         missing = list(
                           number      = length(missing_target_species),
-                          row_indexes = missing_target_species
+                          row_indexes = spreadsheet_rows_for(form, missing_target_species)
                         )
                       ),
                       IOTC_main_areas = list(
                         invalid = list(
                           number       = length(invalid_IOTC_areas),
-                          row_indexes  = invalid_IOTC_areas,
+                          row_indexes  = spreadsheet_rows_for(form, invalid_IOTC_areas),
                           codes        = strata[invalid_IOTC_areas]$IOTC_MAIN_AREA_CODE,
                           codes_unique = unique(strata[invalid_IOTC_areas]$IOTC_MAIN_AREA_CODE)
                         ),
                         missing = list(
                           number      = length(missing_IOTC_areas),
-                          row_indexes = missing_IOTC_areas
+                          row_indexes = spreadsheet_rows_for(form, missing_IOTC_areas)
                         )
                       )
                     ),
@@ -256,37 +256,37 @@ setMethod("validate_data",
                       type = list(
                         invalid = list(
                           number       = length(invalid_types_of_data),
-                          row_indexes  = invalid_types_of_data,
+                          row_indexes  = spreadsheet_rows_for(form, invalid_types_of_data),
                           codes        = strata[invalid_types_of_data]$DATA_TYPE_CODE,
                           codes_unique = unique(strata[invalid_types_of_data]$DATA_TYPE_CODE)
                         ),
                         missing = list(
                           number      = length(missing_types_of_data),
-                          row_indexes = missing_types_of_data
+                          row_indexes = spreadsheet_rows_for(form, missing_types_of_data)
                         )
                       ),
                       source = list(
                         invalid = list(
                           number       = length(invalid_data_sources),
-                          row_indexes  = invalid_data_sources,
+                          row_indexes  = spreadsheet_rows_for(form, invalid_data_sources),
                           codes        = strata[invalid_data_sources]$DATA_SOURCE_CODE,
                           codes_unique = unique(strata[invalid_data_sources]$DATA_SOURCE_CODE)
                         ),
                         missing = list(
                           number      = length(missing_data_sources),
-                          row_indexes = missing_data_sources
+                          row_indexes = spreadsheet_rows_for(form, missing_data_sources)
                         )
                       ),
                       processing = list(
                         invalid = list(
                           number       = length(invalid_data_processings),
-                          row_indexes  = invalid_data_processings,
+                          row_indexes  = spreadsheet_rows_for(form, invalid_data_processings),
                           codes        = strata[invalid_data_processings]$DATA_PROCESSING_CODE,
                           codes_unique = unique(strata[invalid_data_processings]$DATA_PROCESSING_CODE)
                         ),
                         missing = list(
                           number      = length(missing_data_processings),
-                          row_indexes = missing_data_processings
+                          row_indexes = spreadsheet_rows_for(form, missing_data_processings)
                         )
                       )
                     ),
@@ -294,24 +294,24 @@ setMethod("validate_data",
                       type = list(
                         invalid = list(
                           number       = length(invalid_coverage_types),
-                          row_indexes  = invalid_coverage_types,
+                          row_indexes  = spreadsheet_rows_for(form, invalid_coverage_types),
                           codes        = strata[invalid_coverage_types]$COVERAGE_TYPE_CODE,
                           codes_unique = unique(strata[invalid_coverage_types]$COVERAGE_TYPE_CODE)
                         ),
                         missing = list(
                           number      = length(missing_coverage_types),
-                          row_indexes = missing_coverage_types
+                          row_indexes = spreadsheet_rows_for(form, missing_coverage_types)
                         )
                       ),
                       value = list(
                         invalid = list(
                           number      = length(invalid_coverages),
-                          row_indexes = invalid_coverages,
+                          row_indexes = spreadsheet_rows_for(form, invalid_coverages),
                           values      = strata[invalid_coverages]$COVERAGE
                         ),
                         missing = list(
                           number      = length(missing_coverages),
-                          row_indexes = missing_coverages
+                          row_indexes = spreadsheet_rows_for(form, missing_coverages)
                         )
                       )
                     )
@@ -321,36 +321,51 @@ setMethod("validate_data",
                   total = nrow(catch_data),
                   empty_rows = list(
                     number      = length(data_empty_rows),
-                    row_indexes = data_empty_rows
+                    row_indexes = spreadsheet_rows_for(form, data_empty_rows)
                   ),
                   empty_columns = list(
                     number      = length(data_empty_columns),
-                    col_indexes = data_empty_columns
+                    col_indexes = spreadsheet_cols_for(form, data_empty_columns)
                   ),
                   checks = list(
                     species = list(
                       missing = list(
                         number      = length(missing_species),
-                        col_indexes = missing_species
+                        col_indexes = spreadsheet_cols_for(form, missing_species)
                       ),
                       invalid = list(
                         number       = length(invalid_species),
-                        col_indexes  = invalid_species,
+                        col_indexes  = spreadsheet_cols_for(form, invalid_species),
                         codes        = records$codes$species[invalid_species],
                         codes_unique = unique(records$codes$species[invalid_species])
                       ),
                       aggregates = list(
                         number      = length(species_aggregates),
-                        col_indexes = species_aggregates,
+                        col_indexes = spreadsheet_cols_for(form, species_aggregates),
                         codes       = records$codes$species[species_aggregates]
                       )
                     ),
                     catch_values = list(
-                      na       = na_catches,
-                      zero     = zero_catches,
-                      positive = positive_catches,
-                      negative = negative_catches,
-                      non_num  = non_num_catches
+                      na = list(
+                        number = nrow(na_catches),
+                        cells  = coordinates_to_cells(form, na_catches)
+                      ),
+                      zero = list(
+                        number = nrow(zero_catches),
+                        cells  = coordinates_to_cells(form, zero_catches)
+                      ),
+                      positive = list(
+                        number = nrow(positive_catches),
+                        cells  = coordinates_to_cells(form, positive_catches)
+                      ),
+                      negative = list(
+                        number = nrow(negative_catches),
+                        cells  = coordinates_to_cells(form, negative_catches)
+                      ),
+                      non_num  = list(
+                        number = nrow(non_num_catches),
+                        cells  = coordinates_to_cells(form, non_num_catches)
+                      )
                     )
                   )
                 )
@@ -384,7 +399,7 @@ setMethod("common_data_validation_summary",
               validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
 
             if(strata$empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) #", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) ", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
 
             if(strata$duplicate$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
@@ -495,39 +510,53 @@ setMethod("common_data_validation_summary",
             empty_columns = records$empty_columns
 
             if(empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) #", paste0(empty_columns$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) ", paste0(empty_columns$col_indexes, collapse = ", "))))
 
             ## Species
 
             species = checks_records$species
 
             if(species$aggregates$number > 0) # Aggregates
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated species in column(s) #", paste0(species$aggregates$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated species in column(s) ", paste0(species$aggregates$col_indexes, collapse = ", "))))
 
             if(species$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) #", paste0(species$missing$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) ", paste0(species$missing$col_indexes, collapse = ", "))))
 
             if(species$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) #", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) ", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
 
             ## Catches
 
             catches = checks_records$catch_values
 
-            if(catches$positive > 0)
-              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$positive, " positive catch value(s) reported")))
+            if(catches$positive$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$positive$number, " positive catch value(s) reported")))
 
-            if(catches$na > 0)
-              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$na, " empty catch value(s) reported for all strata / species combinations")))
+            if(catches$na$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$na$number, " empty catch value(s) reported for all strata / species combinations")))
 
-            if(catches$zero > 0)
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
+            if(catches$zero$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero$number, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
 
-            if(catches$negative > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative, " negative catch value(s) reported")))
+            if(catches$negative$number > 0) {
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative$number, " negative catch value(s) reported")))
 
-            if(catches$non_num > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num, " non-numeric catch value(s) reported")))
+              for(n in 1:nrow(catches$negative$cells)) {
+                cell = catches$negative$cells[n]
+
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Negative catch value reported in cell ", cell$INDEXES)))
+              }
+            }
+
+            if(catches$non_num$number > 0) {
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num$number, " non-numeric catch value(s) reported")))
+
+              for(n in 1:nrow(catches$non_num$cells)) {
+                cell = catches$non_num$cells[n]
+
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Non-numeric catch value reported in cell ", cell$INDEXES)))
+              }
+            }
 
             return(validation_messages)
           }

@@ -347,6 +347,34 @@ setMethod("validation_summary", "IOTCForm", function(form) {
   )
 })
 
+#' @export
+setGeneric("spreadsheet_rows_for", function(form, row_indexes) {
+  standardGeneric("spreadsheet_rows_for")
+})
+
+# Doesn't need to be extended
+setMethod("spreadsheet_rows_for", signature(form = "IOTCForm", row_indexes = "numeric"), function(form, row_indexes) {
+  first_row = first_data_row(form)
+
+  return(
+    first_row - 1 + row_indexes
+  )
+})
+
+#' @export
+setGeneric("spreadsheet_cols_for", function(form, col_indexes) {
+  standardGeneric("spreadsheet_cols_for")
+})
+
+# Doesn't need to be extended
+setMethod("spreadsheet_cols_for", signature(form = "IOTCForm", col_indexes = "numeric"), function(form, col_indexes) {
+  first_col = first_data_column(form)
+
+  return(
+    EXCEL_COLUMNS[first_col - 1 + col_indexes]
+  )
+})
+
 ### METHODS TO BE IMPLEMENTED BY SUBCLASSES
 
 setGeneric("form_type", function(form) {
@@ -380,6 +408,22 @@ setGeneric("metadata_validation_summary", function(form, metadata_validation_res
 })
 
 ## DATA
+
+setGeneric("first_data_column", function(form) {
+  standardGeneric("first_data_column")
+})
+
+setGeneric("first_data_row", function(form) {
+  standardGeneric("first_data_row")
+})
+
+setGeneric("first_strata_column", function(form) {
+  standardGeneric("first_strata_column")
+})
+
+setGeneric("last_strata_column", function(form) {
+  standardGeneric("last_strata_column")
+})
 
 setGeneric("extract_data", function(form) {
   standardGeneric("extract_data")

@@ -17,6 +17,22 @@ setMethod("form_dataset_code", "IOTCForm1DI", function(form) {
   return("DI")
 })
 
+setMethod("first_data_column", "IOTCForm1DI", function(form) {
+  return(which(EXCEL_COLUMNS == "M"))
+})
+
+setMethod("first_data_row", "IOTCForm1DI", function(form) {
+  return(8)
+})
+
+setMethod("first_strata_column", "IOTCForm1DI", function(form) {
+  return(which(EXCEL_COLUMNS == "B"))
+})
+
+setMethod("last_strata_column", "IOTCForm1DI", function(form) {
+  return(which(EXCEL_COLUMNS == "K"))
+})
+
 setMethod("extract_data", "IOTCForm1DI", function(form) {
   # Based on the same method from IOTCForm1RC
 
@@ -155,25 +171,25 @@ setMethod("validate_data",
             data_validation_results$strata$duplicate =
               list(
                 number = length(duplicate_strata),
-                row_indexes = duplicate_strata
+                row_indexes = spreadsheet_rows_for(form, duplicate_strata)
               )
 
             data_validation_results$strata$unique =
               list(
                 number = length(unique_strata),
-                row_indexes = unique_strata
+                row_indexes = spreadsheet_rows_for(form, unique_strata)
               )
 
             data_validation_results$strata$checks$main$discard_reasons = list(
               invalid = list(
                 number       = length(invalid_discard_reasons),
-                row_indexes  = invalid_discard_reasons,
+                row_indexes  = spreadsheet_rows_for(form, invalid_discard_reasons),
                 codes        = strata[invalid_discard_reasons]$DISCARD_REASON_CODE,
                 codes_unique = unique(strata[invalid_discard_reasons]$DISCARD_REASON_CODE)
               ),
               missing = list(
                 number      = length(missing_discard_reasons),
-                row_indexes = missing_discard_reasons
+                row_indexes = spreadsheet_rows_for(form, missing_discard_reasons)
               )
             )
 
@@ -181,11 +197,11 @@ setMethod("validate_data",
               list(
                 missing = list(
                   number      = length(missing_conditions),
-                  col_indexes = missing_conditions
+                  col_indexes = spreadsheet_cols_for(form, missing_conditions)
                 ),
                 invalid = list(
                   number       = length(invalid_conditions),
-                  col_indexes  = invalid_conditions,
+                  col_indexes  = spreadsheet_cols_for(form, invalid_conditions),
                   codes        = records$codes$conditions[invalid_conditions],
                   codes_unique = unique(records$codes$conditions[invalid_conditions])
                 )
@@ -195,11 +211,11 @@ setMethod("validate_data",
               list(
                 missing = list(
                   number      = length(missing_data_raisings),
-                  col_indexes = missing_data_raisings
+                  col_indexes = spreadsheet_cols_for(form, missing_data_raisings)
                 ),
                 invalid = list(
                   number       = length(invalid_data_raisings),
-                  col_indexes  = invalid_data_raisings,
+                  col_indexes  = spreadsheet_cols_for(form, invalid_data_raisings),
                   codes        = records$codes$raisings[invalid_data_raisings],
                   codes_unique = unique(records$codes$raisings[invalid_data_raisings])
                 )
@@ -209,11 +225,11 @@ setMethod("validate_data",
               list(
                 missing = list(
                   number      = length(missing_catch_units),
-                  col_indexes = missing_catch_units
+                  col_indexes = spreadsheet_cols_for(form, missing_catch_units)
                 ),
                 invalid = list(
                   number       = length(invalid_catch_units),
-                  col_indexes  = invalid_catch_units,
+                  col_indexes  = spreadsheet_cols_for(form, invalid_catch_units),
                   codes        = records$codes$catch_units[invalid_catch_units],
                   codes_unique = unique(records$codes$catch_units[invalid_catch_units])
                 )
@@ -223,7 +239,7 @@ setMethod("validate_data",
               list(
                 multiple = list(
                   number       = length(data_stratifications_multiple),
-                  col_indexes  = data_stratifications_multiple,
+                  col_indexes  = spreadsheet_cols_for(form, data_stratifications_multiple),
                   codes_unique = data_stratification_occurrences_multiple$STRATIFICATION_CODE
                 )
               )
@@ -274,31 +290,31 @@ setMethod("data_validation_summary",
             conditions = checks_records$conditions
 
             if(conditions$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing conditions in column(s) #", paste0(conditions$missing$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing conditions in column(s) ", paste0(conditions$missing$col_indexes, collapse = ", "))))
 
             if(conditions$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid conditions in column(s) #", paste0(conditions$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid conditions in column(s) ", paste0(conditions$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes")))
 
             raisings = checks_records$data_raisings
 
             if(raisings$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing data raising in column(s) #", paste0(raisings$missing$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing data raising in column(s) ", paste0(raisings$missing$col_indexes, collapse = ", "))))
 
             if(raisings$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid data raising in column(s) #", paste0(raisings$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid data raising in column(s) ", paste0(raisings$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
 
             catch_units = checks_records$catch_units
 
             if(catch_units$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing catch unit in column(s) #", paste0(catch_units$missing$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing catch unit in column(s) ", paste0(catch_units$missing$col_indexes, collapse = ", "))))
 
             if(catch_units$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid catch unit in column(s) #", paste0(catch_units$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid catch unit in column(s) ", paste0(catch_units$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes")))
 
             stratifications = checks_records$stratifications
 
             if(stratifications$multiple$number > 0)   # Multiple
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Repeated species-condition-raising-catch units in column(s) #", paste0(stratifications$multiple$col_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Repeated species-condition-raising-catch units in column(s) ", paste0(stratifications$multiple$col_indexes, collapse = ", "))))
 
             return(validation_messages)
           }

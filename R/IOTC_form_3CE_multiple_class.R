@@ -29,6 +29,23 @@ setMethod("optional_strata_columns", "IOTCForm3CEMultiple", function(form) {
   return(14:17) # Secondary and tertiary effort codes / values
 })
 
+setMethod("first_data_column", "IOTCForm3CEMultiple", function(form) {
+  return(which(EXCEL_COLUMNS == "T"))
+})
+
+setMethod("first_data_row", "IOTCForm3CEMultiple", function(form) {
+  return(6)
+})
+
+setMethod("first_strata_column", "IOTCForm3CEMultiple", function(form) {
+  return(which(EXCEL_COLUMNS == "B"))
+})
+
+setMethod("last_strata_column", "IOTCForm3CEMultiple", function(form) {
+  return(which(EXCEL_COLUMNS == "R"))
+})
+
+
 setMethod("validate_months_multiple", list(form = "IOTCForm3CEMultiple", strata = "data.table"), function(form, strata) {
   start = Sys.time()
 

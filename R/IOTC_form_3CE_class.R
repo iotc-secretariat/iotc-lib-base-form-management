@@ -21,6 +21,22 @@ setMethod("allow_empty_data", "IOTCForm3CE", function(form) {
   return(FALSE)
 })
 
+setMethod("first_data_column", "IOTCForm3CE", function(form) {
+  return(which(EXCEL_COLUMNS == "H"))
+})
+
+setMethod("first_data_row", "IOTCForm3CE", function(form) {
+  return(6)
+})
+
+setMethod("first_strata_column", "IOTCForm3CE", function(form) {
+  return(which(EXCEL_COLUMNS == "B"))
+})
+
+setMethod("last_strata_column", "IOTCForm3CE", function(form) {
+  return(which(EXCEL_COLUMNS == "G"))
+})
+
 setMethod("validate_months", list(form = "IOTCForm3CE", strata = "data.table"), function(form, strata) {
   l_info("IOTCForm3CE.validate_months")
 
@@ -252,13 +268,13 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
   data_validation_results$strata$duplicate =
     list(
       number = length(duplicate_strata),
-      row_indexes = duplicate_strata
+      row_indexes = spreadsheet_rows_for(form, duplicate_strata)
     )
 
   data_validation_results$strata$unique =
     list(
       number = length(unique_strata),
-      row_indexes = unique_strata
+      row_indexes = spreadsheet_rows_for(form, unique_strata)
     )
 
   is_effort_valid = function(value) { return(!is.na(value) | value > 0) }
@@ -296,11 +312,11 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
       values_provided = primary_efforts_provided,
       missing = list(
         number      = length(missing_primary_efforts),
-        row_indexes = missing_primary_efforts
+        row_indexes = spreadsheet_rows_for(form, missing_primary_efforts)
       ),
       invalid = list(
         number        = length(invalid_primary_efforts),
-        row_indexes   = invalid_primary_efforts,
+        row_indexes   = spreadsheet_rows_for(form, invalid_primary_efforts),
         values        = strata$PRIMARY_EFFORT[invalid_primary_efforts],
         values_unique = unique(strata$PRIMARY_EFFORT[invalid_primary_efforts])
       )
@@ -310,11 +326,11 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
       values_provided = secondary_efforts_provided,
       missing = list(
         number      = length(missing_secondary_efforts),
-        row_indexes = missing_secondary_efforts
+        row_indexes = spreadsheet_rows_for(form, missing_secondary_efforts)
       ),
       invalid = list(
         number        = length(invalid_secondary_efforts),
-        row_indexes   = invalid_secondary_efforts,
+        row_indexes   = spreadsheet_rows_for(form, invalid_secondary_efforts),
         values        = strata$SECONDARY_EFFORT[invalid_secondary_efforts],
         values_unique = unique(strata$SECONDARY_EFFORT[invalid_secondary_efforts])
       )
@@ -324,11 +340,11 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
       values_provided = tertiary_efforts_provided,
       missing = list(
         number      = length(missing_tertiary_efforts),
-        row_indexes = missing_tertiary_efforts
+        row_indexes = spreadsheet_rows_for(form, missing_tertiary_efforts)
       ),
       invalid = list(
         number        = length(invalid_tertiary_efforts),
-        row_indexes   = invalid_tertiary_efforts,
+        row_indexes   = spreadsheet_rows_for(form, invalid_tertiary_efforts),
         values        = strata$TERTIARY_EFFORT[invalid_tertiary_efforts],
         values_unique = unique(strata$TERTIARY_EFFORT[invalid_tertiary_efforts])
       )
@@ -374,41 +390,57 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
   numeric_catch_data =
     catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
 
-  non_num_catches  = sum(numeric_catch_data == FALSE, na.rm = TRUE)
 
-  na_catches       = sum(numeric_catch_data == TRUE & is.na(catch_data), na.rm = TRUE)
-  zero_catches     = sum(numeric_catch_data == TRUE & catch_data == 0,   na.rm = TRUE)
-  negative_catches = sum(numeric_catch_data == TRUE & catch_data  < 0,   na.rm = TRUE)
-  positive_catches = sum(numeric_catch_data == TRUE & catch_data  > 0,   na.rm = TRUE)
+  non_num_catches  = which(numeric_catch_data == FALSE, arr.ind = TRUE) #sum(numeric_catch_data == FALSE, na.rm = TRUE)
+
+  na_catches       = which(numeric_catch_data == TRUE & is.na(catch_data), arr.ind = TRUE) #sum(numeric_catch_data == TRUE & is.na(catch_data), na.rm = TRUE)
+  zero_catches     = which(numeric_catch_data == TRUE & catch_data == 0,   arr.ind = TRUE) #sum(numeric_catch_data == TRUE & catch_data == 0,   na.rm = TRUE)
+  negative_catches = which(numeric_catch_data == TRUE & catch_data  < 0,   arr.ind = TRUE) #sum(numeric_catch_data == TRUE & catch_data  < 0,   na.rm = TRUE)
+  positive_catches = which(numeric_catch_data == TRUE & catch_data  > 0,   arr.ind = TRUE) #sum(numeric_catch_data == TRUE & catch_data  > 0,   na.rm = TRUE)
 
   data_validation_results$records$checks = list(
     species = list(
       multiple = list(
         number      = length(species_multiple),
-        col_indexes = species_multiple
+        col_indexes = spreadsheet_cols_for(form, species_multiple)
       ),
       missing = list(
         number      = length(missing_species),
-        col_indexes = missing_species
+        col_indexes = spreadsheet_cols_for(form, missing_species)
       ),
       invalid = list(
         number       = length(invalid_species),
-        col_indexes  = invalid_species,
+        col_indexes  = spreadsheet_cols_for(form, invalid_species),
         codes        = records$codes$species[invalid_species],
         codes_unique = unique(records$codes$species[invalid_species])
       ),
       aggregates = list(
         number      = length(species_aggregates),
-        col_indexes = species_aggregates,
+        col_indexes = spreadsheet_cols_for(form, species_aggregates),
         codes       = records$codes$species[species_aggregates]
       )
     ),
     catch_values = list(
-      na       = na_catches,
-      zero     = zero_catches,
-      positive = positive_catches,
-      negative = negative_catches,
-      non_num  = non_num_catches
+      na = list(
+        number = nrow(na_catches),
+        cells  = coordinates_to_cells(form, na_catches)
+      ),
+      zero = list(
+        number = nrow(zero_catches),
+        cells  = coordinates_to_cells(form, zero_catches)
+      ),
+      positive = list(
+        number = nrow(positive_catches),
+        cells  = coordinates_to_cells(form, positive_catches)
+      ),
+      negative = list(
+        number = nrow(negative_catches),
+        cells  = coordinates_to_cells(form, negative_catches)
+      ),
+      non_num  = list(
+        number = nrow(non_num_catches),
+        cells  = coordinates_to_cells(form, non_num_catches)
+      )
     )
   )
 
@@ -509,32 +541,46 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
   species = checks_records$species
 
   if(species$aggregates$number > 0) # Aggregates
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated species in column(s) #", paste0(species$aggregates$col_indexes, collapse = ", "))))
+    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated species in column(s) ", paste0(species$aggregates$col_indexes, collapse = ", "))))
 
   if(species$missing$number > 0)    # Missing
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) #", paste0(species$missing$col_indexes, collapse = ", "))))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) ", paste0(species$missing$col_indexes, collapse = ", "))))
 
   if(species$invalid$number > 0)    # Invalid
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) #", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) ", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
 
   ## Catches
 
   catches = checks_records$catch_values
 
-  if(catches$positive > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$positive, " positive catch value(s) reported")))
+  if(catches$positive$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$positive$number, " positive catch value(s) reported")))
 
-  if(catches$na > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$na, " empty catch value(s) reported for all strata / species combinations")))
+  if(catches$na$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$na$number, " empty catch value(s) reported for all strata / species combinations")))
 
-  if(catches$zero > 0)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
+  if(catches$zero$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero$number, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
 
-  if(catches$negative > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative, " negative catch value(s) reported")))
+  if(catches$negative$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative$number, " negative catch value(s) reported")))
 
-  if(catches$non_num > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num, " non-numeric catch value(s) reported")))
+    for(n in 1:nrow(catches$negative$cells)) {
+      cell = catches$negative$cells[n]
+
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Negative catch value reported in cell ", cell$INDEXES)))
+    }
+  }
+
+  if(catches$non_num$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num$number, " non-numeric catch value(s) reported")))
+
+    for(n in 1:nrow(catches$non_num$cells)) {
+      cell = catches$non_num$cells[n]
+
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Non-numeric catch value reported in cell ", cell$INDEXES)))
+    }
+  }
 
   return(validation_messages)
 })

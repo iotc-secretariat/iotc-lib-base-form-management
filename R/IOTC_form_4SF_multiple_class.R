@@ -29,6 +29,21 @@ setMethod("optional_strata_columns", "IOTCForm4SFMultiple", function(form) {
   return(c()) # None
 })
 
+setMethod("first_data_column", "IOTCForm4SFMultiple", function(form) {
+  return(which(EXCEL_COLUMNS == "V"))
+})
+
+setMethod("first_data_row", "IOTCForm4SFMultiple", function(form) {
+  return(6)
+})
+
+setMethod("first_strata_column", "IOTCForm4SFMultiple", function(form) {
+  return(which(EXCEL_COLUMNS == "B"))
+})
+
+setMethod("last_strata_column", "IOTCForm4SFMultiple", function(form) {
+  return(which(EXCEL_COLUMNS == "U"))
+})
 setMethod("validate_months_multiple", list(form = "IOTCForm4SFMultiple", strata = "data.table"), function(form, strata) {
   start = Sys.time()
   l_info("IOTCForm4SFMultiple.validate_months")

@@ -271,25 +271,25 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
       strata = list(
         empty_rows = list(
           number      = length(strata_empty_rows),
-          row_indexes = strata_empty_rows
+          row_indexes = spreadsheet_rows_for(form, strata_empty_rows)
         ),
         #empty_columns = list(
         #  number      = length(strata_empty_columns),
-        #  col_indexes = strata_empty_columns
+        #  col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
         #),
         total = list(
           number = total_strata
         ),
         non_empty = list(
           number = length(non_empty_strata),
-          row_indexes = non_empty_strata
+          row_indexes = spreadsheet_rows_for(form, non_empty_strata)
         ),
         checks = list(
           main = list(
             months = list(
               missing = list(
                 number      = length(missing_months),
-                row_indexes = missing_months
+                row_indexes = spreadsheet_rows_for(form, missing_months)
               ),
               invalid = list(
                 number        = length(invalid_months),
@@ -300,31 +300,31 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
               # REMOVED: while we expect data to be provided for all quarters in 1-RC and 1-DI, same is not the case for 3-CE or 4-SF where stratification is much finer
               #, incomplete = list(
               #  number = length(months_check$incomplete_months),
-              #  row_indexes = months_check$incomplete_months
+              #  row_indexes = spreadsheet_rows_for(form, months_check$incomplete_months)
               #)
             ),
             grids = list(
               invalid = list(
                 number       = length(invalid_grids),
-                row_indexes  = invalid_grids,
+                row_indexes  = spreadsheet_rows_for(form, invalid_grids),
                 codes        = strata[invalid_grids]$GRID_CODE,
                 codes_unique = unique(strata[invalid_grids]$GRID_CODE)
               ),
               missing = list(
                 number      = length(missing_grids),
-                row_indexes = missing_grids
+                row_indexes = spreadsheet_rows_for(form, missing_grids)
               )
             ),
             estimations = list(
               invalid = list(
                 number       = length(invalid_estimations),
-                row_indexes  = invalid_estimations,
+                row_indexes  = spreadsheet_rows_for(form, invalid_estimations),
                 codes        = strata[invalid_estimations]$ESTIMATION_CODE,
                 codes_unique = unique(strata[invalid_estimations]$ESTIMATION_CODE)
               ),
               missing = list(
                 number      = length(missing_estimations),
-                row_indexes = missing_estimations
+                row_indexes = spreadsheet_rows_for(form, missing_estimations)
               )
             )
           )
@@ -334,11 +334,11 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
         total = nrow(CE_SF_data),
         empty_rows = list(
           number      = length(data_empty_rows),
-          row_indexes = data_empty_rows
+          row_indexes = spreadsheet_rows_for(form, data_empty_rows)
         ),
         empty_columns = list(
           number      = length(data_empty_columns),
-          col_indexes = data_empty_columns
+          col_indexes = spreadsheet_cols_for(form, data_empty_columns)
         )
       )
     )
@@ -368,7 +368,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
 
   #if(strata$empty_columns$number > 0)
-  #  validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) #", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
+  #  validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) ", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
 
   # Strata checks
 
@@ -419,7 +419,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
   empty_columns = records$empty_columns
 
   if(empty_columns$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) #", paste0(empty_columns$col_indexes, collapse = ", "))))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) ", paste0(empty_columns$col_indexes, collapse = ", "))))
 
   return(validation_messages)
 })

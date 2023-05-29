@@ -1,3 +1,23 @@
+### SUPPORT FOR EXCEL DATA CHECKS
+
+UPPERCASE_LETTERS    = str_to_upper(letters)
+LETTERS_COMBINATIONS = expand.grid(UPPERCASE_LETTERS, UPPERCASE_LETTERS, stringsAsFactors = FALSE)
+
+EXCEL_COLUMNS = append(UPPERCASE_LETTERS, sort(paste0(LETTERS_COMBINATIONS$Var1, LETTERS_COMBINATIONS$Var2)))
+
+coordinates_to_cells = function(form, array_indexes) {
+  result = data.table(COL = as.integer(array_indexes[, 2] + first_data_column(form) - 1),
+                      ROW = as.integer(array_indexes[, 1] + first_data_row   (form) - 1))
+
+  # Coordinates ([ COL, ROW ])
+  #result[, INDEXES := paste0("[ ", EXCEL_COLUMNS[COL], ", ", ROW, " ]")]
+
+  # Excel notation ([COLROW])
+  result[, INDEXES := paste0("[", EXCEL_COLUMNS[COL], ROW, "]")]
+
+  return(result[order(ROW, COL)])
+}
+
 ### COMMON UTILITIES
 
 is_numeric_ = function(value) {
