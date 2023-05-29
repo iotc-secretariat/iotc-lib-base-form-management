@@ -190,13 +190,13 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
   data_validation_results$strata$duplicate =
     list(
       number = length(duplicate_strata),
-      row_indexes = duplicate_strata
+      row_indexes = spreadsheet_rows_for(form, duplicate_strata)
     )
 
   data_validation_results$strata$unique =
     list(
       number = length(unique_strata),
-      row_indexes = unique_strata
+      row_indexes = spreadsheet_rows_for(form, unique_strata)
     )
 
   l_info(paste0("IOTCForm4SFMultiple.validate_data (V): ", Sys.time() - start))
@@ -289,17 +289,17 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
   data_validation_results$strata$checks$main$species = list(
     invalid = list(
       number       = length(invalid_species),
-      row_indexes  = invalid_species,
+      row_indexes  = spreadsheet_rows_for(form, invalid_species),
       codes        = strata$SPECIES_CODE[invalid_species],
       codes_unique = unique(strata$SPECIES_CODE[invalid_species])
     ),
     missing = list(
       number      = length(missing_species),
-      row_indexes = missing_species
+      row_indexes = spreadsheet_rows_for(form, missing_species)
     ),
     aggregates = list(
       number       = length(species_aggregates),
-      row_indexes  = species_aggregates,
+      row_indexes  = spreadsheet_rows_for(form, species_aggregates),
       codes        = strata[species_aggregates]$SPECIES_CODE,
       codes_unique = unique(strata[species_aggregates]$SPECIES_CODE)
     )
@@ -308,13 +308,13 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
   data_validation_results$strata$checks$main$sex = list(
     invalid = list(
       number       = length(invalid_sex),
-      row_indexes  = invalid_sex,
+      row_indexes  = spreadsheet_rows_for(form, invalid_sex),
       codes        = strata$SEX_CODE[invalid_sex],
       codes_unique = unique(strata$SEX_CODE[invalid_sex])
     ),
     missing = list(
       number      = length(missing_sex),
-      row_indexes = missing_sex
+      row_indexes = spreadsheet_rows_for(form, missing_sex)
     )
   )
 
@@ -322,25 +322,25 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
     type = list(
       invalid = list(
         number       = length(invalid_fate_type),
-        row_indexes  = invalid_fate_type,
+        row_indexes  = spreadsheet_rows_for(form, invalid_fate_type),
         codes        = strata$FATE_TYPE_CODE[invalid_fate_type],
         codes_unique = unique(strata$FATE_TYPE_CODE[invalid_fate_type])
       ),
       missing = list(
         number      = length(missing_fate_type),
-        row_indexes = missing_fate_type
+        row_indexes = spreadsheet_rows_for(form, missing_fate_type)
       )
     ),
     fate = list(
       invalid = list(
         number       = length(invalid_fate),
-        row_indexes  = invalid_fate,
+        row_indexes  = spreadsheet_rows_for(form, invalid_fate),
         codes        = strata$FATE_CODE[invalid_fate],
         codes_unique = unique(strata$FATE_CODEv[invalid_fate])
       ),
       missing = list(
         number      = length(missing_fate),
-        row_indexes = missing_fate
+        row_indexes = spreadsheet_rows_for(form, missing_fate)
       )
     )
   )
@@ -349,37 +349,37 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
     type = list(
       invalid = list(
         number       = length(invalid_measurement_type),
-        row_indexes  = invalid_measurement_type,
+        row_indexes  = spreadsheet_rows_for(form, invalid_measurement_type),
         codes        = strata$MEASUREMENT_TYPE_CODE[invalid_measurement_type],
         codes_unique = unique(strata$MEASUREMENT_TYPE_CODE[invalid_measurement_type])
       ),
       missing = list(
         number      = length(missing_measurement_type),
-        row_indexes = missing_measurement_type
+        row_indexes = spreadsheet_rows_for(form, missing_measurement_type)
       )
     ),
     measure = list(
       invalid = list(
         number       = length(invalid_measure),
-        row_indexes  = invalid_measure,
+        row_indexes  = spreadsheet_rows_for(form, invalid_measure),
         codes        = strata$MEASURE_CODE[invalid_measure],
         codes_unique = unique(strata$MEASURE_CODE[invalid_measure])
       ),
       missing = list(
         number      = length(missing_measure),
-        row_indexes = missing_measure
+        row_indexes = spreadsheet_rows_for(form, missing_measure)
       )
     ),
     measuring_tool = list(
       invalid = list(
         number       = length(invalid_measuring_tool),
-        row_indexes  = invalid_measuring_tool,
+        row_indexes  = spreadsheet_rows_for(form, invalid_measuring_tool),
         codes        = strata$MEASURING_TOOL_CODE[invalid_measuring_tool],
         codes_unique = unique(strata$MEASURING_TOOL_CODE[invalid_measuring_tool])
       ),
       missing = list(
         number      = length(missing_measuring_tool),
-        row_indexes = missing_measuring_tool
+        row_indexes = spreadsheet_rows_for(form, missing_measuring_tool)
       )
     )
   )
@@ -388,70 +388,101 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
     low = list(
       missing = list(
         number       = length(missing_size_class_low),
-        row_indexes  = missing_size_class_low
+        row_indexes  = spreadsheet_rows_for(form, missing_size_class_low)
       ),
       invalid = list(
         number       = length(invalid_size_class_low),
-        row_indexes  = invalid_size_class_low
+        row_indexes  = spreadsheet_rows_for(form, invalid_size_class_low)
       )
     ),
     high = list(
       missing = list(
         number       = length(missing_size_class_high),
-        row_indexes  = missing_size_class_high
+        row_indexes  = spreadsheet_rows_for(form, missing_size_class_high)
       ),
       invalid = list(
         number       = length(invalid_size_class_high),
-        row_indexes  = invalid_size_class_high
+        row_indexes  = spreadsheet_rows_for(form, invalid_size_class_high)
       )
     ),
     invalid = list(
       number      = length(invalid_size_classes),
-      row_indexes = invalid_size_classes
+      row_indexes = spreadsheet_rows_for(form, invalid_size_classes)
     )
   )
 
   start = Sys.time()
 
-  records = form@data$records
+  records = form@data$records$data
 
-  num_samples_original = records$num_samples_original
-  num_samples          = records$num_samples
-  num_fish_original    = records$num_fish_original
-  num_fish             = records$num_fish
+  num_samples_original = records$num_samples_original[[1]]
+  num_samples          = records$num_samples[[1]]
 
-  numeric_num_samples     = num_samples_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
-  non_numeric_num_samples = sum(numeric_num_samples == FALSE, na.rm = TRUE)
+  is_value_numeric = function(value) { return(is.na(value) | is_numeric(value)) }
 
-  na_samples       = sum(numeric_num_samples == TRUE & is.na(num_samples), na.rm = TRUE)
-  zero_samples     = sum(numeric_num_samples == TRUE & num_samples == 0,   na.rm = TRUE)
-  negative_samples = sum(numeric_num_samples == TRUE & num_samples  < 0,   na.rm = TRUE)
-  positive_samples = sum(numeric_num_samples == TRUE & num_samples  > 0,   na.rm = TRUE)
+  numeric_num_samples = is_value_numeric(num_samples_original)
 
-  numeric_num_fish     = num_fish_original   [, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
-  non_numeric_num_fish = sum(numeric_num_fish == FALSE, na.rm = TRUE)
+  na_samples       = which(numeric_num_samples == TRUE & is.na(num_samples), arr.ind = TRUE) # sum(numeric_num_samples == TRUE & is.na(num_samples), na.rm = TRUE)
+  zero_samples     = which(numeric_num_samples == TRUE & num_samples == 0, arr.ind = TRUE)   # sum(numeric_num_samples == TRUE & num_samples == 0,   na.rm = TRUE)
+  negative_samples = which(numeric_num_samples == TRUE & num_samples  < 0, arr.ind = TRUE)   # sum(numeric_num_samples == TRUE & num_samples  < 0,   na.rm = TRUE)
+  positive_samples = which(numeric_num_samples == TRUE & num_samples  > 0, arr.ind = TRUE)   # sum(numeric_num_samples == TRUE & num_samples  > 0,   na.rm = TRUE)
 
-  na_fish       = sum(numeric_num_fish == TRUE & is.na(num_fish), na.rm = TRUE)
-  zero_fish     = sum(numeric_num_fish == TRUE & num_fish == 0,   na.rm = TRUE)
-  negative_fish = sum(numeric_num_fish == TRUE & num_fish  < 0,   na.rm = TRUE)
-  positive_fish = sum(numeric_num_fish == TRUE & num_fish  > 0,   na.rm = TRUE)
+  num_fish_original    = records$num_fish_original[[1]]
+  num_fish             = records$num_fish[[1]]
+
+  numeric_num_fish = is_value_numeric(num_fish_original)
+
+  na_fish       = which(numeric_num_fish == TRUE & is.na(num_fish), arr.ind = TRUE) # sum(numeric_num_fish == TRUE & is.na(num_fish), na.rm = TRUE)
+  zero_fish     = which(numeric_num_fish == TRUE & num_fish == 0, arr.ind = TRUE)   # sum(numeric_num_fish == TRUE & num_fish == 0,   na.rm = TRUE)
+  negative_fish = which(numeric_num_fish == TRUE & num_fish  < 0, arr.ind = TRUE)   # sum(numeric_num_fish == TRUE & num_fish  < 0,   na.rm = TRUE)
+  positive_fish = which(numeric_num_fish == TRUE & num_fish  > 0, arr.ind = TRUE)   # sum(numeric_num_fish == TRUE & num_fish  > 0,   na.rm = TRUE)
 
   l_info(paste0("IOTCForm4SFMultiple.validate_data (XII): ", Sys.time() - start))
 
   data_validation_results$records$checks = list(
     samples = list(
-      na       = na_samples,
-      zero     = zero_samples,
-      positive = positive_samples,
-      negative = negative_samples,
-      non_num  = non_numeric_num_samples
+      na = list(
+        number = length(na_samples),
+        row_indexes = spreadsheet_rows_for(form, na_samples)
+      ),
+      zero = list(
+        number = length(zero_samples),
+        row_indexes = spreadsheet_rows_for(form, zero_samples)
+      ),
+      positive = list(
+        number = length(positive_samples),
+        row_indexes = spreadsheet_rows_for(form, positive_samples)
+      ),
+      negative = list(
+        number = length(negative_samples),
+        row_indexes = spreadsheet_rows_for(form, negative_samples)
+      ),
+      non_num  = list(
+        number = length(which(numeric_num_samples == FALSE)),
+        row_indexes = spreadsheet_rows_for(form, which(numeric_num_samples == FALSE))
+      )
     ),
     fish = list(
-      na       = na_fish,
-      zero     = zero_fish,
-      positive = positive_fish,
-      negative = negative_fish,
-      non_num  = non_numeric_num_fish
+      na = list(
+        number = length(na_fish),
+        row_indexes = spreadsheet_rows_for(form, na_fish)
+      ),
+      zero = list(
+        number = length(zero_fish),
+        row_indexes = spreadsheet_rows_for(form, zero_fish)
+      ),
+      positive = list(
+        number = length(positive_fish),
+        row_indexes = spreadsheet_rows_for(form, positive_fish)
+      ),
+      negative = list(
+        number = length(negative_fish),
+        row_indexes = spreadsheet_rows_for(form, negative_fish)
+      ),
+      non_num  = list(
+        number = length(which(numeric_num_fish == FALSE)),
+        row_indexes = spreadsheet_rows_for(form, which(numeric_num_fish == FALSE))
+      )
     )
   )
 
@@ -572,41 +603,79 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SFMultiple", metadata
 
   # Data issues / summary
 
-  ## Catches
+  ## Number of samples
 
-  samples = checks_records$samples
+  num_samples = checks_records$samples
 
-  if(samples$positive > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(samples$positive, " positive number(s) of samples reported")))
+  if(num_samples$positive$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_samples$positive$number, " positive value(s) reported as number of samples")))
 
-  if(samples$na > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(samples$na, " number(s) of samples left empty")))
+  if(num_samples$zero$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_samples$zero$number, " number of samples explicitly reported as zero")))
 
-  if(samples$zero > 0)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(samples$zero, " number(s) of samples explicitly reported as zero")))
+  if(num_samples$na$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$na$number, " empty value(s) reported as number of samples")))
 
-  if(samples$negative > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(samples$negative, " negative number(s) of samples reported")))
+    for(row_index in num_samples$na$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "G"), text = paste0("Empty value reported as number of samples in row #", row_index)))
+    }
+  }
 
-  if(samples$non_num > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(samples$non_num, " non-numeric number(s) of samples reported")))
+  if(num_samples$negative$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$negative$number, " negative value(s) reported as number of samples")))
 
-  fish = checks_records$fish
+    for(row_index in num_samples$negative$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "G"), text = paste0("Negative value reported as number of samples in row #", row_index)))
+    }
+  }
 
-  if(fish$positive > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(fish$positive, " positive number(s) of fish reported")))
+  if(num_samples$non_num$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$non_num$number, " non-numeric value(s) reported as number of samples")))
 
-  if(fish$na > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(fish$na, " number(s) of fish left empty")))
+    for(row_index in num_samples$non_num$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "G"), text = paste0("Non-numeric value reported as number of samples in row #", row_index)))
+    }
+  }
 
-  if(fish$zero > 0)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(fish$zero, " number(s) of fish explicitly reported as zero")))
 
-  if(fish$negative > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(fish$negative, " negative number(s) of fish reported")))
+  ## Number of fish
 
-  if(fish$non_num > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(fish$non_num, " non-numeric number(s) of fish reported")))
+  num_fish = checks_records$fish
+
+  if(num_fish$positive$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_fish$positive$number, " positive value(s) reported as number of fish")))
+
+  if(num_fish$zero$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$zero$number, " number of fish explicitly reported as zero")))
+
+    for(row_index in num_fish$zero$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Zero fish reported in row #", row_index)))
+    }
+  }
+
+  if(num_fish$na$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$na$number, " empty values reported as number of fish")))
+
+    for(row_index in num_fish$na$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Empty value reported as number of fish in row #", row_index)))
+    }
+  }
+
+  if(num_fish$negative$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$negative$number, " negative values reported as number of fish")))
+
+    for(row_index in num_fish$negative$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Negative value reported as number of fish in row #", row_index)))
+    }
+  }
+
+  if(num_fish$non_num$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$non_num$number, " non-numeric value(s) reported as number of fish")))
+
+    for(row_index in num_fish$non_num$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Non-numeric value reported as number of fish in row #", row_index)))
+    }
+  }
 
   l_info(paste0("IOTCForm4SFMultiple.validate_months: ", Sys.time() - start))
 

@@ -399,7 +399,7 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
   negative_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  < 0, arr.ind = TRUE) #sum(non_num_sizes_fish == TRUE    & sizes$NUM_FISH  < 0,   na.rm = TRUE)
 
   data_validation_results$records$checks = list(
-    num_samples = list(
+    samples = list(
       na = list(
         number = length(na_samples),
         row_indexes = spreadsheet_rows_for(form, na_samples)
@@ -421,7 +421,7 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
         row_indexes = spreadsheet_rows_for(form, which(non_num_sizes_samples == TRUE))
       )
     ),
-    num_fish = list(
+    fish = list(
       na = list(
         number = length(na_fish),
         row_indexes = spreadsheet_rows_for(form, na_fish)
@@ -506,7 +506,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
 
   ## Number of samples
 
-  num_samples = checks_records$num_samples
+  num_samples = checks_records$samples
 
   if(num_samples$positive$number > 0)
     validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_samples$positive$number, " positive value(s) reported as number of samples")))
@@ -540,7 +540,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
 
   ## Number of fish
 
-  num_fish = checks_records$num_fish
+  num_fish = checks_records$fish
 
   if(num_fish$positive$number > 0)
     validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_fish$positive$number, " positive value(s) reported as number of fish")))

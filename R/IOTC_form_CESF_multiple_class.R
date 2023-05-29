@@ -208,104 +208,104 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
       strata = list(
         empty_rows = list(
           number      = length(strata_empty_rows),
-          row_indexes = strata_empty_rows
+          row_indexes = spreadsheet_rows_for(form, strata_empty_rows)
         ),
         empty_columns = list(
           number      = length(strata_empty_columns),
-          col_indexes = strata_empty_columns
+          col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
         ),
         total = list(
           number = total_strata
         ),
         non_empty = list(
           number = length(non_empty_strata),
-          row_indexes = non_empty_strata
+          row_indexes = spreadsheet_rows_for(form, non_empty_strata)
         ),
         checks = list(
           main = list(
             months = list(
               missing = list(
                 number      = length(missing_months),
-                row_indexes = missing_months
+                row_indexes = spreadsheet_rows_for(form, missing_months)
               ),
               invalid = list(
                 number        = length(invalid_months),
-                row_indexes   = invalid_months,
+                row_indexes   = spreadsheet_rows_for(form, invalid_months),
                 values        = strata$MONTH[invalid_months],
                 values_unique = unique(strata$MONTH[invalid_months])
               )
               # REMOVED: while we expect data to be provided for all quarters in 1-RC and 1-DI, same is not the case for 3-CE or 4-SF where stratification is much finer
               #, incomplete = list(
               #  number      = length(months_check$incomplete_months),
-              #  row_indexes = months_check$incomplete_months
+              #  row_indexes = spreadsheet_rows_for(form, months_check$incomplete_months
               #)
             ),
             fisheries = list(
               invalid = list(
                 number       = length(invalid_fisheries),
-                row_indexes  = invalid_fisheries,
+                row_indexes  = spreadsheet_rows_for(form, invalid_fisheries),
                 codes        = strata$FISHERY_CODE[invalid_fisheries],
                 codes_unique = unique(strata$FISHERY_CODE[invalid_fisheries])
               ),
               missing = list(
                 number      = length(missing_fisheries),
-                row_indexes = missing_fisheries
+                row_indexes = spreadsheet_rows_for(form, missing_fisheries)
               ),
               aggregates = list(
                 number       = length(fishery_aggregates),
-                row_indexes  = fishery_aggregates,
+                row_indexes  = spreadsheet_rows_for(form, fishery_aggregates),
                 codes        = strata[fishery_aggregates]$FISHERY_CODE,
                 codes_unique = unique(strata[fishery_aggregates]$FISHERY_CODE)
               ),
               types = list(
                 artisanal = list(
                   number      = length(which(fishery_types == "AR")),
-                  row_indexes = which(fishery_types == "AR")
+                  row_indexes = spreadsheet_rows_for(form, which(fishery_types == "AR"))
                 ),
                 semi_industrial = list(
                   number      = length(which(fishery_types == "SI")),
-                  row_indexes = which(fishery_types == "SI")
+                  row_indexes = spreadsheet_rows_for(form, which(fishery_types == "SI"))
                 ),
                 industrial = list(
                   number      = length(which(fishery_types == "IN")),
-                  row_indexes = which(fishery_types == "IN")
+                  row_indexes = spreadsheet_rows_for(form, which(fishery_types == "IN"))
                 )
               )
             ),
             target_species = list(
               invalid = list(
                 number       = length(invalid_target_species),
-                row_indexes  = invalid_target_species,
+                row_indexes  = spreadsheet_rows_for(form, invalid_target_species),
                 codes        = strata$TARGET_SPECIES_CODE[invalid_target_species],
                 codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_target_species])
               ),
               missing = list(
                 number      = length(missing_target_species),
-                row_indexes = missing_target_species
+                row_indexes = spreadsheet_rows_for(form, missing_target_species)
               )
             ),
             grids = list(
               invalid = list(
                 number       = length(invalid_grids),
-                row_indexes  = invalid_grids,
+                row_indexes  = spreadsheet_rows_for(form, invalid_grids),
                 codes        = strata[invalid_grids]$GRID_CODE,
                 codes_unique = unique(strata[invalid_grids]$GRID_CODE)
               ),
               missing = list(
                 number      = length(missing_grids),
-                row_indexes = missing_grids
+                row_indexes = spreadsheet_rows_for(form, missing_grids)
               )
             ),
             estimations = list(
               invalid = list(
                 number       = length(invalid_estimations),
-                row_indexes  = invalid_estimations,
+                row_indexes  = spreadsheet_rows_for(form, invalid_estimations),
                 codes        = strata[invalid_estimations]$ESTIMATION_CODE,
                 codes_unique = unique(strata[invalid_estimations]$ESTIMATION_CODE)
               ),
               missing = list(
                 number      = length(missing_estimations),
-                row_indexes = missing_estimations
+                row_indexes = spreadsheet_rows_for(form, missing_estimations)
               )
             )
           ),
@@ -313,49 +313,49 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
             type = list(
               invalid = list(
                 number       = length(invalid_types_of_data),
-                row_indexes  = invalid_types_of_data,
+                row_indexes  = spreadsheet_rows_for(form, invalid_types_of_data),
                 codes        = strata[invalid_types_of_data]$DATA_TYPE_CODE,
                 codes_unique = unique(strata[invalid_types_of_data]$DATA_TYPE_CODE)
               ),
               missing = list(
                 number      = length(missing_types_of_data),
-                row_indexes = missing_types_of_data
+                row_indexes = spreadsheet_rows_for(form, missing_types_of_data)
               )
             ),
             source = list(
               invalid = list(
                 number       = length(invalid_data_sources),
-                row_indexes  = invalid_data_sources,
+                row_indexes  = spreadsheet_rows_for(form, invalid_data_sources),
                 codes        = strata[invalid_data_sources]$DATA_SOURCE_CODE,
                 codes_unique = unique(strata[invalid_data_sources]$DATA_SOURCE_CODE)
               ),
               missing = list(
                 number      = length(missing_data_sources),
-                row_indexes = missing_data_sources
+                row_indexes = spreadsheet_rows_for(form, missing_data_sources)
               )
             ),
             processing = list(
               invalid = list(
                 number       = length(invalid_data_processings),
-                row_indexes  = invalid_data_processings,
+                row_indexes  = spreadsheet_rows_for(form, invalid_data_processings),
                 codes        = strata[invalid_data_processings]$DATA_PROCESSING_CODE,
                 codes_unique = unique(strata[invalid_data_processings]$DATA_PROCESSING_CODE)
               ),
               missing = list(
                 number      = length(missing_data_processings),
-                row_indexes = missing_data_processings
+                row_indexes = spreadsheet_rows_for(form, missing_data_processings)
               )
             ),
             raising = list(
               invalid = list(
                 number       = length(invalid_data_raisings),
-                row_indexes  = invalid_data_raisings,
+                row_indexes  = spreadsheet_rows_for(form, invalid_data_raisings),
                 codes        = strata[invalid_data_raisings]$DATA_RAISING_CODE,
                 codes_unique = unique(strata[invalid_data_raisings]$DATA_RAISING_CODE)
               ),
               missing = list(
                 number      = length(missing_data_raisings),
-                row_indexes = missing_data_raisings
+                row_indexes = spreadsheet_rows_for(form, missing_data_raisings)
               )
             )
           ),
@@ -363,24 +363,24 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
             type = list(
               invalid = list(
                 number       = length(invalid_coverage_types),
-                row_indexes  = invalid_coverage_types,
+                row_indexes  = spreadsheet_rows_for(form, invalid_coverage_types),
                 codes        = strata[invalid_coverage_types]$COVERAGE_TYPE_CODE,
                 codes_unique = unique(strata[invalid_coverage_types]$COVERAGE_TYPE_CODE)
               ),
               missing = list(
                 number      = length(missing_coverage_types),
-                row_indexes = missing_coverage_types
+                row_indexes = spreadsheet_rows_for(form, missing_coverage_types)
               )
             ),
             value = list(
               invalid = list(
                 number      = length(invalid_coverages),
-                row_indexes = invalid_coverages,
+                row_indexes = spreadsheet_rows_for(form, invalid_coverages),
                 values      = strata[invalid_coverages]$COVERAGE
               ),
               missing = list(
                 number      = length(missing_coverages),
-                row_indexes = missing_coverages
+                row_indexes = spreadsheet_rows_for(form, missing_coverages)
               )
             )
           )
@@ -390,11 +390,11 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
         total = nrow(data_CE_SF),
         empty_rows = list(
           number      = length(data_empty_rows),
-          row_indexes = data_empty_rows
+          row_indexes = spreadsheet_rows_for(form, data_empty_rows)
         ),
         empty_columns = list(
           number      = length(data_empty_columns),
-          col_indexes = data_empty_columns
+          col_indexes = spreadsheet_cols_for(form, data_empty_columns)
         )
       )
     )
@@ -425,7 +425,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number,    " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
 
   if(strata$empty_columns$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) #", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) ", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
 
   if(strata$duplicate$number > 0)
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number,     " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
@@ -570,7 +570,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
   empty_columns = records$empty_columns
 
   if(empty_columns$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) #", paste0(empty_columns$col_indexes, collapse = ", "))))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) ", paste0(empty_columns$col_indexes, collapse = ", "))))
 
   l_info(paste0("IOTCFormCESFMultiple.common_data_validation_summary: ", Sys.time() - start))
 
