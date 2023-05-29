@@ -515,7 +515,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
     validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_samples$zero$number, " number of samples explicitly reported as zero")))
 
   if(num_samples$na$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$na$number, " empty value(s) reported as number of samples")))
+    if(num_samples$na$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$na$number, " empty values reported as number of samples")))
 
     for(row_index in num_samples$na$row_indexes) {
        validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "G"), text = paste0("Empty value reported as number of samples in row #", row_index)))
@@ -523,7 +523,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
   }
 
   if(num_samples$negative$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$negative$number, " negative value(s) reported as number of samples")))
+    if(num_samples$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$negative$number, " negative values reported as number of samples")))
 
     for(row_index in num_samples$negative$row_indexes) {
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "G"), text = paste0("Negative value reported as number of samples in row #", row_index)))
@@ -531,7 +531,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
   }
 
   if(num_samples$non_num$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$non_num$number, " non-numeric value(s) reported as number of samples")))
+    if(num_samples$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$non_num$number, " non-numeric values reported as number of samples")))
 
     for(row_index in num_samples$non_num$row_indexes) {
        validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "G"), text = paste0("Non-numeric value reported as number of samples in row #", row_index)))
@@ -546,7 +546,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
     validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_fish$positive$number, " positive value(s) reported as number of fish")))
 
   if(num_fish$zero$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$zero$number, " number of fish explicitly reported as zero")))
+    if(num_fish$zero$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$zero$number, " number of fish explicitly reported as zero")))
 
     for(row_index in num_fish$zero$row_indexes) {
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Zero fish reported in row #", row_index)))
@@ -554,7 +554,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
   }
 
   if(num_fish$na$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$na$number, " empty values reported as number of fish")))
+    if(num_fish$na$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$na$number, " empty values reported as number of fish")))
 
     for(row_index in num_fish$na$row_indexes) {
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Empty value reported as number of fish in row #", row_index)))
@@ -562,7 +562,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
   }
 
   if(num_fish$negative$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$negative$number, " negative values reported as number of fish")))
+    if(num_fish$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$negative$number, " negative values reported as number of fish")))
 
     for(row_index in num_fish$negative$row_indexes) {
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Negative value reported as number of fish in row #", row_index)))
@@ -570,7 +570,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
   }
 
   if(num_fish$non_num$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$non_num$number, " non-numeric value(s) reported as number of fish")))
+    if(num_fish$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$non_num$number, " non-numeric values reported as number of fish")))
 
     for(row_index in num_fish$non_num$row_indexes) {
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "H"), text = paste0("Non-numeric value reported as number of fish in row #", row_index)))

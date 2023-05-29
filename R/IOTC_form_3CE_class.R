@@ -562,7 +562,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
     validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero$number, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
 
   if(catches$negative$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative$number, " negative catch value(s) reported")))
+    if(catches$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative$number, " negative catch values reported")))
 
     for(n in 1:nrow(catches$negative$cells)) {
       cell = catches$negative$cells[n]
@@ -572,7 +572,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
   }
 
   if(catches$non_num$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num$number, " non-numeric catch value(s) reported")))
+    if(catches$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num$number, " non-numeric catch values reported")))
 
     for(n in 1:nrow(catches$non_num$cells)) {
       cell = catches$non_num$cells[n]
