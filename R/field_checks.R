@@ -24,52 +24,39 @@ is_year_valid = function(year) {
   current_year = as.integer(format(Sys.time(), "%Y"))
 
   return(
-    is_integer(year) &&
-    year <= current_year
+    is.integer(year) & year <= current_year
   )
 }
 
-is_quarter_valid_ = function(quarter) {
+is_quarter_valid = function(quarter) {
   return(
-    is_integer(quarter) &&
     quarter %in% 0:4
   )
 }
 
-is_quarter_valid = memoise(is_quarter_valid_)
-
-is_month_valid_ = function(month) {
+is_month_valid = function(month) {
   return(
-    is_integer(month) &&
     month %in% 1:12
   )
 }
 
-is_month_valid = memoise(is_month_valid_)
-
-is_percentage_valid_ = function(percentage) {
+is_percentage_valid = function(percentage) {
   return(
-    is_double(percentage) &&
-    percentage >=0 &&
+    is.numeric(percentage) &
+    percentage >=   0 &
     percentage <= 100
   )
 }
 
-is_percentage_valid = memoise(is_percentage_valid_)
-
-is_value_positive_ = function(value) {
+is_value_positive = function(value) {
   return(
-    is_double(value) &&
-    value >= 0
+    is.numeric(value) & value >= 0
   )
 }
 
-is_value_positive = memoise(is_value_positive_)
-
 is_value_strictly_positive = function(value) {
   return(
-    is_double(value) &&
-      value > 0
+    is.numeric(value) & value > 0
   )
 }
 

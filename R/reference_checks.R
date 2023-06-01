@@ -4,17 +4,13 @@
 
 entities_for = function(entity_code) {
   return(
-    iotc.data.reference.codelists::ENTITIES[CODE == trim(entity_code)]
+    iotc.data.reference.codelists::ENTITIES[CODE %in% trim(entity_code)]
   )
 }
 
 is_entity_valid = function(entity_code) {
   return(
-    nrow(
-      entities_for(
-        entity_code
-      )
-    ) == 1
+    trim(entity_code) %in% iotc.data.reference.codelists::ENTITIES$CODE
   )
 }
 
@@ -33,17 +29,13 @@ validate_entity = function(entity_code, field = "Reporting entity") {
 
 countries_for = function(country_code) {
   return(
-    iotc.data.reference.codelists::COUNTRIES[CODE == trim(country_code)]
+    iotc.data.reference.codelists::COUNTRIES[CODE %in% trim(country_code)]
   )
 }
 
 is_country_valid = function(country_code) {
   return(
-    nrow(
-      countries_for(
-        country_code
-      )
-    ) == 1
+    trim(country_code) %in% iotc.data.reference.codelists::COUNTRIES$CODE
   )
 }
 
@@ -92,25 +84,17 @@ validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets
 
 ## FISHERIES
 
-fisheries_for_ = function(fishery_code) {
+fisheries_for = function(fishery_code) {
   return(
-    iotc.data.reference.codelists::LEGACY_FISHERIES[CODE == trim(fishery_code)]
+    iotc.data.reference.codelists::LEGACY_FISHERIES[CODE %in% trim(fishery_code)]
   )
 }
 
-fisheries_for = memoise(fisheries_for_) # Caches the original method using the 'memoise' library to speed up processing of large datasets... Funny part is that it *ACTUALLY* works!
-
-is_fishery_valid_ = function(fishery_code) {
+is_fishery_valid = function(fishery_code) {
   return(
-    nrow(
-      fisheries_for(
-        fishery_code
-      )
-    ) == 1
+    trim(fishery_code) %in% iotc.data.reference.codelists::LEGACY_FISHERIES$CODE
   )
 }
-
-is_fishery_valid = memoise(is_fishery_valid_)
 
 validate_fishery = function(fishery_code, field = "Fishery") {
   fishery_code = check_mandatory(trim(fishery_code), field)
@@ -123,37 +107,45 @@ validate_fishery = function(fishery_code, field = "Fishery") {
   return(fisheries)
 }
 
-is_multiple_gear_fishery_ = function(fishery_code) {
+is_multiple_gear_fishery = function(fishery_code) {
+  fisheries = data.table(CODE = fishery_code)
+  fisheries = merge(fisheries,
+                    iotc.data.reference.codelists::LEGACY_FISHERIES[, .(CODE, IS_AGGREGATE)],
+                    by = "CODE",
+                    all.x = TRUE,
+                    sort = FALSE)
+
   return(
-    fisheries_for(fishery_code)$IS_AGGREGATE
-    #grepl("\\+", fisheries_for(fishery_code)$CODE)
-    #grepl("\\+", fishery_code)
+    fisheries$IS_AGGREGATE
   )
 }
 
-is_multiple_gear_fishery = memoise(is_multiple_gear_fishery_)
+fishery_type_for = function(fishery_code) {
+  fisheries = data.table(CODE = fishery_code)
+  fisheries = merge(fisheries,
+                    iotc.data.reference.codelists::LEGACY_FISHERIES[, .(CODE, FISHERY_TYPE_CODE)],
+                    by = "CODE",
+                    all.x = TRUE,
+                    sort = FALSE)
+
+  return(
+    fisheries$FISHERY_TYPE_CODE
+  )
+}
 
 ## IOTC MAIN AREAS
 
-IOTC_main_areas_for_ = function(IOTC_main_area_code) {
+IOTC_main_areas_for = function(IOTC_main_area_code) {
   return(
-    iotc.data.reference.codelists::IOTC_AREA[CODE == trim(IOTC_main_area_code)]
+    iotc.data.reference.codelists::IOTC_AREA[CODE %in% trim(IOTC_main_area_code)]
   )
 }
 
-IOTC_main_areas_for = memoise(IOTC_main_areas_for_)
-
-is_IOTC_main_area_valid_ = function(IOTC_main_area_code) {
+is_IOTC_main_area_valid = function(IOTC_main_area_code) {
   return(
-    nrow(
-      IOTC_main_areas_for(
-        IOTC_main_area_code
-      )
-    ) == 1
+    trim(IOTC_main_area_code) %in% iotc.data.reference.codelists::IOTC_AREA$CODE
   )
 }
-
-is_IOTC_main_area_valid = memoise(is_IOTC_main_area_valid_)
 
 validate_IOTC_main_area = function(IOTC_main_area_code, field = "IOTC main area") {
   IOTC_main_area_code = check_mandatory(trim(IOTC_main_area_code), field)
@@ -168,25 +160,17 @@ validate_IOTC_main_area = function(IOTC_main_area_code, field = "IOTC main area"
 
 ## GRIDS CE-SF
 
-grids_CE_SF_for_ = function(grid_code) {
+grids_CE_SF_for = function(grid_code) {
   return(
-    iotc.data.reference.codelists::IOTC_GRIDS_CE_SF[CODE == trim(grid_code)]
+    iotc.data.reference.codelists::IOTC_GRIDS_CE_SF[CODE %in% trim(grid_code)]
   )
 }
 
-grids_CE_SF_for = memoise(grids_CE_SF_for_)
-
-is_grid_CE_SF_valid_ = function(grid_code) {
+is_grid_CE_SF_valid = function(grid_code) {
   return(
-    nrow(
-      grids_CE_SF_for(
-        grid_code
-      )
-    ) == 1
+    trim(grid_code) %in% iotc.data.reference.codelists::IOTC_GRIDS_CE_SF$CODE
   )
 }
-
-is_grid_CE_SF_valid = memoise(is_grid_CE_SF_valid_)
 
 validate_grid_CE_SF = function(grid_code, field = "Grid") {
   grid_code = check_mandatory(trim(grid_code), field)
@@ -201,25 +185,17 @@ validate_grid_CE_SF = function(grid_code, field = "Grid") {
 
 ## GRIDS AR
 
-grids_AR_for_ = function(grid_code) {
+grids_AR_for = function(grid_code) {
   return(
-    iotc.data.reference.codelists::IOTC_GRIDS_AR[CODE == trim(grid_code)]
+    iotc.data.reference.codelists::IOTC_GRIDS_AR[CODE %in% trim(grid_code)]
   )
 }
 
-grids_AR_for = memoise(grids_AR_for_)
-
-is_grid_AR_valid_ = function(grid_code) {
+is_grid_AR_valid = function(grid_code) {
   return(
-    nrow(
-      grids_AR_for(
-        grid_code
-      )
-    ) == 1
+    trim(grid_code) %in% iotc.data.reference.codelists::IOTC_GRIDS_AR$CODE
   )
 }
-
-is_grid_AR_valid = memoise(is_grid_AR_valid_)
 
 validate_grid_AR = function(grid_code, field = "Grid") {
   grid_code = check_mandatory(trim(grid_code), field)
@@ -234,25 +210,17 @@ validate_grid_AR = function(grid_code, field = "Grid") {
 
 ## SPECIES
 
-species_for_ = function(species_code) {
+species_for = function(species_code) {
   return(
-    iotc.data.reference.codelists::LEGACY_SPECIES[CODE == trim(species_code)]
+    iotc.data.reference.codelists::LEGACY_SPECIES[CODE %in% trim(species_code)]
   )
 }
 
-species_for = memoise(species_for_)
-
-is_species_valid_ = function(species_code) {
+is_species_valid = function(species_code) {
   return(
-    nrow(
-      species_for(
-        species_code
-      )
-    ) == 1
+    trim(species_code) %in% iotc.data.reference.codelists::LEGACY_SPECIES$CODE
   )
 }
-
-is_species_valid = memoise(is_species_valid_)
 
 validate_species = function(species_code, field = "Species") {
   species_code = check_mandatory(trim(species_code), field)
@@ -265,35 +233,32 @@ validate_species = function(species_code, field = "Species") {
   return(species)
 }
 
-is_species_aggregate_ = function(species_code) {
+is_species_aggregate = function(species_code) {
+  species = data.table(CODE = species_code)
+  species = merge(species,
+                  iotc.data.reference.codelists::LEGACY_SPECIES[, .(CODE, IS_AGGREGATE)],
+                  by = "CODE",
+                  all.x = TRUE,
+                  sort = FALSE)
+
   return(
-    species_for(species_code)$IS_AGGREGATE == TRUE
+    species$IS_AGGREGATE
   )
 }
-
-is_species_aggregate = memoise(is_species_aggregate_)
 
 ## DATA TYPES
 
-data_type_for_ = function(data_type_code) {
+data_type_for = function(data_type_code) {
   return(
-    iotc.data.reference.codelists::DATA_TYPES[CODE == trim(data_type_code)]
+    iotc.data.reference.codelists::DATA_TYPES[CODE %in% trim(data_type_code)]
   )
 }
 
-data_type_for = memoise(data_type_for_)
-
-is_data_type_valid_ = function(data_type_code) {
+is_data_type_valid = function(data_type_code) {
   return(
-    nrow(
-      data_type_for(
-        data_type_code
-      )
-    ) == 1
+    trim(data_type_code) %in% iotc.data.reference.codelists::DATA_TYPES$CODE
   )
 }
-
-is_data_type_valid = memoise(is_data_type_valid_)
 
 validate_data_type = function(data_type_code, field = "Data type") {
   data_type_code = check_mandatory(trim(data_type_code), field)
@@ -308,30 +273,20 @@ validate_data_type = function(data_type_code, field = "Data type") {
 
 ## DATA SOURCES
 
-data_source_for_ = function(dataset_code, data_source_code) {
-  dataset_code = trim(dataset_code)
+data_source_for = function(dataset_code, data_source_code) {
+  dataset_code     = trim(dataset_code)
   data_source_code = trim(data_source_code)
 
   return(
-    iotc.data.reference.codelists::DATA_SOURCES[DATASET_CODE == dataset_code &
-                                                CODE == data_source_code]
+    iotc.data.reference.codelists::DATA_SOURCES[paste0(dataset_code, "-", data_source_code) %in% paste0(DATASET_CODE, "-", CODE)]
   )
 }
 
-data_source_for = memoise(data_source_for_)
-
-is_data_source_valid_ = function(dataset_code, data_source_code) {
+is_data_source_valid = function(dataset_code, data_source_code) {
   return(
-    nrow(
-      data_source_for(
-        dataset_code,
-        data_source_code
-      )
-    ) == 1
+    paste0(trim(dataset_code), "-", trim(data_source_code)) %in% paste0(iotc.data.reference.codelists::DATA_SOURCES$DATASET_CODE, "-",iotc.data.reference.codelists::DATA_SOURCES$CODE)
   )
 }
-
-is_data_source_valid = memoise(is_data_source_valid_)
 
 validate_data_source = function(dataset_code, data_source_code, field = "Data source") {
   dataset_code     = check_mandatory(trim(dataset_code), "Dataset")
@@ -347,27 +302,20 @@ validate_data_source = function(dataset_code, data_source_code, field = "Data so
 
 ## DATA PROCESSINGS
 
-data_processing_for_ = function(dataset_code, data_processing_code) {
+data_processing_for = function(dataset_code, data_processing_code) {
+  dataset_code         = trim(dataset_code)
+  data_processing_code = trim(data_processing_code)
+
   return(
-    iotc.data.reference.codelists::DATA_PROCESSINGS[DATASET_CODE == trim(dataset_code) &
-                                                    CODE == trim(data_processing_code)]
+    iotc.data.reference.codelists::DATA_PROCESSINGS[paste0(dataset_code, "-", data_processing_code) %in% paste0(DATASET_CODE, "-", CODE)]
   )
 }
 
-data_processing_for = memoise(data_processing_for_)
-
-is_data_processing_valid_ = function(dataset_code, data_processing_code) {
+is_data_processing_valid = function(dataset_code, data_processing_code) {
   return(
-    nrow(
-      data_processing_for(
-        dataset_code,
-        data_processing_code
-      )
-    ) == 1
+    paste0(trim(dataset_code), "-", trim(data_processing_code)) %in% paste0(iotc.data.reference.codelists::DATA_PROCESSINGS$DATASET_CODE, "-",iotc.data.reference.codelists::DATA_PROCESSINGS$CODE)
   )
 }
-
-is_data_processing_valid = memoise(is_data_processing_valid_)
 
 validate_data_processing = function(dataset_code, data_processing_code, field = "Data processing") {
   dataset_code         = check_mandatory(trim(dataset_code), "Dataset")
@@ -383,25 +331,17 @@ validate_data_processing = function(dataset_code, data_processing_code, field = 
 
 ## DATA COVERAGE TYPES
 
-data_coverage_type_for_ = function(data_coverage_type_code) {
+data_coverage_type_for = function(data_coverage_type_code) {
   return(
-    iotc.data.reference.codelists::DATA_COVERAGE_TYPES[CODE == trim(data_coverage_type_code)]
+    iotc.data.reference.codelists::DATA_COVERAGE_TYPES[CODE %in% trim(data_coverage_type_code)]
   )
 }
 
-data_coverage_type_for = memoise(data_coverage_type_for_)
-
-is_data_coverage_type_valid_ = function(data_coverage_type_code) {
+is_data_coverage_type_valid = function(data_coverage_type_code) {
   return(
-    nrow(
-      data_coverage_type_for(
-        data_coverage_type_code
-      )
-    ) == 1
+    trim(data_coverage_type_code) %in% iotc.data.reference.codelists::DATA_COVERAGE_TYPES$CODE
   )
 }
-
-is_data_coverage_type_valid = memoise(is_data_coverage_type_valid_)
 
 validate_data_coverage_type = function(data_coverage_type_code, field = "Data coverage type") {
   data_coverage_type_code = check_mandatory(trim(data_coverage_type_code), field)
@@ -416,25 +356,17 @@ validate_data_coverage_type = function(data_coverage_type_code, field = "Data co
 
 ## DATA ESTIMATIONS
 
-data_estimation_for_ = function(data_estimation_code) {
+data_estimation_for = function(data_estimation_code) {
   return(
-    iotc.data.reference.codelists::DATA_ESTIMATIONS[CODE == trim(data_estimation_code)]
+    iotc.data.reference.codelists::DATA_ESTIMATIONS[CODE %in% trim(data_estimation_code)]
   )
 }
 
-data_estimation_for = memoise(data_estimation_for_)
-
-is_data_estimation_valid_ = function(data_estimation_code) {
+is_data_estimation_valid = function(data_estimation_code) {
   return(
-    nrow(
-      data_estimation_for(
-        data_estimation_code
-      )
-    ) == 1
+    trim(data_estimation_code) %in% iotc.data.reference.codelists::DATA_ESTIMATIONS$CODE
   )
 }
-
-is_data_estimation_valid = memoise(is_data_estimation_valid_)
 
 validate_data_estimation = function(data_estimation_code, field = "Data estimation") {
   data_estimation_code = check_mandatory(trim(data_estimation_code), field)
@@ -449,25 +381,17 @@ validate_data_estimation = function(data_estimation_code, field = "Data estimati
 
 ## FATE TYPES
 
-fate_type_for_ = function(fate_type_code) {
+fate_type_for = function(fate_type_code) {
   return(
-    iotc.data.reference.codelists::TYPES_OF_FATE[CODE == trim(fate_type_code)]
+    iotc.data.reference.codelists::TYPES_OF_FATE[CODE %in% trim(fate_type_code)]
   )
 }
 
-fate_type_for = memoise(fate_type_for_)
-
-is_fate_type_valid_ = function(fate_type_code) {
+is_fate_type_valid = function(fate_type_code) {
   return(
-    nrow(
-      fate_type_for(
-        fate_type_code
-      )
-    ) == 1
+    trim(fate_type_code) %in% iotc.data.reference.codelists::TYPES_OF_FATE$CODE
   )
 }
-
-is_fate_type_valid = memoise(is_fate_type_valid_)
 
 validate_fate_type = function(fate_type_code, field = "Fate type") {
   fate_type_code = check_mandatory(trim(fate_type_code), field)
@@ -482,30 +406,20 @@ validate_fate_type = function(fate_type_code, field = "Fate type") {
 
 ## FATES
 
-fate_for_ = function(type_of_fate_code, fate_code) {
+fate_for = function(type_of_fate_code, fate_code) {
   type_of_fate_code = trim(type_of_fate_code)
   fate_code         = trim(fate_code)
 
   return(
-    iotc.data.reference.codelists::FATES[TYPE_OF_FATE_CODE == type_of_fate_code &
-                                         CODE              == fate_code]
+    iotc.data.reference.codelists::FATES[paste0(type_of_fate_code, "-", fate_code) %in% paste0(TYPE_OF_FATE_CODE, "-", CODE)]
   )
 }
 
-fate_for = memoise(fate_for_)
-
-is_fate_valid_ = function(type_of_fate_code, fate_code) {
+is_fate_valid = function(type_of_fate_code, fate_code) {
   return(
-    nrow(
-      fate_for(
-        type_of_fate_code,
-        fate_code
-      )
-    ) == 1
+    paste0(trim(type_of_fate_code), "-", trim(fate_code)) %in% paste0(iotc.data.reference.codelists::FATES$TYPE_OF_FATE_CODE, "-", iotc.data.reference.codelists::FATES$CODE)
   )
 }
-
-is_fate_valid = memoise(is_fate_valid_)
 
 validate_fate = function(type_of_fate_code, fate_code, field = "Fate") {
   type_of_fate_code = check_mandatory(trim(type_of_fate_code), "Type of fate")
@@ -521,7 +435,7 @@ validate_fate = function(type_of_fate_code, fate_code, field = "Fate") {
 
 ## RETAIN REASONS
 
-is_retain_reason_valid_ = function(retain_reason_code) {
+is_retain_reason_valid = function(retain_reason_code) {
   return(
     is_fate_valid(
       "RE", retain_reason_code
@@ -529,9 +443,7 @@ is_retain_reason_valid_ = function(retain_reason_code) {
   )
 }
 
-is_retain_reason_valid = memoise(is_retain_reason_valid_)
-
-validate_retain_reason_ = function(retain_reason_code, field = "Retain reason") {
+validate_retain_reason = function(retain_reason_code, field = "Retain reason") {
   return(
     validate_fate(
       "RE",
@@ -541,11 +453,9 @@ validate_retain_reason_ = function(retain_reason_code, field = "Retain reason") 
   )
 }
 
-validate_retain_reason = memoise(validate_retain_reason_)
-
 ## DISCARD REASONS
 
-is_discard_reason_valid_ = function(discard_reason_code) {
+is_discard_reason_valid = function(discard_reason_code) {
   return(
     is_fate_valid(
       "DI", discard_reason_code
@@ -553,9 +463,7 @@ is_discard_reason_valid_ = function(discard_reason_code) {
   )
 }
 
-is_discard_reason_valid = memoise(is_discard_reason_valid_)
-
-validate_discard_reason_ = function(discard_reason_code, field = "Discard reason") {
+validate_discard_reason = function(discard_reason_code, field = "Discard reason") {
   return(
     validate_fate(
       "DI",
@@ -565,29 +473,19 @@ validate_discard_reason_ = function(discard_reason_code, field = "Discard reason
   )
 }
 
-validate_discard_reason = memoise(validate_discard_reason_)
-
 ## DATA RAISINGS
 
-data_raising_for_ = function(data_raising_code) {
+data_raising_for = function(data_raising_code) {
   return(
-    iotc.data.reference.codelists::DATA_RAISINGS[CODE == trim(data_raising_code)]
+    iotc.data.reference.codelists::DATA_RAISINGS[CODE %in% trim(data_raising_code)]
   )
 }
 
-data_raising_for = memoise(data_raising_for_)
-
-is_data_raising_valid_ = function(data_raising_code) {
+is_data_raising_valid = function(data_raising_code) {
   return(
-    nrow(
-      data_raising_for(
-        data_raising_code
-      )
-    ) == 1
+    trim(data_raising_code) %in% iotc.data.reference.codelists::DATA_RAISINGS$CODE
   )
 }
-
-is_data_raising_valid = memoise(is_data_raising_valid_)
 
 validate_data_raising = function(data_raising_code, field = "Data raising") {
   data_raising_code = check_mandatory(trim(data_raising_code), field)
@@ -602,25 +500,17 @@ validate_data_raising = function(data_raising_code, field = "Data raising") {
 
 ## CONDITIONS
 
-condition_for_ = function(condition_code) {
+condition_for = function(condition_code) {
   return(
-    iotc.data.reference.codelists::CONDITIONS[CODE == trim(condition_code)]
+    iotc.data.reference.codelists::CONDITIONS[CODE %in% trim(condition_code)]
   )
 }
 
-condition_for = memoise(condition_for_)
-
-is_condition_valid_ = function(condition_code) {
+is_condition_valid = function(condition_code) {
   return(
-    nrow(
-      condition_for(
-        condition_code
-      )
-    ) == 1
+    trim(condition_code) %in% iotc.data.reference.codelists::CONDITIONS$CODE
   )
 }
-
-is_condition_valid = memoise(is_condition_valid_)
 
 validate_condition = function(condition_code, field = "Condition") {
   condition_code = check_mandatory(trim(condition_code), field)
@@ -635,25 +525,17 @@ validate_condition = function(condition_code, field = "Condition") {
 
 ## SEX
 
-sex_for_ = function(sex_code) {
+sex_for = function(sex_code) {
   return(
-    iotc.data.reference.codelists::SEX[CODE == trim(sex_code)]
+    iotc.data.reference.codelists::SEX[CODE %in% trim(sex_code)]
   )
 }
 
-sex_for = memoise(sex_for_)
-
-is_sex_valid_ = function(sex_code) {
+is_sex_valid = function(sex_code) {
   return(
-    nrow(
-      sex_for(
-        sex_code
-      )
-    ) == 1
+    trim(sex_code) %in% iotc.data.reference.codelists::SEX$CODE
   )
 }
-
-is_sex_valid = memoise(is_sex_valid_)
 
 validate_sex = function(sex_code, field = "Sex") {
   sex_code = check_mandatory(trim(sex_code), field)
@@ -666,28 +548,19 @@ validate_sex = function(sex_code, field = "Sex") {
   return(sexes)
 }
 
-
 ## CATCH UNITS
 
-catch_unit_for_ = function(catch_unit_code) {
+catch_unit_for = function(catch_unit_code) {
   return(
-    iotc.data.reference.codelists::CATCH_UNITS[CODE == trim(catch_unit_code)]
+    iotc.data.reference.codelists::CATCH_UNITS[CODE %in% trim(catch_unit_code)]
   )
 }
 
-catch_unit_for = memoise(catch_unit_for_)
-
-is_catch_unit_valid_ = function(catch_unit_code) {
+is_catch_unit_valid = function(catch_unit_code) {
   return(
-    nrow(
-      catch_unit_for(
-        catch_unit_code
-      )
-    ) == 1
+    trim(catch_unit_code) %in% iotc.data.reference.codelists::CATCH_UNITS$CODE
   )
 }
-
-is_catch_unit_valid = memoise(is_catch_unit_valid_)
 
 validate_catch_unit = function(catch_unit_code, field = "Catch unit") {
   catch_unit_code = check_mandatory(trim(catch_unit_code), field)
@@ -702,25 +575,17 @@ validate_catch_unit = function(catch_unit_code, field = "Catch unit") {
 
 ## EFFORT UNITS
 
-effort_unit_for_ = function(effort_unit_code) {
+effort_unit_for = function(effort_unit_code) {
   return(
-    iotc.data.reference.codelists::EFFORT_UNITS[CODE == trim(effort_unit_code)]
+    iotc.data.reference.codelists::EFFORT_UNITS[CODE %in% trim(effort_unit_code)]
   )
 }
 
-effort_unit_for = memoise(effort_unit_for_)
-
-is_effort_unit_valid_ = function(effort_unit_code) {
+is_effort_unit_valid = function(effort_unit_code) {
   return(
-    nrow(
-      effort_unit_for(
-        effort_unit_code
-      )
-    ) == 1
+    trim(effort_unit_code) %in% iotc.data.reference.codelists::EFFORT_UNITS$CODE
   )
 }
-
-is_effort_unit_valid = memoise(is_effort_unit_valid_)
 
 validate_effort_unit = function(effort_unit_code, field = "Effort unit") {
   effort_unit_code = check_mandatory(trim(effort_unit_code), field)
@@ -735,25 +600,17 @@ validate_effort_unit = function(effort_unit_code, field = "Effort unit") {
 
 ## MEASUREMENT TYPES
 
-measurement_type_for_ = function(measurement_type_code) {
+measurement_type_for = function(measurement_type_code) {
   return(
-    iotc.data.reference.codelists::TYPES_OF_MEASUREMENT[CODE == trim(measurement_type_code)]
+    iotc.data.reference.codelists::TYPES_OF_MEASUREMENT[CODE %in% trim(measurement_type_code)]
   )
 }
 
-measurement_type_for = memoise(measurement_type_for_)
-
-is_measurement_type_valid_ = function(measurement_type_code) {
+is_measurement_type_valid = function(measurement_type_code) {
   return(
-    nrow(
-      measurement_type_for(
-        measurement_type_code
-      )
-    ) == 1
+    trim(measurement_type_code) %in% iotc.data.reference.codelists::TYPES_OF_MEASUREMENT$CODE
   )
 }
-
-is_measurement_type_valid = memoise(is_measurement_type_valid_)
 
 validate_measurement_type = function(measurement_type_code, field = "Measurement type") {
   measurement_type_code = check_mandatory(trim(measurement_type_code), field)
@@ -768,30 +625,20 @@ validate_measurement_type = function(measurement_type_code, field = "Measurement
 
 ## MEASUREMENTS
 
-measurement_for_ = function(measurement_type_code, measurement_code) {
+measurement_for = function(measurement_type_code, measurement_code) {
   measurement_type_code = trim(measurement_type_code)
   measurement_code      = trim(measurement_code)
 
   return(
-    iotc.data.reference.codelists::MEASUREMENT_TYPES[TYPE_OF_MEASUREMENT_CODE  == measurement_type_code &
-                                                     CODE                      == measurement_code]
+    iotc.data.reference.codelists::MEASUREMENT_TYPES[paste0(measurement_type_code, "-", measurement_code) %in% paste0(TYPE_OF_MEASUREMENT_CODE, "-", CODE)]
   )
 }
 
-measurement_for = memoise(measurement_for_)
-
-is_measurement_valid_ = function(measurement_type_code, measurement_code) {
+is_measurement_valid = function(measurement_type_code, measurement_code) {
   return(
-    nrow(
-      measurement_for(
-        measurement_type_code,
-        measurement_code
-      )
-    ) == 1
+    paste0(trim(measurement_type_code), "-", trim(measurement_code)) %in% paste0(iotc.data.reference.codelists::MEASUREMENT_TYPES$TYPE_OF_MEASUREMENT_CODE, "-", iotc.data.reference.codelists::MEASUREMENT_TYPES$CODE)
   )
 }
-
-is_measurement_valid = memoise(is_measurement_valid_)
 
 validate_measurement = function(measurement_type_code, measurement_code, field = "Measurement") {
   measurement_type_code = check_mandatory(trim(measurement_type_code), "Type of measurement")
@@ -807,30 +654,20 @@ validate_measurement = function(measurement_type_code, measurement_code, field =
 
 ## MEASURING TOOLS
 
-measuring_tool_for_ = function(measurement_type_code, measuring_tool_code) {
+measuring_tool_for = function(measurement_type_code, measuring_tool_code) {
   measurement_type_code = trim(measurement_type_code)
   measuring_tool_code   = trim(measuring_tool_code)
 
   return(
-    iotc.data.reference.codelists::MEASUREMENT_TOOLS[TYPE_OF_MEASUREMENT_CODE  == measurement_type_code &
-                                                     CODE                      == measuring_tool_code]
+    iotc.data.reference.codelists::MEASUREMENT_TOOLS[paste0(measurement_type_code, "-", measuring_tool_code) %in% paste0(TYPE_OF_MEASUREMENT_CODE, "-", CODE)]
   )
 }
 
-measuring_tool_for = memoise(measuring_tool_for_)
-
-is_measuring_tool_valid_ = function(measurement_type_code, measuring_tool_code) {
+is_measuring_tool_valid = function(measurement_type_code, measuring_tool_code) {
   return(
-    nrow(
-      measuring_tool_for(
-        measurement_type_code,
-        measuring_tool_code
-      )
-    ) == 1
+    paste0(trim(measurement_type_code), "-", trim(measuring_tool_code)) %in% paste0(iotc.data.reference.codelists::MEASUREMENT_TOOLS$TYPE_OF_MEASUREMENT_CODE, "-", iotc.data.reference.codelists::MEASUREMENT_TOOLS$CODE)
   )
 }
-
-is_measuring_tool_valid = memoise(is_measuring_tool_valid_)
 
 validate_measuring_tool = function(measurement_type_code, measuring_tool_code, field = "Measuring tool") {
   measurement_type_code = check_mandatory(trim(measurement_type_code), "Type of measurement")

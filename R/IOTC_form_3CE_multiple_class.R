@@ -138,25 +138,31 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   start = Sys.time()
 
   grid_size = function(code) {
-    if(is.na(code) || code == "") return("OTHER")
-    else if(str_sub(code, 1, 1) == "5") return("1_DEG")
-    else if(str_sub(code, 1, 1) == "6") return("5_DEG")
-    return("OTHER")
+    return(
+      fifelse(is.na(code) | code == "",
+              "OTHER",
+              fifelse(str_sub(code, 1, 1) == "5",
+                      "1_DEG",
+                      fifelse(str_sub(code, 1, 1) == "6",
+                              "5_DEG",
+                              "OTHER"
+                      )
+              )
+      )
+    )
   }
 
-  fishery_category = function(value) {
-    if(!is.na(value) && is_fishery_valid(value)) {
-      return(fisheries_for(value)$FISHERY_CATEGORY)
-    }
+  # Merges the fishery codes in the strata with the LEGACY_FISHERIES table in order to recover - when possible - the fishery category
+  fishery_categories = merge(strata, iotc.data.reference.codelists::LEGACY_FISHERIES[, .(CODE, FISHERY_CATEGORY)],
+                             by.x = "FISHERY_CODE", by.y = "CODE",
+                             sort = FALSE)
 
-    return(NA)
-  }
-
-  grid_status    = data.table(FISHERY_CATEGORY_CODE = sapply(strata$FISHERY_CODE, fishery_category),
+  grid_status    = data.table(FISHERY_CODE = fishery_categories$FISHERY_CODE,
+                              FISHERY_CATEGORY_CODE = fishery_categories$FISHERY_CATEGORY,
                               GRID_CODE = strata$GRID_CODE,
-                              MISSING   = sapply(strata$GRID_CODE, is.na),
-                              VALID     = sapply(strata$GRID_CODE, grid_validator(form)),
-                              SIZE      = sapply(strata$GRID_CODE, grid_size))
+                              MISSING   = is.na(strata$GRID_CODE),
+                              VALID     = grid_validator(form)(strata$GRID_CODE),
+                              SIZE      = grid_size(strata$GRID_CODE))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (I.a): ", Sys.time() - start))
   start = Sys.time()
@@ -171,7 +177,7 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   l_info(paste0("IOTCForm3CEMultiple.validate_data (I.b): ", Sys.time() - start))
   start = Sys.time()
 
-  wrong_grid_types = which(grid_status$WRONG_GRID_TYPE == TRUE)
+  wrong_grid_types = which(!is.na(grid_status$GRID_CODE) & grid_status$WRONG_GRID_TYPE == TRUE)
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (II.a): ", Sys.time() - start))
   start = Sys.time()
@@ -203,19 +209,19 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
       row_indexes = spreadsheet_rows_for(form, unique_strata)
     )
 
-  is_effort_valid = function(value) { return(!is.na(value) & is_numeric(value) & value > 0) } #{ return(!is.na(value) | value > 0) }
-
   l_info(paste0("IOTCForm3CEMultiple.validate_data (II.c): ", Sys.time() - start))
   start = Sys.time()
 
+  is_effort_valid = function(value) { return(!is.na(value) & is_numeric(value) & value > 0) }
+
   ### Primary effort code + value
 
-  missing_primary_effort_codes = which( sapply(strata$PRIMARY_EFFORT_CODE, is.na))
+  missing_primary_effort_codes = which( is.na(strata$PRIMARY_EFFORT_CODE))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (II.d): ", Sys.time() - start))
   start = Sys.time()
 
-  invalid_primary_effort_codes = which(!sapply(strata$PRIMARY_EFFORT_CODE, is_effort_unit_valid))
+  invalid_primary_effort_codes = which(!is_effort_unit_valid(strata$PRIMARY_EFFORT_CODE))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (II.e): ", Sys.time() - start))
   start = Sys.time()
@@ -226,12 +232,12 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   l_info(paste0("IOTCForm3CEMultiple.validate_data (III): ", Sys.time() - start))
   start = Sys.time()
 
-  missing_primary_efforts = which( sapply(strata$PRIMARY_EFFORT, is.na))
+  missing_primary_efforts = which( is.na(strata$PRIMARY_EFFORT))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (III.a): ", Sys.time() - start))
   start = Sys.time()
 
-  invalid_primary_efforts = which(!sapply(strata$PRIMARY_EFFORT, is_effort_valid))
+  invalid_primary_efforts = which(!is_effort_valid(strata$PRIMARY_EFFORT))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (III.b): ", Sys.time() - start))
   start = Sys.time()
@@ -244,16 +250,16 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
 
   ### Secondary effort code + value
 
-  missing_secondary_effort_codes = which( sapply(strata$SECONDARY_EFFORT_CODE, is.na))
-  invalid_secondary_effort_codes = which(!sapply(strata$SECONDARY_EFFORT_CODE, is_effort_unit_valid))
+  missing_secondary_effort_codes = which( is.na(strata$SECONDARY_EFFORT_CODE))
+  invalid_secondary_effort_codes = which(!is_effort_unit_valid(strata$SECONDARY_EFFORT_CODE))
   invalid_secondary_effort_codes = invalid_secondary_effort_codes[ ! invalid_secondary_effort_codes %in% missing_secondary_effort_codes ]
   missing_secondary_effort_codes = missing_secondary_effort_codes[ ! missing_secondary_effort_codes %in% strata_empty_rows ]
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (V): ", Sys.time() - start))
   start = Sys.time()
 
-  missing_secondary_efforts = which( sapply(strata$SECONDARY_EFFORT, is.na))
-  invalid_secondary_efforts = which(!sapply(strata$SECONDARY_EFFORT, is_effort_valid))
+  missing_secondary_efforts = which( is.na(strata$SECONDARY_EFFORT))
+  invalid_secondary_efforts = which(!is_effort_valid(strata$SECONDARY_EFFORT))
   invalid_secondary_efforts = invalid_secondary_efforts[ ! invalid_secondary_efforts %in% missing_secondary_efforts ]
   missing_secondary_efforts = missing_secondary_efforts[ ! missing_secondary_efforts %in% strata_empty_rows ]
 
@@ -263,23 +269,21 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   missing_secondary_efforts      = missing_secondary_efforts_
   missing_secondary_effort_codes = missing_secondary_effort_codes_
 
-  #secondary_efforts_provided= length(which(!sapply(strata$SECONDARY_EFFORT, is.na))) > 0
-
   l_info(paste0("IOTCForm3CEMultiple.validate_data (VI): ", Sys.time() - start))
   start = Sys.time()
 
   ### Tertiary effort code + value
 
-  missing_tertiary_effort_codes = which( sapply(strata$TERTIARY_EFFORT_CODE, is.na))
-  invalid_tertiary_effort_codes = which(!sapply(strata$TERTIARY_EFFORT_CODE, is_effort_unit_valid))
+  missing_tertiary_effort_codes = which( is.na(strata$TERTIARY_EFFORT_CODE))
+  invalid_tertiary_effort_codes = which(!is.na(strata$TERTIARY_EFFORT_CODE) & !is_value_strictly_positive(strata$TERTIARY_EFFORT_CODE))
   invalid_tertiary_effort_codes = invalid_tertiary_effort_codes[ ! invalid_tertiary_effort_codes %in% missing_tertiary_effort_codes ]
   missing_tertiary_effort_codes = missing_tertiary_effort_codes[ ! missing_tertiary_effort_codes %in% strata_empty_rows ]
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (VII): ", Sys.time() - start))
   start = Sys.time()
 
-  missing_tertiary_efforts = which( sapply(strata$TERTIARY_EFFORT, is.na))
-  invalid_tertiary_efforts = which(!sapply(strata$TERTIARY_EFFORT, is_effort_valid))
+  missing_tertiary_efforts = which( is.na(strata$TERTIARY_EFFORT))
+  invalid_tertiary_efforts = which(!is_effort_valid(strata$TERTIARY_EFFORT))
   invalid_tertiary_efforts = invalid_tertiary_efforts[ ! invalid_tertiary_efforts %in% missing_tertiary_efforts ]
   missing_tertiary_efforts = missing_tertiary_efforts[ ! missing_tertiary_efforts %in% strata_empty_rows ]
 
@@ -292,8 +296,6 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   same_effort_unit_ps = which(strata[!is.na(PRIMARY_EFFORT_CODE),   SAME_EFFORT_UNITS_PS := PRIMARY_EFFORT_CODE   == SECONDARY_EFFORT_CODE]$SAME_EFFORT_UNITS_PS == TRUE)
   same_effort_unit_pt = which(strata[!is.na(PRIMARY_EFFORT_CODE),   SAME_EFFORT_UNITS_PT := PRIMARY_EFFORT_CODE   == TERTIARY_EFFORT_CODE ]$SAME_EFFORT_UNITS_PT == TRUE)
   same_effort_unit_st = which(strata[!is.na(SECONDARY_EFFORT_CODE), SAME_EFFORT_UNITS_ST := SECONDARY_EFFORT_CODE == TERTIARY_EFFORT_CODE ]$SAME_EFFORT_UNITS_ST == TRUE)
-
-  #tertiary_efforts_provided= length(which(!sapply(strata$TERTIARY_EFFORT, is.na))) > 0
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (VIII): ", Sys.time() - start))
   start = Sys.time()
@@ -403,34 +405,20 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
 
   ### Maybe a check shall be added that for surface / coastal fisheries catches shall be necessarily provided in weight?
 
-  missing_species    = which( sapply(records$codes$species, is.na))
-  invalid_species    = which(!sapply(records$codes$species, is_species_valid))
+  missing_species    = which( is.na(records$codes$species))
+  invalid_species    = which(!is_species_valid(records$codes$species))
   invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (X): ", Sys.time() - start))
   start = Sys.time()
 
-  species_aggregates =
-    which(
-      unlist(
-        sapply(
-          records$codes$species,
-          function(value) {
-            return(
-              !is.na(value) && is_species_aggregate(value)
-            )
-          },
-          USE.NAMES = FALSE
-        ),
-        use.names = FALSE
-      )
-    )
+  species_aggregates = which(is_species_aggregate(records$codes$species))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (XI): ", Sys.time() - start))
   start = Sys.time()
 
-  missing_catch_units = which( sapply(records$codes$catch_units, is.na))
-  invalid_catch_units = which(!sapply(records$codes$catch_units, is_catch_unit_valid))
+  missing_catch_units = which( is.na(records$codes$catch_units))
+  invalid_catch_units = which(!is_catch_unit_valid(records$codes$catch_units))
   invalid_catch_units = invalid_catch_units[ ! invalid_catch_units %in% missing_catch_units ]
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (XII): ", Sys.time() - start))
@@ -589,7 +577,13 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
   }
 
   if(strata$checks$main$grids$wrong$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery: see row(s) #", paste0(strata$checks$main$grids$wrong$row_indexes, collapse = ", "))))
+    if(strata$checks$main$grids$wrong$number > 1) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
+    }
+
+    for(row_index in strata$checks$main$grids$wrong$row_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "E"), text = paste0("Wrong grid code used for fishery in row #", row_index)))
+    }
   }
 
   # Commented out as the message is handled at superclass level

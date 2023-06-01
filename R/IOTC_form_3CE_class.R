@@ -236,26 +236,44 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
   grid_size = function(code) {
-    if(is.na(code) || code == "") return("OTHER")
-    else if(str_sub(code, 1, 1) == "5") return("1_DEG")
-    else if(str_sub(code, 1, 1) == "6") return("5_DEG")
-    return("OTHER")
+    return(
+      fifelse(is.na(code) | code == "",
+              "OTHER",
+              fifelse(str_sub(code, 1, 1) == "5",
+                      "1_DEG",
+                      fifelse(str_sub(code, 1, 1) == "6",
+                              "5_DEG",
+                              "OTHER"
+                      )
+              )
+      )
+    )
   }
 
-  grid_status    = data.table(GRID_CODE = strata$GRID_CODE,
-                              MISSING   = sapply(strata$GRID_CODE, is.na),
-                              VALID     = sapply(strata$GRID_CODE, is_grid_AR_valid),
-                              SIZE      = sapply(strata$GRID_CODE, grid_size))
+  grid_status    = data.table(FISHERY_CATEGORY_CODE = metadata_validation_results$general_information$fishery$category,
+                              GRID_CODE = strata$GRID_CODE,
+                              MISSING   = is.na(strata$GRID_CODE),
+                              VALID     = is_grid_AR_valid(strata$GRID_CODE),
+                              SIZE      = grid_size(strata$GRID_CODE))
 
-  if(metadata_validation_results$general_information$fishery$category == "SURFACE") {
-    wrong_grid_types = which(grid_status$SIZE != "1_DEG")
-    wrong_grid_types = wrong_grid_types[ which(wrong_grid_types %in% which(grid_status$VALID)) ]
-  } else
-    wrong_grid_types = as.integer(array())
+  grid_status[, WRONG_GRID_TYPE := fifelse(FISHERY_CATEGORY_CODE == "SURFACE",
+                                           SIZE != "1_DEG",
+                                           fifelse(FISHERY_CATEGORY_CODE == "LONGLINE",
+                                                   SIZE == "OTHER",
+                                                   FALSE)
+  )]
+
+  wrong_grid_types = which(!is.na(grid_status$GRID_CODE) & grid_status$WRONG_GRID_TYPE == TRUE)
+
+  #if(metadata_validation_results$general_information$fishery$category == "SURFACE") {
+  #  wrong_grid_types = which(grid_status$SIZE != "1_DEG")
+  #  wrong_grid_types = wrong_grid_types[ which(wrong_grid_types %in% which(grid_status$VALID)) ]
+  #} else
+  #  wrong_grid_types = as.integer(array())
 
   data_validation_results$strata$checks$main$grids$wrong = list(
     number       = length(wrong_grid_types),
-    row_indexes  = wrong_grid_types,
+    row_indexes  = spreadsheet_rows_for(form, wrong_grid_types),
     codes        = strata$GRID_CODE[wrong_grid_types],
     codes_unique = unique(strata$GRID_CODE[wrong_grid_types])
   )
@@ -285,26 +303,26 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
   has_secondary_effort = FALSE
   has_tertiary_effort  = FALSE
 
-  missing_primary_efforts = which(sapply(strata$PRIMARY_EFFORT, is.na))
-  invalid_primary_efforts = which(!sapply(strata$PRIMARY_EFFORT, is_effort_valid))
+  missing_primary_efforts = which( is.na(strata$PRIMARY_EFFORT))
+  invalid_primary_efforts = which(!is_effort_valid(strata$PRIMARY_EFFORT))
   invalid_primary_efforts = invalid_primary_efforts[ ! invalid_primary_efforts %in% missing_primary_efforts ]
   missing_primary_efforts = missing_primary_efforts[ ! missing_primary_efforts %in% strata_empty_rows ]
 
-  primary_efforts_provided= length(which(!sapply(strata$PRIMARY_EFFORT, is.na))) > 0
+  primary_efforts_provided= length(which(!is.na(strata$PRIMARY_EFFORT))) > 0
 
-  missing_secondary_efforts = which(sapply(strata$SECONDARY_EFFORT, is.na))
-  invalid_secondary_efforts = which(!sapply(strata$SECONDARY_EFFORT, is_effort_valid))
+  missing_secondary_efforts = which( is.na(strata$SECONDARY_EFFORT))
+  invalid_secondary_efforts = which(!is_effort_valid(strata$SECONDARY_EFFORT))
   invalid_secondary_efforts = invalid_secondary_efforts[ ! invalid_secondary_efforts %in% missing_secondary_efforts ]
   missing_secondary_efforts = missing_secondary_efforts[ ! missing_secondary_efforts %in% strata_empty_rows ]
 
-  secondary_efforts_provided= length(which(!sapply(strata$SECONDARY_EFFORT, is.na))) > 0
+  secondary_efforts_provided= length(which(!is.na(strata$SECONDARY_EFFORT))) > 0
 
-  missing_tertiary_efforts = which(sapply(strata$TERTIARY_EFFORT, is.na))
-  invalid_tertiary_efforts = which(!sapply(strata$TERTIARY_EFFORT, is_effort_valid))
+  missing_tertiary_efforts = which( is.na(strata$TERTIARY_EFFORT))
+  invalid_tertiary_efforts = which(!is_effort_valid(strata$TERTIARY_EFFORT))
   invalid_tertiary_efforts = invalid_tertiary_efforts[ ! invalid_tertiary_efforts %in% missing_tertiary_efforts ]
   missing_tertiary_efforts = missing_tertiary_efforts[ ! missing_tertiary_efforts %in% strata_empty_rows ]
 
-  tertiary_efforts_provided= length(which(!sapply(strata$TERTIARY_EFFORT, is.na))) > 0
+  tertiary_efforts_provided= length(which(!is.na(strata$TERTIARY_EFFORT))) > 0
 
   data_validation_results$strata$checks$efforts = list(
     primary = list(
@@ -369,23 +387,11 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
     species_multiple = as.integer(array())
   }
 
-  missing_species    = which( sapply(records$codes$species, is.na))
-  invalid_species    = which(!sapply(records$codes$species, is_species_valid))
+  missing_species    = which( is.na(records$codes$species))
+  invalid_species    = which(!is_species_valid(records$codes$species))
   invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
 
-  species_aggregates =
-    which(
-      unlist(
-        sapply(
-          records$codes$species,
-          function(value) {
-            return(!is.na(value) && is_species_aggregate(value))
-          },
-          USE.NAMES = FALSE
-        ),
-        use.names = FALSE
-      )
-    )
+  species_aggregates = which(is_species_aggregate(records$codes$species))
 
   numeric_catch_data =
     catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]

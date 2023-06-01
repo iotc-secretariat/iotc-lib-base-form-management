@@ -31,7 +31,7 @@ is_numeric = memoise(is_numeric_)
 trim = function(string) {
   trimmed = str_trim(string)
 
-  if(is.null(trimmed) || is.na(trimmed) || trimmed == "") trimmed = NA_character_
+  trimmed[is.na(trimmed) | str_length(trimmed) == 0] = NA_character_
 
   return(trimmed)
 }

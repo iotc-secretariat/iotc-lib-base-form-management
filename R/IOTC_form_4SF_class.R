@@ -296,13 +296,6 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
   incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("GRID_CODE", "SEX_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
-  grid_size = function(code) {
-    if(is.na(code) || code == "") return("OTHER")
-    else if(str_sub(code, 1, 1) == "5") return("1_DEG")
-    else if(str_sub(code, 1, 1) == "6") return("5_DEG")
-    return("OTHER")
-  }
-
   non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
   duplicate_strata = which(strata$OCCURRENCES > 1)   #which(strata_duplicated$COUNT > 1)
   duplicate_strata = duplicate_strata[ ! duplicate_strata %in% strata_empty_rows ]
@@ -320,10 +313,25 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
       row_indexes = spreadsheet_rows_for(form, unique_strata)
     )
 
+  grid_size = function(code) {
+    return(
+      fifelse(is.na(code) | code == "",
+              "OTHER",
+              fifelse(str_sub(code, 1, 1) == "5",
+                      "1_DEG",
+                      fifelse(str_sub(code, 1, 1) == "6",
+                              "5_DEG",
+                              "OTHER"
+                      )
+              )
+      )
+    )
+  }
+
   grid_status    = data.table(GRID_CODE = strata$GRID_CODE,
-                              MISSING   = sapply(strata$GRID_CODE, is.na),
-                              VALID     = sapply(strata$GRID_CODE, is_grid_CE_SF_valid),
-                              SIZE      = sapply(strata$GRID_CODE, grid_size))
+                              MISSING   = is.na(strata$GRID_CODE),
+                              VALID     = is_grid_CE_SF_valid(strata$GRID_CODE),
+                              SIZE      = grid_size(strata$GRID_CODE))
 
   wrong_grid_types = which(grid_status$SIZE == "OTHER")
   wrong_grid_types = wrong_grid_types[ which(wrong_grid_types %in% which(grid_status$VALID)) ]
@@ -335,8 +343,8 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
     codes_unique = unique(strata$GRID_CODE[wrong_grid_types])
   )
 
-  missing_sex = which(sapply(strata$SEX_CODE, is.na))
-  invalid_sex = which(!sapply(strata$SEX_CODE, is_sex_valid))
+  missing_sex = which( is.na(strata$SEX_CODE))
+  invalid_sex = which(!is_sex_valid(strata$SEX_CODE))
   invalid_sex = invalid_sex[ ! invalid_sex %in% missing_sex ]
   missing_sex = missing_sex[ ! missing_sex %in% strata_empty_rows ]
 
@@ -353,14 +361,8 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
     )
   )
 
-  is_size_class_valid = function(value) {
-    return(
-      !is.na(value) && is_numeric(value) && as.numeric(value) > 0
-    )
-  }
-
-  missing_size_class = which(sapply(strata$SIZE_CLASS_LOW, is.na))
-  invalid_size_class = which(!sapply(strata$SIZE_CLASS_LOW, is_size_class_valid))
+  missing_size_class = which( is.na(strata$SIZE_CLASS_LOW))
+  invalid_size_class = which(!is_value_positive(strata$SIZE_CLASS_LOW))
   invalid_size_class = invalid_size_class[ ! invalid_size_class %in% missing_size_class ]
   missing_size_class = missing_size_class[ ! missing_size_class %in% strata_empty_rows ]
 

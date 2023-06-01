@@ -248,21 +248,21 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
   data_empty_rows    = find_empty_rows(CE_SF_data)
   data_empty_columns = find_empty_columns(CE_SF_data)
 
-  missing_months   = which( sapply(strata$MONTH, is.na))
-  invalid_months   = which(!sapply(strata$MONTH, is_month_valid))
+  missing_months   = which( is.na(strata$MONTH))
+  invalid_months   = which(!is_month_valid(strata$MONTH))
   invalid_months   = invalid_months[ ! invalid_months %in% missing_months ]
   missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
 
   # If all months are provided and valid, we check that they're also consistent...
   months_check = validate_months(form, strata)
 
-  missing_grids  = which( sapply(strata$GRID_CODE, is.na))
-  invalid_grids  = which(!sapply(strata$GRID_CODE, is_grid_AR_valid))
+  missing_grids  = which( is.na(strata$GRID_CODE))
+  invalid_grids  = which(!is_grid_AR_valid(strata$GRID_CODE))
   invalid_grids  = invalid_grids[ ! invalid_grids %in% missing_grids ]
   missing_grids  = missing_grids[ ! missing_grids %in% strata_empty_rows]
 
-  missing_estimations = which( sapply(strata$ESTIMATION_CODE, is.na))
-  invalid_estimations = which(!sapply(strata$ESTIMATION_CODE, is_data_estimation_valid))
+  missing_estimations = which( is.na(strata$ESTIMATION_CODE))
+  invalid_estimations = which(!is_data_estimation_valid(strata$ESTIMATION_CODE))
   invalid_estimations = invalid_estimations[ ! invalid_estimations %in% missing_estimations ]
   missing_estimations = missing_estimations[ ! missing_estimations %in% strata_empty_rows]
 
@@ -293,7 +293,7 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
               ),
               invalid = list(
                 number        = length(invalid_months),
-                row_indexes   = invalid_months,
+                row_indexes   = spreadsheet_rows_for(form, invalid_months),
                 values        = strata$MONTH[invalid_months],
                 values_unique = unique(strata$MONTH[invalid_months])
               )
