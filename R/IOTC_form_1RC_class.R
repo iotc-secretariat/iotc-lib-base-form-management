@@ -132,8 +132,8 @@ setMethod("validate_data",
             duplicate_strata = duplicate_strata[ ! duplicate_strata %in% strata_empty_rows ]
             unique_strata    = non_empty_strata[ ! non_empty_strata %in% duplicate_strata ]
 
-            missing_retain_reasons = which(sapply(strata$RETAIN_REASON_CODE, is.na))
-            invalid_retain_reasons = which(!sapply(strata$RETAIN_REASON_CODE, is_retain_reason_valid))
+            missing_retain_reasons = which( is.na(strata$RETAIN_REASON_CODE))
+            invalid_retain_reasons = which(!is_retain_reason_valid(strata$RETAIN_REASON_CODE))
             invalid_retain_reasons = invalid_retain_reasons[ ! invalid_retain_reasons %in% missing_retain_reasons ]
             missing_retain_reasons = missing_retain_reasons[ ! missing_retain_reasons %in% strata_empty_rows ]
 

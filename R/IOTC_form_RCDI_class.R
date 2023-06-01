@@ -53,8 +53,8 @@ setMethod("validate_data",
             data_empty_rows    = find_empty_rows(catch_data)
             data_empty_columns = find_empty_columns(catch_data)
 
-            missing_quarters   = which( sapply(strata$QUARTER, is.na))
-            invalid_quarters   = which(!sapply(strata$QUARTER, is_quarter_valid))
+            missing_quarters   = which( is.na(strata$QUARTER))
+            invalid_quarters   = which(!is_quarter_valid(strata$QUARTER))
             invalid_quarters   = invalid_quarters[ ! invalid_quarters %in% missing_quarters ]
             missing_quarters   = missing_quarters[ ! missing_quarters %in% strata_empty_rows]
 
@@ -62,88 +62,57 @@ setMethod("validate_data",
 
             quarters_check = validate_quarters(form, strata)
 
-            missing_fisheries  = which( sapply(strata$FISHERY_CODE, is.na))
-            invalid_fisheries  = which(!sapply(strata$FISHERY_CODE, is_fishery_valid))
+            missing_fisheries  = which( is.na(strata$FISHERY_CODE))
+            invalid_fisheries  = which(!is_fishery_valid(strata$FISHERY_CODE))
             invalid_fisheries  = invalid_fisheries[ ! invalid_fisheries %in% missing_fisheries ]
             missing_fisheries  = missing_fisheries[ ! missing_fisheries %in% strata_empty_rows]
 
-            find_fishery_type = function(code) {
-              if(!is.na(code) && is_fishery_valid(code)) {
-                return(fisheries_for(code)$FISHERY_TYPE_CODE)
-              }
+            fishery_types = fishery_type_for(strata$FISHERY_CODE)
+            fishery_aggregates = which(is_multiple_gear_fishery(strata$FISHERY_CODE))
 
-              return(NA)
-            }
-
-            fishery_types      = sapply(strata$FISHERY_CODE, find_fishery_type)
-
-            fishery_aggregates =
-              which(
-                unlist(
-                  sapply(
-                    strata$FISHERY_CODE,
-                    function(value) {
-                      return(!is.na(value) && is_multiple_gear_fishery(value))
-                    }, USE.NAMES = FALSE
-                  ), use.names = FALSE
-                )
-              )
-
-            missing_target_species = which( sapply(strata$TARGET_SPECIES_CODE, is.na))
-            invalid_target_species = which(!sapply(strata$TARGET_SPECIES_CODE, is_species_valid))
+            missing_target_species = which( is.na(strata$TARGET_SPECIES_CODE))
+            invalid_target_species = which(!is_species_valid(strata$TARGET_SPECIES_CODE))
             invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
             missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
 
-            missing_IOTC_areas = which( sapply(strata$IOTC_MAIN_AREA_CODE, is.na))
-            invalid_IOTC_areas = which(!sapply(strata$IOTC_MAIN_AREA_CODE, is_IOTC_main_area_valid))
+            missing_IOTC_areas = which( is.na(strata$IOTC_MAIN_AREA_CODE))
+            invalid_IOTC_areas = which(!is_IOTC_main_area_valid(strata$IOTC_MAIN_AREA_CODE))
             invalid_IOTC_areas = invalid_IOTC_areas[ ! invalid_IOTC_areas %in% missing_IOTC_areas ]
             missing_IOTC_areas = missing_IOTC_areas[ ! missing_IOTC_areas %in% strata_empty_rows ]
 
             valid_IOTC_areas   = strata$IOTC_MAIN_AREA_CODE
-            valid_IOTC_areas   = which(!sapply(strata$IOTC_MAIN_AREA_CODE, is.na))
+            valid_IOTC_areas   = which(!is.na(strata$IOTC_MAIN_AREA_CODE))
 
-            missing_types_of_data    = which( sapply(strata$DATA_TYPE_CODE, is.na))
-            invalid_types_of_data    = which(!sapply(strata$DATA_TYPE_CODE, is_data_type_valid))
+            missing_types_of_data    = which( is.na(strata$DATA_TYPE_CODE))
+            invalid_types_of_data    = which(!is_data_type_valid(strata$DATA_TYPE_CODE))
             invalid_types_of_data    = invalid_types_of_data[ ! invalid_types_of_data %in% missing_types_of_data ]
             missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
 
-            missing_data_sources     = which( sapply(strata$DATA_SOURCE_CODE, is.na))
-            invalid_data_sources     = which(!sapply(strata$DATA_SOURCE_CODE, function(code) { return(is_data_source_valid(form_dataset_code(form), code)) }))
+            missing_data_sources     = which( is.na(strata$DATA_SOURCE_CODE))
+            invalid_data_sources     = which(!is_data_source_valid(form_dataset_code(form), strata$DATA_SOURCE_CODE))
             invalid_data_sources     = invalid_data_sources[ ! invalid_data_sources %in% missing_data_sources ]
             missing_data_sources     = missing_data_sources[ ! missing_data_sources %in% strata_empty_rows ]
 
-            missing_data_processings = which( sapply(strata$DATA_PROCESSING_CODE, is.na))
-            invalid_data_processings = which(!sapply(strata$DATA_PROCESSING_CODE, function(code) { return(is_data_processing_valid(form_dataset_code(form), code)) }))
+            missing_data_processings = which( is.na(strata$DATA_PROCESSING_CODE))
+            invalid_data_processings = which(!is_data_processing_valid(form_dataset_code(form), strata$DATA_PROCESSING_CODE))
             invalid_data_processings = invalid_data_processings[ ! invalid_data_processings %in% missing_data_processings ]
             missing_data_processings = missing_data_processings[ ! missing_data_processings %in% strata_empty_rows ]
 
-            missing_coverage_types   = which( sapply(strata$COVERAGE_TYPE_CODE, is.na))
-            invalid_coverage_types   = which(!sapply(strata$COVERAGE_TYPE_CODE, is_data_coverage_type_valid))
+            missing_coverage_types   = which( is.na(strata$COVERAGE_TYPE_CODE))
+            invalid_coverage_types   = which(!is_data_coverage_type_valid(strata$COVERAGE_TYPE_CODE))
             invalid_coverage_types   = invalid_coverage_types[ ! invalid_coverage_types %in% missing_coverage_types ]
             missing_coverage_types   = missing_coverage_types[ ! missing_coverage_types %in% strata_empty_rows ]
 
-            missing_coverages        = which( sapply(strata$COVERAGE, is.na))
-            invalid_coverages        = which(!sapply(strata$COVERAGE, is_percentage_valid))
+            missing_coverages        = which( is.na(strata$COVERAGE))
+            invalid_coverages        = which(!is_percentage_valid(strata$COVERAGE))
             invalid_coverages        = invalid_coverages[ ! invalid_coverages %in% missing_coverages ]
             missing_coverages        = missing_coverages[ ! missing_coverages %in% strata_empty_rows ]
 
-            missing_species    = which( sapply(records$codes$species, is.na))
-            invalid_species    = which(!sapply(records$codes$species, is_species_valid))
+            missing_species    = which( is.na(records$codes$species))
+            invalid_species    = which(!is_species_valid(records$codes$species))
             invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
 
-            species_aggregates =
-              which(
-                unlist(
-                  sapply(
-                    records$codes$species,
-                    function(value) {
-                      return(!is.na(value) && is_species_aggregate(value))
-                    },
-                    USE.NAMES = FALSE
-                  ),
-                  use.names = FALSE
-                )
-              )
+            species_aggregates = which(is_species_aggregate(records$codes$species))
 
             numeric_catch_data =
               catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]

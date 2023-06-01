@@ -130,16 +130,16 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
   l_debug(paste0("IOTCFormCESFMultiple.validate_data (VIII): ", Sys.time() - start_VD))
   start_VD = Sys.time()
 
-  missing_estimations    = which( is.na(strata$ESTIMATION_CODE)) #which( sapply(strata$ESTIMATION_CODE, is.na))
-  invalid_estimations    = which(!is_data_estimation_valid(strata$ESTIMATION_CODE)) #which(!sapply(strata$ESTIMATION_CODE, is_data_estimation_valid))
+  missing_estimations    = which( is.na(strata$ESTIMATION_CODE))
+  invalid_estimations    = which(!is_data_estimation_valid(strata$ESTIMATION_CODE))
   invalid_estimations    = invalid_estimations[ ! invalid_estimations %in% missing_estimations ]
   missing_estimations    = missing_estimations[ ! missing_estimations %in% strata_empty_rows ]
 
   l_debug(paste0("IOTCFormCESFMultiple.validate_data (IX): ", Sys.time() - start_VD))
   start_VD = Sys.time()
 
-  missing_types_of_data    = which( is.na(strata$DATA_TYPE_CODE)) #which( sapply(strata$DATA_TYPE_CODE, is.na))
-  invalid_types_of_data    = which(!is_data_type_valid(strata$DATA_TYPE_CODE)) #which(!sapply(strata$DATA_TYPE_CODE, is_data_type_valid))
+  missing_types_of_data    = which( is.na(strata$DATA_TYPE_CODE))
+  invalid_types_of_data    = which(!is_data_type_valid(strata$DATA_TYPE_CODE))
   invalid_types_of_data    = invalid_types_of_data[ ! invalid_types_of_data %in% missing_types_of_data ]
   missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
 
@@ -148,32 +148,32 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
 
   form_dataset = form_dataset_code(form)
 
-  missing_data_sources     = which( is.na(strata$DATA_SOURCE_CODE)) #which( sapply(strata$DATA_SOURCE_CODE, is.na))
-  invalid_data_sources     = which(!is_data_source_valid(form_dataset, strata$DATA_SOURCE_CODE)) #which(!sapply(strata$DATA_SOURCE_CODE, function(code) { return(is_data_source_valid(form_dataset_code(form), code)) }))
+  missing_data_sources     = which( is.na(strata$DATA_SOURCE_CODE))
+  invalid_data_sources     = which(!is_data_source_valid(form_dataset, strata$DATA_SOURCE_CODE))
   invalid_data_sources     = invalid_data_sources[ ! invalid_data_sources %in% missing_data_sources ]
   missing_data_sources     = missing_data_sources[ ! missing_data_sources %in% strata_empty_rows ]
 
   l_debug(paste0("IOTCFormCESFMultiple.validate_data (XI): ", Sys.time() - start_VD))
   start_VD = Sys.time()
 
-  missing_data_processings = which( is.na(strata$DATA_PROCESSING_CODE)) #which( sapply(strata$DATA_PROCESSING_CODE, is.na))
-  invalid_data_processings = which(!is_data_processing_valid(form_dataset, strata$DATA_PROCESSING_CODE)) #which(!sapply(strata$DATA_PROCESSING_CODE, function(code) { return(is_data_processing_valid(form_dataset_code(form), code)) }))
+  missing_data_processings = which( is.na(strata$DATA_PROCESSING_CODE))
+  invalid_data_processings = which(!is_data_processing_valid(form_dataset, strata$DATA_PROCESSING_CODE))
   invalid_data_processings = invalid_data_processings[ ! invalid_data_processings %in% missing_data_processings ]
   missing_data_processings = missing_data_processings[ ! missing_data_processings %in% strata_empty_rows ]
 
   l_debug(paste0("IOTCFormCESFMultiple.validate_data (XII): ", Sys.time() - start_VD))
   start_VD = Sys.time()
 
-  missing_data_raisings    = which( is.na(strata$DATA_RAISING_CODE)) #which( sapply(strata$DATA_RAISING_CODE, is.na))
-  invalid_data_raisings    = which(!is_data_raising_valid(strata$DATA_RAISING_CODE)) #which(!sapply(strata$DATA_RAISING_CODE, is_data_raising_valid))
+  missing_data_raisings    = which( is.na(strata$DATA_RAISING_CODE))
+  invalid_data_raisings    = which(!is_data_raising_valid(strata$DATA_RAISING_CODE))
   invalid_data_raisings    = invalid_data_raisings[ ! invalid_data_raisings %in% missing_data_raisings ]
   missing_data_raisings    = missing_data_raisings[ ! missing_data_raisings %in% strata_empty_rows ]
 
   l_debug(paste0("IOTCFormCESFMultiple.validate_data (XIII): ", Sys.time() - start_VD))
   start_VD = Sys.time()
 
-  missing_coverage_types   = which( is.na(strata$COVERAGE_TYPE_CODE)) #which( sapply(strata$COVERAGE_TYPE_CODE, is.na))
-  invalid_coverage_types   = which(!is_data_coverage_type_valid(strata$COVERAGE_TYPE_CODE)) #which(!sapply(strata$COVERAGE_TYPE_CODE, is_data_coverage_type_valid))
+  missing_coverage_types   = which( is.na(strata$COVERAGE_TYPE_CODE))
+  invalid_coverage_types   = which(!is_data_coverage_type_valid(strata$COVERAGE_TYPE_CODE))
   invalid_coverage_types   = invalid_coverage_types[ ! invalid_coverage_types %in% missing_coverage_types ]
   missing_coverage_types   = missing_coverage_types[ ! missing_coverage_types %in% strata_empty_rows ]
 
@@ -183,8 +183,8 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
   # Temporarily added
   strata$COVERAGE = as.double(strata$COVERAGE)
 
-  missing_coverages        = which( sapply(strata$COVERAGE, is.na))
-  invalid_coverages        = which(!sapply(strata$COVERAGE, is_percentage_valid))
+  missing_coverages        = which( is.na(strata$COVERAGE))
+  invalid_coverages        = which(!is_percentage_valid(strata$COVERAGE))
   invalid_coverages        = invalid_coverages[ ! invalid_coverages %in% missing_coverages ]
   missing_coverages        = missing_coverages[ ! missing_coverages %in% strata_empty_rows ]
 

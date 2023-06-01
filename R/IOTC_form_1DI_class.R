@@ -127,21 +127,21 @@ setMethod("validate_data",
             duplicate_strata = duplicate_strata[ ! duplicate_strata %in% strata_empty_rows ]
             unique_strata    = non_empty_strata[ ! non_empty_strata %in% duplicate_strata ]
 
-            missing_discard_reasons = which(sapply(strata$DISCARD_REASON_CODE, is.na))
-            invalid_discard_reasons = which(!sapply(strata$DISCARD_REASON_CODE, is_discard_reason_valid))
+            missing_discard_reasons = which( is.na(strata$DISCARD_REASON_CODE))
+            invalid_discard_reasons = which(!is_discard_reason_valid(strata$DISCARD_REASON_CODE))
             invalid_discard_reasons = invalid_discard_reasons[ ! invalid_discard_reasons %in% missing_discard_reasons ]
             missing_discard_reasons = missing_discard_reasons[ ! missing_discard_reasons %in% strata_empty_rows ]
 
-            missing_conditions   = which( sapply(records$codes$conditions, is.na))
-            invalid_conditions   = which(!sapply(records$codes$conditions, is_condition_valid))
+            missing_conditions   = which( is.na(records$codes$conditions))
+            invalid_conditions   = which(!is_condition_valid(records$codes$conditions))
             invalid_conditions   = invalid_conditions[ ! invalid_conditions %in% missing_conditions ]
 
-            missing_data_raisings   = which( sapply(records$codes$raisings, is.na))
-            invalid_data_raisings   = which(!sapply(records$codes$raisings, is_data_raising_valid))
+            missing_data_raisings   = which( is.na(records$codes$raisings))
+            invalid_data_raisings   = which(!is_data_raising_valid(records$codes$raisings))
             invalid_data_raisings   = invalid_data_raisings[ ! invalid_data_raisings %in% missing_data_raisings ]
 
-            missing_catch_units   = which( sapply(records$codes$catch_units, is.na))
-            invalid_catch_units   = which(!sapply(records$codes$catch_units, is_catch_unit_valid))
+            missing_catch_units   = which( is.na(records$codes$catch_units))
+            invalid_catch_units   = which(!is_catch_unit_valid(records$codes$catch_units))
             invalid_catch_units   = invalid_catch_units[ ! invalid_catch_units %in% missing_catch_units ]
 
             max_length = max(length(records$codes$species),
