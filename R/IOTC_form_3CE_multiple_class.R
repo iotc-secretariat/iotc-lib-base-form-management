@@ -582,7 +582,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
     }
 
     for(row_index in strata$checks$main$grids$wrong$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = which(EXCEL_COLUMNS == "E"), text = paste0("Wrong grid code used for fishery in row #", row_index)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "E", text = paste0("Wrong grid code used for fishery in row #", row_index)))
     }
   }
 
