@@ -30,7 +30,7 @@ setMethod("optional_strata_columns", "IOTCForm4SFMultiple", function(form) {
 })
 
 setMethod("first_data_column", "IOTCForm4SFMultiple", function(form) {
-  return("V")
+  return(which(EXCEL_COLUMNS == "V"))
 })
 
 setMethod("first_data_row", "IOTCForm4SFMultiple", function(form) {

@@ -22,7 +22,7 @@ setMethod("allow_empty_data", "IOTCForm4SF", function(form) {
 })
 
 setMethod("first_data_column", "IOTCForm4SF", function(form) {
-  return("G")
+  return(which(EXCEL_COLUMNS == "G"))
 })
 
 setMethod("first_data_row", "IOTCForm4SF", function(form) {
