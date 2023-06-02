@@ -2,12 +2,12 @@
 Message = setClass("Message",   representation(level  = "character",
                                                source = "character",
                                                row    = "integer",
-                                               column = "integer",
+                                               column = "character",
                                                text   = "character"),
                                 prototype     (level  = "INFO",
                                                source = "data",
                                                row    = NA_integer_,
-                                               column = NA_integer_))
+                                               column = NA_character_))
 
 setGeneric("as_list", function(message) {
   standardGeneric("as_list")
@@ -46,7 +46,7 @@ MessageList = setClass("MessageList", representation(messages = "data.table"),
                                       prototype     (messages = data.table(LEVEL  = character(),
                                                                            SOURCE = character(),
                                                                            ROW    = integer(),
-                                                                           COLUMN = integer(),
+                                                                           COLUMN = character(),
                                                                            TEXT   = character())))
 
 setGeneric("add", function(messageList, message) {
