@@ -389,7 +389,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3BU", metadata_val
     current_date = format(Sys.time(), "%Y-%m-%d")
 
     if(date > current_date) {
-      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The reporting year and month identify a date in the future (", general_info$reporting_year$value, '-', general_info$reporting_month$value, ")")))
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The reporting year and month identify a date in the future (", date, ")")))
     }
   }
 
@@ -410,8 +410,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3BU", metadata_val
     }
 
     if(general_info$vessel$name$differ) {
-      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel with a different flag (", general_info$vessel$name$current, ") than the one provided (", general_info$vessel$name$value, ")")))
-      print("FOO4")
+      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel with a different name (", general_info$vessel$name$current, ") than the one provided (", general_info$vessel$name$value, ")")))
     }
   }
 
