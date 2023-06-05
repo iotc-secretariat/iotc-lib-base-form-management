@@ -13,7 +13,7 @@ Depends:
     memoise,
     data.table,
     openxlsx,
-    iotc.core.db.data,
+    iotc.core.utils.misc,
     iotc.data.reference.codelists,
     R (>= 2.10)
 RoxygenNote: 7.2.3
@@ -31,6 +31,7 @@ Collate:
     'IOTC_form_4SF_class.R'
     'IOTC_form_4SF_multiple_class.R'
     'constants.R'
+    'data.R'
     'data_checks.R'
     'field_checks.R'
     'forms.R'
