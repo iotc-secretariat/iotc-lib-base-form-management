@@ -112,7 +112,7 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
   # Vessel IOTC number
 
-  vessel_ID_available    = is_provided(general_information$vessel$IOTC_NUMBER)
+  vessel_ID_available    = is_provided(general_information$vessel$IOTC_number)
   vessel_ID_valid        = vessel_ID_available && str_detect(general_information$vessel$IOTC_number, "^IOTC[0-9]{6}$")
   vessel_ID_VRKey        = ifelse(vessel_ID_valid, as.integer(str_replace(general_information$vessel$IOTC_number, "IOTC0+", "")), NA)
 
