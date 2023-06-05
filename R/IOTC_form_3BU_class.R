@@ -134,13 +134,7 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
   if(vessel_mapped) {
     # Retrieves historical vessel data (name / flag / current) from the RAV
 
-    vessel_data = query(DB_RAV(),
-                        paste0("SELECT DISTINCT
-                                  LTRIM(RTRIM(VesselName)) AS NAME,
-                                  LTRIM(RTRIM(Flag)) AS FLAG_CODE,
-                                  VesselCurrent AS [CURRENT]
-                                FROM [IOTCVessels].[dbo].V_RAV
-                                WHERE VRVesselKey = ", vessel_ID_VRKey))
+    vessel_data = RAV[IOTC_number == vessel_ID_VRKey]
 
     vessel_data_current = vessel_data[CURRENT == TRUE]
 
