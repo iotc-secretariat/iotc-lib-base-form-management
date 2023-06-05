@@ -13,7 +13,7 @@ Depends:
     memoise,
     data.table,
     openxlsx,
-    iotc.core.utils.misc,
+    iotc.core.db.data,
     iotc.data.reference.codelists,
     R (>= 2.10)
 RoxygenNote: 7.2.3
@@ -23,6 +23,7 @@ Collate:
     'IOTC_form_RCDI_class.R'
     'IOTC_form_1DI_class.R'
     'IOTC_form_1RC_class.R'
+    'IOTC_form_3BU_class.R'
     'IOTC_form_CESF_class.R'
     'IOTC_form_3CE_class.R'
     'IOTC_form_CESF_multiple_class.R'

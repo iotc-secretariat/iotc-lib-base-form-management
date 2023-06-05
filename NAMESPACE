@@ -3,6 +3,7 @@
 export(IOTCForm)
 export(IOTCForm1DI)
 export(IOTCForm1RC)
+export(IOTCForm3BU)
 export(IOTCForm3CE)
 export(IOTCForm3CEMultiple)
 export(IOTCForm4SF)
