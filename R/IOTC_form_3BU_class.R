@@ -141,8 +141,8 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
     current_flag = vessel_data_current$FLAG_CODE
     current_name = vessel_data_current$NAME
 
-    #current_flag = ifelse(length(current_flag == 0), NA, current_flag)
-    #current_name = ifelse(length(current_name == 0), NA, current_name)
+    current_flag = ifelse(length(current_flag == 0), NA, current_flag)
+    current_name = ifelse(length(current_name == 0), NA, current_name)
   }
 
   common_metadata_validation_results$general_information$vessel =

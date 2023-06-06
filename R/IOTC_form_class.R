@@ -291,7 +291,13 @@ setMethod("validation_summary", "IOTCForm", function(form) {
     current_form = read(form)
 
     validation_results = validate(current_form)
+  }, error = function(cond) {
+    l_error(cond)
 
+    validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered while validating form! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", cond$message)))
+  })
+
+  tryCatch({ # Unfortunately this doesn't seem to work with some type of errors, which are de-facto uncatchable
     if(!is.null(validation_results)) {
       metadata_validation_results = validation_results$metadata
       data_validation_results     = validation_results$data
@@ -309,7 +315,7 @@ setMethod("validation_summary", "IOTCForm", function(form) {
   }, error = function(cond) {
     l_error(cond)
 
-    validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", cond$message)))
+    all_validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered while producing validation summary for the form! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", cond$message)))
   })
 
   info_messages    = all_validation_messages[LEVEL == "INFO"]
