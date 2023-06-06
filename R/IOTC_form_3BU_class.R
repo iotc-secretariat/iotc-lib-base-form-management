@@ -128,8 +128,8 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
   # Checks if vessel is mapped to the RAV via its IOTC number / VRVesselKey
 
-  vessel_mapped = !is.na(vessel_ID_VRKey) &&
-                  (query(DB_RAV(), paste0("SELECT COUNT(*) FROM [IOTCVessels].[dbo].V_RAV WHERE VRVesselKey = ", vessel_ID_VRKey)) > 0)[[1]] # TRUE / FALSE
+  vessel_mapped = !is.na(vessel_ID_VRKey) && nrow(RAV[IOTC_NUMBER == vessel_ID_VRKey]) > 0
+                  #(query(DB_RAV(), paste0("SELECT COUNT(*) FROM [IOTCVessels].[dbo].V_RAV WHERE VRVesselKey = ", vessel_ID_VRKey)) > 0)[[1]] # TRUE / FALSE
 
   if(vessel_mapped) {
     # Retrieves historical vessel data (name / flag / current) from the RAV
