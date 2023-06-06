@@ -136,28 +136,33 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
     vessel_data = RAV[IOTC_NUMBER == vessel_ID_VRKey]
 
-    vessel_data_current = vessel_data[CURRENT == TRUE]
+    #vessel_data_current = vessel_data[CURRENT == TRUE]
 
-    current = nrow(vessel_data_current) == 1
+    #current = nrow(vessel_data_current) == 1
+    current = vessel_data$CURRENT
 
-    current_flag = vessel_data_current$FLAG_CODE
-    current_name = vessel_data_current$NAME
+    #current_flag = vessel_data_current$FLAG_CODE
+    #current_name = vessel_data_current$NAME
+    current_flag = vessel_data$FLAG_CODE
+    current_name = vessel_data$NAME
+    current_gear = vessel_data$GEAR_CODE
   }
 
   common_metadata_validation_results$general_information$vessel =
     list(
-      mapped = vessel_mapped,
+      mapped  = vessel_mapped,
       current = vessel_mapped && current,
+      gear    = current_gear,
       flag = list(
         available = check_flag_country$available,
         value     = flag_country,
-        current   = ifelse(vessel_mapped && current, current_flag, NA),
+        current   = ifelse(vessel_mapped, current_flag, NA),
         differ    = vessel_mapped && ( is.na(flag_country) || is.na(current_flag) || current_flag != flag_country )
       ),
       name = list(
         available = vessel_name_available,
         value     = vessel_name,
-        current   = ifelse(vessel_mapped && current, current_name, NA),
+        current   = ifelse(vessel_mapped, current_name, NA),
         differ    = vessel_mapped && ( is.na(vessel_name) || is.na(current_name) || str_to_upper(current_name) != str_to_upper(vessel_name) )
       ),
       IOTC_number = list(
@@ -402,17 +407,22 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3BU", metadata_val
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is incorrect, as it should be in the form 'IOTC' followed by six digits")))
   }
 
+  # Vessel mapping onto the RAV
+
   if(!general_info$vessel$mapped) {
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is not mapped onto any RAV vessel")))
   } else if(!general_info$vessel$current) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is not mapped onto any currently active RAV vessel")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is mapped on a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") but this is currently non-authorized to operate in the IOTC area of competence")))
   } else {
+    if(general_info$vessel$gear != "PS") {
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") using ", general_info$vessel$gear, " instead of PS as gear")))
+    }
     if(general_info$vessel$flag$differ) {
-      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel with a different flag (", general_info$vessel$flag$current, ") than the one provided (", general_info$vessel$flag$value, ")")))
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different flag (", general_info$vessel$flag$current, ") than the one provided (", general_info$vessel$flag$value, ")")))
     }
 
     if(general_info$vessel$name$differ) {
-      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel with a different name (", general_info$vessel$name$current, ") than the one provided (", general_info$vessel$name$value, ")")))
+      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different name (", general_info$vessel$name$current, ") than the one provided (", general_info$vessel$name$value, ")")))
     }
   }
 
