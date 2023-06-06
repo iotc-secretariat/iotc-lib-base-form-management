@@ -140,6 +140,9 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
     current_flag = vessel_data_current$FLAG_CODE
     current_name = vessel_data_current$NAME
+
+    #current_flag = ifelse(length(current_flag == 0), NA, current_flag)
+    #current_name = ifelse(length(current_name == 0), NA, current_name)
   }
 
   common_metadata_validation_results$general_information$vessel =
@@ -148,13 +151,13 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
         available = check_flag_country$available,
         value     = flag_country,
         current   = ifelse(vessel_mapped, current_flag, NA),
-        differ    = vessel_mapped && current_flag != flag_country
+        differ    = vessel_mapped && ( is.na(flag_country) || is.na(current_flag) || current_flag != flag_country )
       ),
       name = list(
         available = vessel_name_available,
         value     = vessel_name,
         current   = ifelse(vessel_mapped, current_name, NA),
-        differ    = vessel_mapped && str_to_upper(current_name) != str_to_upper(vessel_name)
+        differ    = vessel_mapped && ( is.na(vessel_name) || is.na(current_name) || str_to_upper(current_name) != str_to_upper(vessel_name) )
       ),
       IOTC_number = list(
         available = vessel_ID_available,

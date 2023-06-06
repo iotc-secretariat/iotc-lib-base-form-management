@@ -291,26 +291,26 @@ setMethod("validation_summary", "IOTCForm", function(form) {
     current_form = read(form)
 
     validation_results = validate(current_form)
-  }, error = function(e) {
-    l_error(e)
 
-    validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = e$message))
+    if(!is.null(validation_results)) {
+      metadata_validation_results = validation_results$metadata
+      data_validation_results     = validation_results$data
+
+      common_metadata_validation_messages = common_metadata_validation_summary(form, metadata_validation_results)
+      metadata_validation_messages        = metadata_validation_summary       (form, metadata_validation_results)
+      data_validation_messages            = data_validation_summary           (form, metadata_validation_results, data_validation_results)
+
+      all_validation_messages = rbind(common_metadata_validation_messages@messages,
+                                      metadata_validation_messages@messages,
+                                      data_validation_messages@messages)
+    } else {
+      all_validation_messages = validation_messages@messages
+    }
+  }, error = function(cond) {
+    l_error(cond)
+
+    validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", cond$message)))
   })
-
-  if(!is.null(validation_results)) {
-    metadata_validation_results = validation_results$metadata
-    data_validation_results     = validation_results$data
-
-    common_metadata_validation_messages = common_metadata_validation_summary(form, metadata_validation_results)
-    metadata_validation_messages        = metadata_validation_summary       (form, metadata_validation_results)
-    data_validation_messages            = data_validation_summary           (form, metadata_validation_results, data_validation_results)
-
-    all_validation_messages = rbind(common_metadata_validation_messages@messages,
-                                    metadata_validation_messages@messages,
-                                    data_validation_messages@messages)
-  } else {
-    all_validation_messages = validation_messages@messages
-  }
 
   info_messages    = all_validation_messages[LEVEL == "INFO"]
   warning_messages = all_validation_messages[LEVEL == "WARN"]
