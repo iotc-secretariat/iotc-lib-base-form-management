@@ -212,6 +212,8 @@ setMethod("validate_strata",
             incomplete_strata = which(strata$BUOY_ID %in% incomplete_strata$BUOY_ID & !is.na(strata$DAY_OF_MONTH))
             #incomplete_strata  = merge(strata, incomplete_strata, all.x = TRUE, sort = FALSE, by = c("BUOY_ID"))
 
+            incomplete_buoys = unique(strata[incomplete_strata]$BUOY_ID)
+
             missing_day_of_month   = which( is.na(strata$DAY_OF_MONTH))
             invalid_day_of_month   = which(strata$DAY_OF_MONTH < 1 | strata$DAY_OF_MONTH > max_days)
             invalid_day_of_month   = invalid_day_of_month[ ! invalid_day_of_month %in% missing_day_of_month ]
@@ -234,20 +236,21 @@ setMethod("validate_strata",
                   number = total_strata
                 ),
                 non_empty = list(
-                  number = length(non_empty_strata),
+                  number      = length(non_empty_strata),
                   row_indexes = spreadsheet_rows_for(form, non_empty_strata)
                 ),
                 duplicate = list(
-                  number = length(duplicate_strata),
+                  number      = length(duplicate_strata),
                   row_indexes = spreadsheet_rows_for(form, duplicate_strata)
                 ),
                 unique = list(
-                  number = length(unique_strata),
+                  number      = length(unique_strata),
                   row_indexes = spreadsheet_rows_for(form, unique_strata)
                 ),
                 incomplete = list(
-                  number = length(incomplete_strata),
-                  row_indexes = spreadsheet_rows_for(form, incomplete_strata)
+                  number      = length(incomplete_strata),
+                  row_indexes = spreadsheet_rows_for(form, incomplete_strata),
+                  buoy_IDs    = incomplete_buoys
                 ),
                 checks = list(
                   main = list(
@@ -467,8 +470,10 @@ setMethod("data_validation_summary",
             if(strata$duplicate$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
 
-            if(strata$incomplete$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month within the strata in row(s) #", paste0(strata$incomplete$row_indexes, collapse = ", "))))
+            if(strata$incomplete$number > 0) {
+              #validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month within the strata in row(s) #", paste0(strata$incomplete$row_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month for the buoy(s) with ID ", paste0(strata$incomplete$buoy_IDs, collapse = ", "))))
+            }
 
             # Strata checks
 

@@ -131,8 +131,8 @@ to_CWP_grid_1 = function(latitude, longitude) {
   quadrant = ifelse(latitude > 0, ifelse(longitude > 0, "1", "4"),
                     ifelse(longitude > 0, "2", "3"))
 
-  lat2 = str_sub(paste0("00",  abs(latitude)),  -2)
-  lon3 = str_sub(paste0("000", abs(longitude)), -3)
+  lat2 = str_sub(paste0("00",  floor(abs(latitude))),  -2)
+  lon3 = str_sub(paste0("000", floor(abs(longitude))), -3)
 
   return(
     paste0(
