@@ -51,9 +51,6 @@ setMethod("extract_data", "IOTCForm1RC", function(form) {
 
   species_codes = unlist(lapply(records[1], trim), use.names = FALSE)
 
-  print("SPECIES")
-  print(species_codes)
-
   # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
   records_original = records[(first_data_row(form) - 2):nrow(records)]
   records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
