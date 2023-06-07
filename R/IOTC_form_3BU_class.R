@@ -472,7 +472,10 @@ setMethod("data_validation_summary",
 
             if(strata$incomplete$number > 0) {
               #validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month within the strata in row(s) #", paste0(strata$incomplete$row_indexes, collapse = ", "))))
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month for the buoy(s) with ID ", paste0(strata$incomplete$buoy_IDs, collapse = ", "))))
+              #validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month for the buoy(s) with ID ", paste0(strata$incomplete$buoy_IDs, collapse = ", "))))
+              for(bid in strata$incomplete$buoy_IDs) {
+                validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month for buoy #", bid)))
+              }
             }
 
             # Strata checks
