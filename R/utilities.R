@@ -20,11 +20,9 @@ coordinates_to_cells = function(form, array_indexes) {
 
 ### COMMON UTILITIES
 
-is_numeric_ = function(value) {
+is_numeric = function(value) {
   str_detect(value, "^\\s*\\-?[0-9]+\\.?[0-9]*(E\\-?[0-9]+)?\\s*$")
 }
-
-is_numeric = memoise(is_numeric_)
 
 ### STRINGS
 

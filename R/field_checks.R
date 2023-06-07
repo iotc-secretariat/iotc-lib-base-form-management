@@ -2,9 +2,9 @@
 
 is_provided = function(value) {
   return(
-    !is.null(value) &&
-    !is.na(value) &&
-   (!is.character(value) || trim(value) != "")
+    !is.null(value) &
+    !is.na(value) &
+   (!is.character(value) | trim(value) != "")
   )
 }
 
@@ -107,3 +107,37 @@ strictly_positive_value = function(value) {
 
   return(value)
 }
+
+is_latitude_valid = function(latitude) {
+  return(is_provided(latitude) & abs(latitude) < 90)
+}
+
+is_longitude_valid = function(longitude) {
+  return(is_provided(longitude) & abs(longitude) < 180)
+}
+
+are_coordinates_valid = function(latitude, longitude) {
+  return(
+    is_latitude_valid(latitude) &
+    is_longitude_valid(longitude)
+  )
+}
+
+is_IO = function(latitude, longitude) {
+  return(latitude < 35 & longitude >= 20 & longitude <= 150 )
+}
+
+to_CWP_grid_1 = function(latitude, longitude) {
+  quadrant = ifelse(latitude > 0, ifelse(longitude > 0, "1", "4"),
+                    ifelse(longitude > 0, "2", "3"))
+
+  lat2 = str_sub(paste0("00",  abs(latitude)),  -2)
+  lon3 = str_sub(paste0("000", abs(longitude)), -3)
+
+  return(
+    paste0(
+      "5", quadrant, lat2, lon3
+    )
+  )
+}
+

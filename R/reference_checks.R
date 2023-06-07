@@ -137,13 +137,13 @@ fishery_type_for = function(fishery_code) {
 
 IOTC_main_areas_for = function(IOTC_main_area_code) {
   return(
-    iotc.data.reference.codelists::IOTC_AREA[CODE %in% trim(IOTC_main_area_code)]
+    iotc.data.reference.codelists::IOTC_MAIN_AREAS[CODE %in% trim(IOTC_main_area_code)]
   )
 }
 
 is_IOTC_main_area_valid = function(IOTC_main_area_code) {
   return(
-    trim(IOTC_main_area_code) %in% iotc.data.reference.codelists::IOTC_AREA$CODE
+    trim(IOTC_main_area_code) %in% iotc.data.reference.codelists::IOTC_MAIN_AREAS$CODE
   )
 }
 

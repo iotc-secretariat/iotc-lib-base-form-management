@@ -305,25 +305,24 @@ setMethod("validate_data",
             non_num_latitude  = which(numeric_latitude  == FALSE)
             non_num_longitude = which(numeric_longitude == FALSE)
 
-            is_latitude_valid = function(value) {
-              return(!is.na(value) & abs(value) < 90)
-            }
-
-            is_longitude_valid = function(value) {
-              return(!is.na(value) & abs(value) < 180)
-            }
-
             missing_latitude  = which( is.na(positions$LATITUDE))
+            missing_latitude  = missing_latitude[ ! missing_latitude %in% non_num_latitude ]
             invalid_latitude  = which(!is_latitude_valid(positions$LATITUDE))
             invalid_latitude  = invalid_latitude[ ! invalid_latitude %in% missing_latitude ]
             invalid_latitude  = invalid_latitude[ ! invalid_latitude %in% non_num_latitude ]
             missing_latitude  = missing_latitude[ ! missing_latitude %in% data_empty_rows]
 
             missing_longitude  = which( is.na(positions$LONGITUDE))
+            missing_longitude  = missing_longitude[ ! missing_longitude %in% non_num_longitude ]
             invalid_longitude  = which(!is_longitude_valid(positions$LONGITUDE))
             invalid_longitude  = invalid_longitude[ ! invalid_longitude %in% missing_longitude ]
             invalid_longitude  = invalid_longitude[ ! invalid_longitude %in% non_num_longitude ]
             missing_longitude  = missing_longitude[ ! missing_longitude %in% data_empty_rows]
+
+            outside_IO = which(are_coordinates_valid(positions$LATITUDE, positions$LONGITUDE) & !is_IO(positions$LATITUDE, positions$LONGITUDE))
+            on_land    = which( are_coordinates_valid(positions$LATITUDE, positions$LONGITUDE) &
+                                is_IO(positions$LATITUDE, positions$LONGITUDE) &
+                               !to_CWP_grid_1(positions$LATITUDE, positions$LONGITUDE) %in% iotc.data.reference.codelists::IO_GRIDS_01x01$CODE)
 
             data_validation_results$records = list(
               total = nrow(positions),
@@ -362,6 +361,16 @@ setMethod("validate_data",
                   invalid = list(
                     number       = length(invalid_longitude),
                     row_indexes  = spreadsheet_rows_for(form, invalid_longitude)
+                  )
+                ),
+                coordinates = list(
+                  outside_IO = list(
+                    number      = length(outside_IO),
+                    row_indexes = spreadsheet_rows_for(form, outside_IO)
+                  ),
+                  on_land = list(
+                    number      = length(on_land),
+                    row_indexes = spreadsheet_rows_for(form, on_land)
                   )
                 )
               )
@@ -521,6 +530,20 @@ setMethod("data_validation_summary",
 
             if(longitude$invalid$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid longitude in row(s) #", paste0(longitude$invalid$row_indexes, collapse = ", "))))
+
+            ## Coordinates
+
+            coordinates = checks_records$coordinates
+
+            ### Outside IO
+
+            if(coordinates$outside_IO$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Coordinates are outside of the Indian Ocean area in row(s) #", paste0(coordinates$outside_IO$row_indexes, collapse = ", "))))
+
+            ### On land
+
+            if(coordinates$on_land$number > 0)
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Coordinates are inside the Indian Ocean area but on land in row(s) #", paste0(coordinates$on_land$row_indexes, collapse = ", "))))
 
             return(validation_messages)
           }
