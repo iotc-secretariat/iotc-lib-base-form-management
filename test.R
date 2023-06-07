@@ -1,5 +1,4 @@
 #library(iotc.data.common.workflow.legacy)
-library(memoise)
 library(data.table)
 library(openxlsx)
 library(stringr)
@@ -33,7 +32,7 @@ FORM_1RC =
       original_name = "Form-1RC.xlsx"
   )
 
-#summary = validation_summary(FORM_1RC)
+summary = validation_summary(FORM_1RC)
 
 FORM_1DI =
   new("IOTCForm1DI",
@@ -43,13 +42,14 @@ FORM_1DI =
 
 #summary = validation_summary(FORM_1DI)
 
+
 FORM_3BU =
   new("IOTCForm3BU",
       path_to_file  = "./test_forms/Form-3BU - legacy.xlsx",
       original_name = "Form-3BU.xlsx"
   )
 
-summary = validation_summary(FORM_3BU)
+#summary = validation_summary(FORM_3BU)
 
 FORM_3CE =
   new("IOTCForm3CE",

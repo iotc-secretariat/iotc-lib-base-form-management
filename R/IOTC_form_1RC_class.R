@@ -22,7 +22,7 @@ setMethod("first_data_column", "IOTCForm1RC", function(form) {
 })
 
 setMethod("first_data_row", "IOTCForm1RC", function(form) {
-  return(6)
+  return(4)
 })
 
 setMethod("first_strata_column", "IOTCForm1RC", function(form) {
@@ -34,6 +34,8 @@ setMethod("last_strata_column", "IOTCForm1RC", function(form) {
 })
 
 setMethod("extract_data", "IOTCForm1RC", function(form) {
+  l_info("IOTCForm1RC.extract_data")
+
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
@@ -48,6 +50,9 @@ setMethod("extract_data", "IOTCForm1RC", function(form) {
   records = form_data[(first_data_row(form) - 1):nrow(form_data), first_data_column(form):ncol(form_data)]
 
   species_codes = unlist(lapply(records[1], trim), use.names = FALSE)
+
+  print("SPECIES")
+  print(species_codes)
 
   # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
   records_original = records[(first_data_row(form) - 2):nrow(records)]
