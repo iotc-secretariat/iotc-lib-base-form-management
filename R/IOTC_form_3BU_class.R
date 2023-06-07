@@ -551,7 +551,7 @@ setMethod("data_validation_summary",
             ### On land
 
             if(coordinates$on_land$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Coordinates are inside the Indian Ocean area but on land in row(s) #", paste0(coordinates$on_land$row_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Coordinates appear to identify a point on land in row(s) #", paste0(coordinates$on_land$row_indexes, collapse = ", "))))
 
             return(validation_messages)
           }
