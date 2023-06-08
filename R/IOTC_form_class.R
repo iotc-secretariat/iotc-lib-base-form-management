@@ -454,7 +454,7 @@ setMethod("report_data", signature(form = "IOTCForm", message_list = "MessageLis
     if(data_validation$empty_columns$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(data_validation$empty_columns$number, " empty data columns detected")))
 
     for(col in data_validation$empty_columns$col_indexes) {
-      message_list = add(message_list, new("Message", level = "FATAL", source = "Data", column = col, text = paste0(data_validation$empty_columns$number, "Empty data column detected at column ", col)))
+      message_list = add(message_list, new("Message", level = "FATAL", source = "Data", column = col, text = paste0("Empty data column detected at column ", col)))
     }
   }
 
