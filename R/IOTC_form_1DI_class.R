@@ -281,7 +281,7 @@ setMethod("data_validation_summary",
             }
 
             if(discard_reasons$invalid$number > 0) {
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(discard_reasons$missing$number, " invalid discard reason codes. Please refer to ", reference_codes("biological", "discardReasons"), " for a list of valid discard reason codes")))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(discard_reasons$invalid$number, " invalid discard reason codes. Please refer to ", reference_codes("biological", "discardReasons"), " for a list of valid discard reason codes")))
 
               for(row in discard_reasons$invalid$row_indexes) {
                 validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Invalid discard reason code in row #", row)))
@@ -296,30 +296,68 @@ setMethod("data_validation_summary",
 
             # Data issues / summary
 
-
             conditions = checks_records$conditions
+            conditions_row = 3
 
-            if(conditions$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing conditions in column(s) ", paste0(conditions$missing$col_indexes, collapse = ", "))))
+            print(paste0("Conditions: ", class(conditions_row)))
 
-            if(conditions$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid conditions in column(s) ", paste0(conditions$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes")))
+            if(conditions$missing$number > 0) {   # Missing
+              if(conditions$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, text = paste0(conditions$missing$number , " missing condition codes")))
+
+              for(col in conditions$missing$col_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, column = col, text = paste0("Missing condition code in column ", col)))
+              }
+            }
+
+            if(conditions$invalid$number > 0) {   # Invalid
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, text = paste0(conditions$missing$number , " invalid condition code(s). Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes")))
+
+              for(col in conditions$invalid$col_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, column = col, text = paste0("Invalid condition code in column ", col)))
+              }
+            }
 
             raisings = checks_records$data_raisings
+            raisings_row = conditions_row + 1
 
-            if(raisings$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing data raising in column(s) ", paste0(raisings$missing$col_indexes, collapse = ", "))))
+            print(paste0("Raisings: ", class(raisings_row)))
 
-            if(raisings$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid data raising in column(s) ", paste0(raisings$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
+            if(raisings$missing$number > 0) {   # Missing
+              if(raisings$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, text = paste0(raisings$missing$number , " missing data raising codes")))
+
+              for(col in raisings$missing$col_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, column = col, text = paste0("Missing data raising code in column ", col)))
+              }
+            }
+
+            if(raisings$invalid$number > 0) {   # Invalid
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, text = paste0(raisings$invalid$number , " invalid raising code(s). Please refer to ", reference_codes("biological", "raisings"), " for a list of valid data raising codes")))
+
+              for(col in raisings$invalid$col_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, column = col, text = paste0("Invalid raising code in column ", col)))
+              }
+            }
 
             catch_units = checks_records$catch_units
+            catch_units_row = raisings_row + 1
 
-            if(catch_units$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing catch unit in column(s) ", paste0(catch_units$missing$col_indexes, collapse = ", "))))
+            print(paste0("Catch units: ", class(catch_units_row)))
 
-            if(catch_units$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid catch unit in column(s) ", paste0(catch_units$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes")))
+            if(catch_units$missing$number > 0) {   # Missing
+              if(catch_units$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number , " missing catch unit codes")))
+
+              for(col in catch_units$missing$col_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Missing catch unit code in column ", col)))
+              }
+            }
+
+            if(catch_units$invalid$number > 0) {   # Invalid
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number , " invalid catch unit code(s). Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes")))
+
+              for(col in catch_units$invalid$col_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Invalid catch unit code in column ", col)))
+              }
+            }
 
             stratifications = checks_records$stratifications
 

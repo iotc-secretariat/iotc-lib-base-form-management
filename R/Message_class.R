@@ -1,7 +1,7 @@
 #' @export Message
 Message = setClass("Message",   representation(level  = "character",
                                                source = "character",
-                                               row    = "integer",
+                                               row    = "numeric",
                                                column = "character",
                                                text   = "character"),
                                 prototype     (level  = "INFO",
@@ -45,7 +45,7 @@ setMethod("as_data_table", "Message", function(message) {
 MessageList = setClass("MessageList", representation(messages = "data.table"),
                                       prototype     (messages = data.table(LEVEL  = character(),
                                                                            SOURCE = character(),
-                                                                           ROW    = integer(),
+                                                                           ROW    = numeric(),
                                                                            COLUMN = character(),
                                                                            TEXT   = character())))
 
