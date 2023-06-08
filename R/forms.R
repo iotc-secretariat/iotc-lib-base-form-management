@@ -10,7 +10,7 @@ read_form = function(path_to_file, original_name = NA) {
     )
   },
   error = function(e) {
-    stop(paste0("Unable to read metadata from ", display_filename, ": ", e$message))
+    stop(paste0("File format error: unable to read metadata from ", display_filename, ": ", e$message))
   })
 
   form_data = tryCatch({
@@ -19,7 +19,7 @@ read_form = function(path_to_file, original_name = NA) {
     )
   },
   error = function(e) {
-    stop(paste0("Unable to read data from ", display_filename, ": ", e$message))
+    stop(paste0("File format error: unable to read data from ", display_filename, ": ", e$message))
   })
 
   return(

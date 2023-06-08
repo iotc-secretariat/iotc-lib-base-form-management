@@ -20,10 +20,10 @@ setMethod("validate_type_and_version", "IOTCForm", function(form) {
   form_version = form@metadata$form_details$version
 
   if(check_mandatory(form_type, "Form type") != form_type(form))
-    stop(call. = FALSE, paste0("Please provide a valid form ", form_type(form), " (current form type: ", form_type, " - required: ", form_type(form), ")"))
+    stop(call. = FALSE, paste0("File format error: please provide a valid form ", form_type(form), " (current form type: ", form_type, " - required: ", form_type(form), ")"))
 
   if(check_mandatory(form_version, "Form version") != form_version(form))
-    stop(call. = FALSE, paste0("Please provide a valid form ", form_type(form), " (current form version: ", form_version, " - required: ", form_version(form), ")"))
+    stop(call. = FALSE, paste0("File format error: please provide a valid form ", form_type(form), " (current form version: ", form_version, " - required: ", form_version(form), ")"))
 })
 
 setGeneric("read", function(form) {
@@ -294,7 +294,12 @@ setMethod("validation_summary", "IOTCForm", function(form) {
   }, error = function(cond) {
     l_error(cond)
 
-    validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered while validating form! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", cond$message)))
+    error_message = cond$message
+
+    if(!is.na(error_message) && !str_detect(error_message, "File format error: "))
+      validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered while validating form! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", error_message)))
+    else
+      validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = error_message))
   })
 
   tryCatch({ # Unfortunately this doesn't seem to work with some type of errors, which are de-facto uncatchable
