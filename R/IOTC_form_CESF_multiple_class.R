@@ -407,18 +407,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   # Strata issues / summary
 
-  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number,     " total strata")))
-  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$non_empty$number, " non-empty strata")))
-  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number,    " unique strata")))
-
-  if(strata$empty_rows$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number,    " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
-
-  if(strata$empty_columns$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) ", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
-
-  if(strata$duplicate$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number,     " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
+  validation_messages = report_strata(form, validation_messages, strata)
 
   # Strata checks
 
@@ -442,26 +431,11 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   ### Fisheries
 
-  fisheries = checks_strata_main$fisheries
-
-  if(fisheries$aggregates$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated fisheries in row(s) #", paste0(fisheries$aggregates$row_indexes, collapse = ", "))))
-
-  if(fisheries$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing fishery in row(s) #", paste0(fisheries$missing$row_indexes, collapse = ", "))))
-
-  if(fisheries$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid fishery in row(s) #", paste0(fisheries$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid legacy fishery codes")))
+  validation_messages = report_fisheries(form, validation_messages, checks_strata_main$fisheries, "C")
 
   ### Target species
 
-  target_species = checks_strata_main$target_species
-
-  if(target_species$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing target species in row(s) #", paste0(target_species$missing$row_indexes, collapse = ", "))))
-
-  if(target_species$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid target species in row(s) #", paste0(target_species$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+  validation_messages = report_target_species(form, validation_messages, checks_strata_main$target_species, "D")
 
   ### Grids
 
@@ -487,35 +461,17 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   checks_strata_original_data = checks_strata$original_data
 
-  ### Types
+  # DATA TYPES (1 per row, although not part of the stratum)
 
-  types = checks_strata_original_data$type # NOT PART OF THE STRATUM
+  validation_messages = report_data_type(form, validation_messages, checks_strata_original_data$type, "G")
 
-  if(types$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing original data type in row(s) #", paste0(types$missing$row_indexes, collapse = ", "))))
+  # DATA SOURCES (1 per row *and* part of the stratum)
 
-  if(types$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid original data type in row(s) #", paste0(types$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
+  validation_messages = report_data_source(form, validation_messages, checks_strata_original_data$source, "H")
 
-  ### Data sources
+  # DATA PROCESSINGS (1 per row *and* part of the stratum)
 
-  sources = checks_strata_original_data$source
-
-  if(sources$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing original data source in row(s) #", paste0(sources$missing$row_indexes, collapse = ", "))))
-
-  if(sources$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid original data source in row(s) #", paste0(sources$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes for this dataset")))
-
-  ### Data processings
-
-  processings = checks_strata_original_data$processing
-
-  if(processings$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing original data processing in row(s) #", paste0(processings$missing$row_indexes, collapse = ", "))))
-
-  if(processings$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid original data processing in row(s) #", paste0(processings$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes for this dataset")))
+  validation_messages = report_data_source(form, validation_messages, checks_strata_original_data$processing, "I")
 
   ### Data raisings
 
@@ -527,42 +483,19 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
   if(raisings$invalid$number > 0)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid data raising in row(s) #", paste0(raisings$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
 
-  ### Coverage types
+  # COVERAGE TYPES (1 per row, although not part of the stratum)
 
-  checks_strata_coverage = checks_strata$coverage # NOT PART OF THE STRATUM
+  validation_messages = report_coverage_type(form, validation_messages, checks_strata$coverage$type, "J")
 
-  coverage_types = checks_strata_coverage$type
+  # COVERAGE VALUES (1 per row, although not part of the stratum)
 
-  if(coverage_types$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing coverage type in row(s) #", paste0(coverage_types$missing$row_indexes, collapse = ", "))))
-
-  if(coverage_types$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid coverage type in row(s) #", paste0(coverage_types$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid coverage type codes")))
-
-  ### Coverage values
-
-  coverage_values = checks_strata_coverage$value # NOT PART OF THE STRATUM
-
-  if(coverage_values$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing coverage value in row(s) #", paste0(coverage_values$missing$row_indexes, collapse = ", "))))
-
-  if(coverage_values$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid coverage value in row(s) #", paste0(coverage_values$invalid$row_indexes, collapse = ", "))))
+  validation_messages = report_coverage_value(form, validation_messages, checks_strata$coverage$type, "J")
 
   # Data issues / summary
 
   ## Empty rows / columns
-  empty_rows = records$empty_rows
 
-  if(empty_rows$number > 0 && !allow_empty_data(form))
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
-
-  empty_columns = records$empty_columns
-
-  if(empty_columns$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) ", paste0(empty_columns$col_indexes, collapse = ", "))))
-
-  l_debug(paste0("IOTCFormCESFMultiple.common_data_validation_summary: ", Sys.time() - start))
+  validation_messages = report_data(form, validation_messages, records, allow_empty_data(form))
 
   return(validation_messages)
 })

@@ -272,11 +272,21 @@ setMethod("data_validation_summary",
 
             discard_reasons = checks_strata_main$discard_reasons
 
-            if(discard_reasons$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing discard reason in row(s) #", paste0(discard_reasons$missing$row_indexes, collapse = ", "))))
+            if(discard_reasons$missing$number > 0) {
+              if(discard_reasons$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(discard_reasons$missing$number, " missing discard reason codes")))
 
-            if(discard_reasons$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid discard reason in row(s) #", paste0(discard_reasons$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "discardReasons"), " for a list of valid discard reason codes")))
+              for(row in discard_reasons$missing$row_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Missing discard reason code in row #", row)))
+              }
+            }
+
+            if(discard_reasons$invalid$number > 0) {
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(discard_reasons$missing$number, " invalid discard reason codes. Please refer to ", reference_codes("biological", "discardReasons"), " for a list of valid discard reason codes")))
+
+              for(row in discard_reasons$invalid$row_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Invalid discard reason code in row #", row)))
+              }
+            }
 
             ## Original data
 

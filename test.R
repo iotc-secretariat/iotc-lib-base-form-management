@@ -5,6 +5,7 @@ library(stringr)
 library(iotc.core.db.data)
 library(iotc.data.reference.codelists)
 
+source("./data-raw/LOAD_RAV.R")
 source("./R/constants.R")
 source("./R/utilities.R")
 source("./R/reference_checks.R")
@@ -32,7 +33,7 @@ FORM_1RC =
       original_name = "Form-1RC.xlsx"
   )
 
-summary = validation_summary(FORM_1RC)
+#summary = validation_summary(FORM_1RC)
 
 FORM_1DI =
   new("IOTCForm1DI",
@@ -41,7 +42,6 @@ FORM_1DI =
   )
 
 #summary = validation_summary(FORM_1DI)
-
 
 FORM_3BU =
   new("IOTCForm3BU",
@@ -61,7 +61,7 @@ FORM_3CE =
 
 FORM_3CE_MUL =
   new("IOTCForm3CEMultiple",
-      path_to_file  = "./test_formsForm-3CE-multiple - legacy.xlsx",
+      path_to_file  = "./test_forms/Form-3CE-multiple - legacy.xlsx",
       original_name = "Form-3CE-multiple.xlsx"
   )
 

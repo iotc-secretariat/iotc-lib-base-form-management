@@ -360,24 +360,15 @@ setMethod("common_data_validation_summary",
 
             # Strata issues / summary
 
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number, " total strata")))
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$non_empty$number, " non-empty strata")))
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number, " unique strata")))
-
-            if(strata$empty_rows$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
-
-            if(strata$empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) ", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
-
-            if(strata$duplicate$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
+            validation_messages = report_strata(form, validation_messages, strata)
 
             # Strata checks
 
             ## Main strata
 
             checks_strata_main = checks_strata$main
+
+            # Quarters (1 per row *and* part of the stratum)
 
             quarters = checks_strata_main$quarters
 
@@ -393,106 +384,76 @@ setMethod("common_data_validation_summary",
             if(quarters$overlapping$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Data is provided for overlapping quarters within the strata in row(s) #", paste0(quarters$overlapping$row_indexes, collapse = ", "))))
 
-            fisheries = checks_strata_main$fisheries
+            # FISHERIES (1 per row *and* part of the stratum)
 
-            if(fisheries$aggregates$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated fisheries in row(s) #", paste0(fisheries$aggregates$row_indexes, collapse = ", "))))
+            validation_messages = report_fisheries(form, validation_messages, checks_strata_main$fisheries, "C")
 
-            if(fisheries$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing fishery in row(s) #", paste0(fisheries$missing$row_indexes, collapse = ", "))))
+            # TARGET SPECIES (1 per row *and* part of the stratum)
 
-            if(fisheries$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid fishery in row(s) #", paste0(fisheries$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid legacy fishery codes")))
+            validation_messages = report_target_species(form, validation_messages, checks_strata_main$target_species, "D")
 
-            target_species = checks_strata_main$target_species
+            # MAIN AREAS (1 per row *and* part of the stratum)
 
-            if(target_species$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing target species in row(s) #", paste0(target_species$missing$row_indexes, collapse = ", "))))
-
-            if(target_species$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid target species in row(s) #", paste0(target_species$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
-
-            areas = checks_strata_main$IOTC_main_areas
-
-            if(areas$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing IOTC main area in row(s) #", paste0(areas$missing$row_indexes, collapse = ", "))))
-
-            if(areas$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid IOTC main area in row(s) #", paste0(areas$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCareasMain"), " for a list of valid IOTC main area codes")))
+            validation_messages = report_IOTC_area(form, validation_messages, checks_strata_main$IOTC_main_areas, "E")
 
             ## Original data
 
             checks_strata_original_data = checks_strata$original_data
 
-            types = checks_strata_original_data$type # NOT PART OF THE STRATUM
+            # DATA TYPES (1 per row, although not part of the stratum)
 
-            if(types$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing original data type in row(s) #", paste0(types$missing$row_indexes, collapse = ", "))))
+            validation_messages = report_data_type(form, validation_messages, checks_strata_original_data$type, "G")
 
-            if(types$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid original data type in row(s) #", paste0(types$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
+            # DATA SOURCES (1 per row *and* part of the stratum)
 
-            sources = checks_strata_original_data$source
+            validation_messages = report_data_source(form, validation_messages, checks_strata_original_data$source, "H")
 
-            if(sources$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing original data source in row(s) #", paste0(sources$missing$row_indexes, collapse = ", "))))
+            # DATA PROCESSINGS (1 per row *and* part of the stratum)
 
-            if(sources$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid original data source in row(s) #", paste0(sources$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes for this dataset")))
+            validation_messages = report_data_processing(form, validation_messages, checks_strata_original_data$processing, "I")
 
-            processings = checks_strata_original_data$processing
+            # COVERAGE TYPES (1 per row, although not part of the stratum)
 
-            if(processings$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing original data processing in row(s) #", paste0(processings$missing$row_indexes, collapse = ", "))))
+            validation_messages = report_coverage_type(form, validation_messages, checks_strata$coverage$type, "J")
 
-            if(processings$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid original data processing in row(s) #", paste0(processings$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes for this dataset")))
+            # COVERAGE VALUES (1 per row, although not part of the stratum)
 
-            checks_strata_coverage = checks_strata$coverage # NOT PART OF THE STRATUM
-
-            coverage_types = checks_strata_coverage$type
-
-            if(coverage_types$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing coverage type in row(s) #", paste0(coverage_types$missing$row_indexes, collapse = ", "))))
-
-            if(coverage_types$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid coverage type in row(s) #", paste0(coverage_types$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid coverage type codes")))
-
-            coverage_values = checks_strata_coverage$value
-
-            if(coverage_values$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing coverage value in row(s) #", paste0(coverage_values$missing$row_indexes, collapse = ", "))))
-
-            if(coverage_values$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid coverage value in row(s) #", paste0(coverage_values$invalid$row_indexes, collapse = ", "))))
+            validation_messages = report_coverage_value(form, validation_messages, checks_strata$coverage$type, "J")
 
             ###
 
             # Data issues / summary
 
             ## Empty rows / columns
-            empty_rows = records$empty_rows
 
-            if(empty_rows$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
-
-            empty_columns = records$empty_columns
-
-            if(empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) ", paste0(empty_columns$col_indexes, collapse = ", "))))
+            validation_messages = report_data(form, validation_messages, records, FALSE)
 
             ## Species
 
             species = checks_records$species
 
-            if(species$aggregates$number > 0) # Aggregates
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated species in column(s) ", paste0(species$aggregates$col_indexes, collapse = ", "))))
+            species_row = spreadsheet_rows_for(form, 2)
 
-            if(species$missing$number > 0)    # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) ", paste0(species$missing$col_indexes, collapse = ", "))))
+            if(species$aggregates$number > 0) { # Aggregates
+              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", row = species_row, text = paste0(species$aggregates$number, " aggregated species codes reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
 
-            if(species$invalid$number > 0)    # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) ", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+              for(col in species$aggregates$col_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", row = species_row, column = col, text = paste0("Aggregated species codes reported in column ", col)))
+            }
+
+            if(species$missing$number > 0) { # Missing
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species$missing$number, " missing species codes")))
+
+              for(col in species$missing$col_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, column = col, text = paste0("Missing species code in column ", col)))
+            }
+
+            if(species$invalid$number > 0) { # Invalid
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species$invalid$number, " invalid species code reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+
+              for(col in species$invalid$col_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, column = col, text = paste0("Invalid species code in column ", col)))
+            }
 
             ## Catches
 

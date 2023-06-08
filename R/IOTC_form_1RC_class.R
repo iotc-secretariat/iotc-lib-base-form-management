@@ -223,11 +223,21 @@ setMethod("data_validation_summary",
 
             retain_reasons = checks_strata_main$retain_reasons
 
-            if(retain_reasons$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing retain reason in row(s) #", paste0(retain_reasons$missing$row_indexes, collapse = ", "))))
+            if(retain_reasons$missing$number > 0) {
+              if(retain_reasons$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(retain_reasons$missing$number, " missing retain reason codes")))
 
-            if(retain_reasons$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid retain reason in row(s) #", paste0(retain_reasons$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "retainReasons"), " for a list of valid retain reason codes")))
+              for(row in retain_reasons$missing$row_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Missing retain reason code in row #", row)))
+              }
+            }
+
+            if(retain_reasons$invalid$number > 0) {
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(retain_reasons$missing$number, " invalid retain reason codes. Please refer to ", reference_codes("biological", "retainReasons"), " for a list of valid retain reason codes")))
+
+              for(row in retain_reasons$invalid$row_indexes) {
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Invalid retain reason code in row #", row)))
+              }
+            }
 
             ## Original data
 
