@@ -18,7 +18,7 @@ setMethod("form_dataset_code", "IOTCForm3CE", function(form) {
 })
 
 setMethod("allow_empty_data", "IOTCForm3CE", function(form) {
-  return(FALSE)
+  return(TRUE)
 })
 
 setMethod("estimation_column", "IOTCForm3CE", function(form) {

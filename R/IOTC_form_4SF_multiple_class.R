@@ -25,6 +25,10 @@ setMethod("allow_empty_data", "IOTCForm4SFMultiple", function(form) {
   return(FALSE)
 })
 
+setMethod("estimation_column", "IOTCForm4SF", function(form) {
+  return("J")
+})
+
 setMethod("optional_strata_columns", "IOTCForm4SFMultiple", function(form) {
   return(c()) # None
 })

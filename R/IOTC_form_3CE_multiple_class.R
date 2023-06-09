@@ -25,6 +25,10 @@ setMethod("allow_empty_data", "IOTCForm3CEMultiple", function(form) {
   return(TRUE)
 })
 
+setMethod("estimation_column", "IOTCForm3CE", function(form) {
+  return("F")
+})
+
 setMethod("optional_strata_columns", "IOTCForm3CEMultiple", function(form) {
   return(14:17) # Secondary and tertiary effort codes / values
 })
