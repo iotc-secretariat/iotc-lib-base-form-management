@@ -413,7 +413,7 @@ report_effort_multiple = function(message_list, effort_validation, type = "prima
   }
 
   if(effort_validation$value$invalid$number > 0) {
-    if(effort_validation$value$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column_value, text = paste0(effort_validation$value$missing$number, " invalid ", type, " effort values")))
+    if(effort_validation$value$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column_value, text = paste0(effort_validation$value$invalid$number, " invalid ", type, " effort values")))
 
     for(row in effort_validation$value$invalid$row_indexes) {
       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column_value, text = paste0("Invalid ", type, " effort value in row #", row)))

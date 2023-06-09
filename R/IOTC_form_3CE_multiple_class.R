@@ -574,15 +574,16 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
 
   if(strata$checks$main$grids$invalid$number > 0) {
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(strata$checks$main$grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid grid codes for this dataset")))
+
+    for(row in strata$checks$main$grids$invalid$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Invalid grid code in row #", row)))
   }
 
   if(strata$checks$main$grids$wrong$number > 0) {
-    if(strata$checks$main$grids$wrong$number > 1) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
-    }
+    if(strata$checks$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
 
     for(row_index in strata$checks$main$grids$wrong$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "E", text = paste0("Wrong grid code used for fishery in row #", row_index)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row_index, column = "E", text = paste0("Wrong grid code for fishery in row #", row_index)))
     }
   }
 
