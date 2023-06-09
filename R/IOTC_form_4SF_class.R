@@ -21,6 +21,10 @@ setMethod("allow_empty_data", "IOTCForm4SF", function(form) {
   return(FALSE)
 })
 
+setMethod("estimation_column", "IOTCForm4SF", function(form) {
+  return("E")
+})
+
 setMethod("first_data_column", "IOTCForm4SF", function(form) {
   return(which(EXCEL_COLUMNS == "G"))
 })
@@ -473,111 +477,40 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
 
   ## Main strata
 
-  if(strata$duplicate$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
-
   if(strata$checks$main$grids$invalid$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(strata$checks$main$grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid grid codes for this dataset")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(strata$checks$main$grids$invalid$number, " invalid grid code(s) reported. Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes for this dataset")))
+
+    for(row in strata$checks$main$grids$invalid$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Invalid grid code in row #", row)))
   }
 
   if(strata$checks$main$grids$wrong$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery: see row(s) #", paste0(strata$checks$main$grids$wrong$row_indexes, collapse = ", "))))
+    if(strata$checks$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
+
+    for(row in strata$checks$main$grids$wrong$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Wrong type of grid for the fishery in row #", row)))
   }
+
+  if(strata$duplicate$number > 0)
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
 
   ## Sex
 
-  sex = checks_strata$sex
-
-  if(sex$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing sex in row(s) #", paste0(sex$missing$row_indexes, collapse = ", "))))
-
-  if(sex$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid sex in row(s) #", paste0(sex$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "sex"), " for a list of valid measuring sex codes")))
+  validation_messages = report_sex(validation_messages, checks_strata$sex)
 
   ## Size class
 
-  size_class = checks_strata$size_class
-
-  if(size_class$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing size class in row(s) #", paste0(size_class$missing$row_indexes, collapse = ", "))))
-
-  if(size_class$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid size class in row(s) #", paste0(size_class$invalid$row_indexes, collapse = ", "), ". Please ensure that size classes are numeric and greater than zero")))
+  validation_messages = report_size_class(validation_messages, checks_strata$size_class)
 
   # Data issues / summary
 
   ## Number of samples
 
-  num_samples = checks_records$samples
-
-  if(num_samples$positive$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_samples$positive$number, " positive value(s) reported as number of samples")))
-
-  if(num_samples$zero$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_samples$zero$number, " number of samples explicitly reported as zero")))
-
-  if(num_samples$na$number > 0) {
-    if(num_samples$na$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$na$number, " empty values reported as number of samples")))
-
-    for(row_index in num_samples$na$row_indexes) {
-       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "G", text = paste0("Empty value reported as number of samples in row #", row_index)))
-    }
-  }
-
-  if(num_samples$negative$number > 0) {
-    if(num_samples$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$negative$number, " negative values reported as number of samples")))
-
-    for(row_index in num_samples$negative$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "G", text = paste0("Negative value reported as number of samples in row #", row_index)))
-    }
-  }
-
-  if(num_samples$non_num$number > 0) {
-    if(num_samples$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_samples$non_num$number, " non-numeric values reported as number of samples")))
-
-    for(row_index in num_samples$non_num$row_indexes) {
-       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "G", text = paste0("Non-numeric value reported as number of samples in row #", row_index)))
-    }
-  }
+  validation_messages = report_number_of_samples(validation_messages, checks_records$samples)
 
   ## Number of fish
 
-  num_fish = checks_records$fish
-
-  if(num_fish$positive$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(num_fish$positive$number, " positive value(s) reported as number of fish")))
-
-  if(num_fish$zero$number > 0) {
-    if(num_fish$zero$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$zero$number, " number of fish explicitly reported as zero")))
-
-    for(row_index in num_fish$zero$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "H", text = paste0("Zero fish reported in row #", row_index)))
-    }
-  }
-
-  if(num_fish$na$number > 0) {
-    if(num_fish$na$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$na$number, " empty values reported as number of fish")))
-
-    for(row_index in num_fish$na$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "H", text = paste0("Empty value reported as number of fish in row #", row_index)))
-    }
-  }
-
-  if(num_fish$negative$number > 0) {
-    if(num_fish$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$negative$number, " negative values reported as number of fish")))
-
-    for(row_index in num_fish$negative$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "H", text = paste0("Negative value reported as number of fish in row #", row_index)))
-    }
-  }
-
-  if(num_fish$non_num$number > 0) {
-    if(num_fish$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(num_fish$non_num$number, " non-numeric values reported as number of fish")))
-
-    for(row_index in num_fish$non_num$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "H", text = paste0("Non-numeric value reported as number of fish in row #", row_index)))
-    }
-  }
+  validation_messages = report_number_of_fish(validation_messages, checks_records$fish)
 
   return(validation_messages)
 })

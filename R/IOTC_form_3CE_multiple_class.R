@@ -596,46 +596,9 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
 
   effort_primary   = checks_strata_efforts$primary
 
-  if(effort_primary$code$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing primary effort code in row(s) #", paste0(effort_primary$code$missing$row_indexes, collapse = ", "))))
-
-  if(effort_primary$code$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid primary effort code in row(s) #", paste0(effort_primary$code$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
-
-  if(effort_primary$value$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing primary effort value in row(s) #", paste0(effort_primary$value$missing$row_indexes, collapse = ", "))))
-
-  if(effort_primary$value$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid primary effort value in row(s) #", paste0(effort_primary$value$invalid$row_indexes, collapse = ", "))))
-
-  effort_secondary = checks_strata_efforts$secondary
-
-  if(effort_secondary$code$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing secondary effort code in row(s) #", paste0(effort_secondary$code$missing$row_indexes, collapse = ", "))))
-
-  if(effort_secondary$code$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid secondary effort code in row(s) #", paste0(effort_secondary$code$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
-
-  if(effort_secondary$value$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing secondary effort value in row(s) #", paste0(effort_secondary$value$missing$row_indexes, collapse = ", "))))
-
-  if(effort_secondary$value$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid secondary effort value in row(s) #", paste0(effort_secondary$value$invalid$row_indexes, collapse = ", "))))
-
-  effort_tertiary  = checks_strata_efforts$tertiary
-
-  if(effort_tertiary$code$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing tertiary effort code in row(s) #", paste0(effort_tertiary$code$missing$row_indexes, collapse = ", "))))
-
-  if(effort_tertiary$code$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid tertiary effort code in row(s) #", paste0(effort_tertiary$code$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
-
-  if(effort_tertiary$value$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing tertiary effort value in row(s) #", paste0(effort_tertiary$value$missing$row_indexes, collapse = ", "))))
-
-  if(effort_tertiary$value$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid tertiary effort value in row(s) #", paste0(effort_tertiary$value$invalid$row_indexes, collapse = ", "))))
-
+  validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$primary)
+  validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$secondary, "secondary", "O", "P")
+  validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$tertiary,  "tertiary",  "Q", "R")
 
   same_effort_unit = checks_strata_efforts$same_unit
 
@@ -643,72 +606,58 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
   same_effort_unit_pt = same_effort_unit$primary_tertiary
   same_effort_unit_st = same_effort_unit$secondary_tertiary
 
-  if(same_effort_unit_ps$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Same primary / secondary effort unit codes in row(s) #", paste0(same_effort_unit_ps$row_indexes, collapse = ", "))))
+  if(same_effort_unit_ps$number > 0) {
+    if(same_effort_unit_ps$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "M & O", text = paste0(same_effort_unit_ps$number, " records with same primary / secondary effort unit codes")))
 
-  if(same_effort_unit_pt$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Same primary / tertiary effort unit codes in row(s) #", paste0(same_effort_unit_pt$row_indexes, collapse = ", "))))
+    for(row in same_effort_unit_ps$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "M & O", text = paste0("Same primary / secondary effort unit codes in row #", row)))
+  }
 
-  if(same_effort_unit_st$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Same secondary / tertiary effort unit codes in row(s) #", paste0(same_effort_unit_st$row_indexes, collapse = ", "))))
+  if(same_effort_unit_pt$number > 0) {
+    if(same_effort_unit_pt$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "M & Q", text = paste0(same_effort_unit_pt$number, " records with same primary / tertiary effort unit codes")))
+
+    for(row in same_effort_unit_pt$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "M & Q", text = paste0("Same primary / tertiary effort unit codes in row #", row)))
+  }
+
+  if(same_effort_unit_st$number > 0) {
+    if(same_effort_unit_st$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "O & Q", text = paste0(same_effort_unit_st$number, " records with same secondary / tertiary effort unit codes")))
+
+    for(row in same_effort_unit_st$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "O & Q", text = paste0("Same secondary / tertiary effort unit codes in row #", row)))
+  }
 
   # Data issues / summary
 
   ## Species
 
-  species = checks_records$species
-
-  if(species$aggregates$number > 0) # Aggregates
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated species in column(s) #", paste0(species$aggregates$col_indexes, collapse = ", "))))
-
-  if(species$missing$number > 0)    # Missing
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) #", paste0(species$missing$col_indexes, collapse = ", "))))
-
-  if(species$invalid$number > 0)    # Invalid
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) #", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+  validation_messages = report_species(validation_messages,checks_records$species, spreadsheet_rows_for(form, 2))
 
   ## Catch units
 
   catch_units = checks_records$catch_units
+  catch_units_row = spreadsheet_rows_for(form, 2)
 
-  if(catch_units$missing$number > 0)    # Missing
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing catch unit in column(s) #", paste0(catch_units$missing$col_indexes, collapse = ", "))))
+  if(catch_units$missing$number > 0) {    # Missing
+    if(catch_units$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number, " missing catch unit codes")))
 
-  if(catch_units$invalid$number > 0)    # Invalid
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid catch unit in column(s) #", paste0(catch_units$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("fishery", "catchUnits"), " for a list of valid catch unit codes")))
+    for(col in catch_units$missing$col_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Missing catch unit code in column ", column)))
+  }
+
+  if(catch_units$invalid$number > 0) {    # Invalid
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number, " invalid catch unit codes. Please refer to ", reference_codes("fishery", "catchUnits"), " for a list of valid catch unit codes")))
+
+    for(col in catch_units$invalid$col_indexes) {
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Invalid catch unit in column ", col)))
+    }
+  }
 
   ## Catches
 
-  catches = checks_records$catch_values
+  validation_messages = report_catches(validation_messages,checks_records$catch_values)
 
-  if(catches$positive$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$positive$number, " positive catch value(s) reported")))
-
-  if(catches$na$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$na$number, " empty catch value(s) reported for all strata / species combinations")))
-
-  if(catches$zero$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero$number, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
-
-  if(catches$negative$number > 0) {
-    if(catches$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative$number, " negative catch values reported")))
-
-    for(n in 1:nrow(catches$negative$cells)) {
-      cell = catches$negative$cells[n]
-
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Negative catch value reported in cell ", cell$INDEXES)))
-    }
-  }
-
-  if(catches$non_num$number > 0) {
-    if(catches$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num$number, " non-numeric catch values reported")))
-
-    for(n in 1:nrow(catches$non_num$cells)) {
-      cell = catches$non_num$cells[n]
-
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Non-numeric catch value reported in cell ", cell$INDEXES)))
-    }
-  }
+  ## Strata
 
   stratifications = checks_records$stratifications
 

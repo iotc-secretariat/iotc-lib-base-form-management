@@ -21,6 +21,10 @@ setMethod("allow_empty_data", "IOTCForm3CE", function(form) {
   return(FALSE)
 })
 
+setMethod("estimation_column", "IOTCForm3CE", function(form) {
+  return("D")
+})
+
 setMethod("first_data_column", "IOTCForm3CE", function(form) {
   return(which(EXCEL_COLUMNS == "H"))
 })
@@ -489,11 +493,17 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
   ## Main strata
 
   if(strata$checks$main$grids$invalid$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(strata$checks$main$grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid grid codes for this dataset")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(strata$checks$main$grids$invalid$number, " invalid grid code(s) reported. Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid grid codes for this dataset")))
+
+    for(row in strata$checks$main$grids$invalid$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Invalid grid code in row #", row)))
   }
 
   if(strata$checks$main$grids$wrong$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery: see row(s) #", paste0(strata$checks$main$grids$wrong$row_indexes, collapse = ", "))))
+    if(strata$checks$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
+
+    for(row in strata$checks$main$grids$wrong$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Wrong type of grid for the fishery in row #", row)))
   }
 
   if(strata$duplicate$number > 0)
@@ -503,89 +513,19 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
 
   checks_strata_efforts = checks_strata$efforts
 
-  effort_primary   = checks_strata_efforts$primary
-
-  if(effort_primary$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing primary effort value in row(s) #", paste0(effort_primary$missing$row_indexes, collapse = ", "))))
-
-  if(effort_primary$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid primary effort value in row(s) #", paste0(effort_primary$invalid$row_indexes, collapse = ", "))))
-
-  effort_secondary = checks_strata_efforts$secondary
-
-  if(effort_secondary$unit_provided) {
-    if(effort_secondary$missing$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing secondary effort value in row(s) #", paste0(effort_secondary$missing$row_indexes, collapse = ", "))))
-
-    if(effort_secondary$invalid$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid secondary effort value in row(s) #", paste0(effort_secondary$invalid$row_indexes, collapse = ", "))))
-  } else {
-    if(effort_secondary$values_provided) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = "Secondary effort values provided, but no secondary effort unit is found in the metadata"))
-    }
-  }
-
-  effort_tertiary  = checks_strata_efforts$tertiary
-
-  if(effort_tertiary$unit_provided) {
-    if(effort_tertiary$missing$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing tertiary effort value in row(s) #", paste0(effort_tertiary$missing$row_indexes, collapse = ", "))))
-
-    if(effort_tertiary$invalid$number > 0)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid tertiary effort value in row(s) #", paste0(effort_tertiary$invalid$row_indexes, collapse = ", "))))
-  } else {
-    if(effort_tertiary$values_provided) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = "Tertiary effort values provided, but no tertiary effort unit is found in the metadata"))
-    }
-  }
+  validation_messages = report_effort_values(validation_messages, checks_strata_efforts$primary)
+  validation_messages = report_effort_values(validation_messages, checks_strata_efforts$secondary, "secondary", "F")
+  validation_messages = report_effort_values(validation_messages, checks_strata_efforts$tertiary,  "tertiary",  "G")
 
   # Data issues / summary
 
   ## Species
 
-  species = checks_records$species
-
-  if(species$aggregates$number > 0) # Aggregates
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Aggregated species in column(s) ", paste0(species$aggregates$col_indexes, collapse = ", "))))
-
-  if(species$missing$number > 0)    # Missing
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species in column(s) ", paste0(species$missing$col_indexes, collapse = ", "))))
-
-  if(species$invalid$number > 0)    # Invalid
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species in column(s) ", paste0(species$invalid$col_indexes, collapse = ", "), ". Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+  validation_messages = report_species(validation_messages, checks_records$species, spreadsheet_rows_for(form, 2))
 
   ## Catches
 
-  catches = checks_records$catch_values
-
-  if(catches$positive$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$positive$number, " positive catch value(s) reported")))
-
-  if(catches$na$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$na$number, " empty catch value(s) reported for all strata / species combinations")))
-
-  if(catches$zero$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero$number, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
-
-  if(catches$negative$number > 0) {
-    if(catches$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative$number, " negative catch values reported")))
-
-    for(n in 1:nrow(catches$negative$cells)) {
-      cell = catches$negative$cells[n]
-
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Negative catch value reported in cell ", cell$INDEXES)))
-    }
-  }
-
-  if(catches$non_num$number > 0) {
-    if(catches$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num$number, " non-numeric catch values reported")))
-
-    for(n in 1:nrow(catches$non_num$cells)) {
-      cell = catches$non_num$cells[n]
-
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Non-numeric catch value reported in cell ", cell$INDEXES)))
-    }
-  }
+  validation_messages = report_catches(validation_messages, checks_records$catch_values)
 
   return(validation_messages)
 })

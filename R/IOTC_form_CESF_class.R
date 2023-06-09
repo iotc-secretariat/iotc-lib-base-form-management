@@ -13,6 +13,10 @@ setGeneric("allow_empty_data", function(form) {
   standardGeneric("allow_empty_data")
 })
 
+setGeneric("estimation_column", function(form) {
+  standardGeneric("estimation_column")
+})
+
 setMethod("form_comment_cell_row", "IOTCFormCESF", function(form) {
   return(34) #Default for CE / SF
 })
@@ -237,7 +241,7 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
   CE_SF_data          = records$data$CE_SF_data
 
   strata_empty_rows    = find_empty_rows(strata)
-  #strata_empty_columns = find_empty_columns(strata)
+  strata_empty_columns = find_empty_columns(strata)
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
@@ -273,10 +277,10 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
           number      = length(strata_empty_rows),
           row_indexes = spreadsheet_rows_for(form, strata_empty_rows)
         ),
-        #empty_columns = list(
-        #  number      = length(strata_empty_columns),
-        #  col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
-        #),
+        empty_columns = list(
+          number      = length(strata_empty_columns),
+          col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
+        ),
         total = list(
           number = total_strata
         ),
@@ -360,15 +364,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
 
   # Strata issues / summary
 
-  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number,     " total strata")))
-  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$non_empty$number, " non-empty strata")))
-  validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number,    " unique strata")))
-
-  if(strata$empty_rows$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
-
-  #if(strata$empty_columns$number > 0)
-  #  validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) ", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
+  validation_messages = report_strata(validation_messages, strata)
 
   # Strata checks
 
@@ -382,16 +378,16 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
   #if(months$incomplete$number > 0)
   #  validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all months within the strata in row(s) #", paste0(months$incomplete$row_indexes, collapse = ", "))))
 
-  if(months$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing month in row(s) #", paste0(months$missing$row_indexes, collapse = ", "))))
-
-  if(months$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid month value in row(s) #", paste0(months$invalid$row_indexes, collapse = ", "), ". Please use only 1-12 for Jan-Dec")))
+  validation_messages = report_months(validation_messages, months)
 
   grids = checks_strata_main$grids
 
-  if(grids$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing grid in row(s) #", paste0(grids$missing$row_indexes, collapse = ", "))))
+  if(grids$missing$number > 0) { # This remains identical for 3-CE and 4-SF, whose 'GRID' column is the same
+    if(grids$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(grids$missing$number, " missing grids")))
+
+    for(row in grids$missing$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Missing grid in row #", row)))
+  }
 
   # MOVED TO 3CE
   #if(grids$invalid$number > 0) {
@@ -399,27 +395,29 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
   #}
 
   estimations = checks_strata_main$estimations # NOT PART OF THE STRATUM
+  estimation_col = estimation_column(form)
 
-  if(estimations$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing estimation code in row(s) #", paste0(estimations$missing$row_indexes, collapse = ", "))))
+  if(estimations$missing$number > 0) { # Applies to 3CE and 4SF
+    if(estimations$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = estimation_col, text = paste0(estimations$missing$number, " missing estimation codes")))
 
-  if(estimations$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid estimation code in row(s) #", paste0(estimations$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("data", "estimates"), " for a list of valid estimation codes")))
+    for(row in estimations$missing$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = estimation_col, text = paste0("Missing estimation code in row #", row)))
+  }
+
+  if(estimations$invalid$number > 0) { # Applies to 3CE and 4SF
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(estimations$invalid$number, " invalid estimation code(s) reported. Please refer to ", reference_codes("data", "estimates"), " for a list of valid estimation codes")))
+
+    for(row in estimations$invalid$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = estimation_col, text = paste0("Invalid estimation code in row #", row)))
+  }
 
   ###
 
   # Data issues / summary
 
   ## Empty rows / columns
-  empty_rows = records$empty_rows
 
-  if(empty_rows$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
-
-  empty_columns = records$empty_columns
-
-  if(empty_columns$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) ", paste0(empty_columns$col_indexes, collapse = ", "))))
+  validation_messages = report_data(validation_messages, records, allow_empty_data(form))
 
   return(validation_messages)
 })

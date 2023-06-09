@@ -38,3 +38,4 @@ Collate:
     'metadata.R'
     'reference_checks.R'
     'utilities.R'
+    'validation_summary_helpers.R'

@@ -407,7 +407,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   # Strata issues / summary
 
-  validation_messages = report_strata(form, validation_messages, strata)
+  validation_messages = report_strata(validation_messages, strata)
 
   # Strata checks
 
@@ -431,11 +431,11 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   ### Fisheries
 
-  validation_messages = report_fisheries(form, validation_messages, checks_strata_main$fisheries, "C")
+  validation_messages = report_fisheries(validation_messages, checks_strata_main$fisheries, "C")
 
   ### Target species
 
-  validation_messages = report_target_species(form, validation_messages, checks_strata_main$target_species, "D")
+  validation_messages = report_target_species(validation_messages, checks_strata_main$target_species, "D")
 
   ### Grids
 
@@ -463,15 +463,15 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   # DATA TYPES (1 per row, although not part of the stratum)
 
-  validation_messages = report_data_type(form, validation_messages, checks_strata_original_data$type, "G")
+  validation_messages = report_data_type(validation_messages, checks_strata_original_data$type, "G")
 
   # DATA SOURCES (1 per row *and* part of the stratum)
 
-  validation_messages = report_data_source(form, validation_messages, checks_strata_original_data$source, "H")
+  validation_messages = report_data_source(validation_messages, checks_strata_original_data$source, "H")
 
   # DATA PROCESSINGS (1 per row *and* part of the stratum)
 
-  validation_messages = report_data_source(form, validation_messages, checks_strata_original_data$processing, "I")
+  validation_messages = report_data_source(validation_messages, checks_strata_original_data$processing, "I")
 
   ### Data raisings
 
@@ -485,17 +485,17 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   # COVERAGE TYPES (1 per row, although not part of the stratum)
 
-  validation_messages = report_coverage_type(form, validation_messages, checks_strata$coverage$type, "J")
+  validation_messages = report_coverage_type(validation_messages, checks_strata$coverage$type, "J")
 
   # COVERAGE VALUES (1 per row, although not part of the stratum)
 
-  validation_messages = report_coverage_value(form, validation_messages, checks_strata$coverage$type, "J")
+  validation_messages = report_coverage_value(validation_messages, checks_strata$coverage$type, "J")
 
   # Data issues / summary
 
   ## Empty rows / columns
 
-  validation_messages = report_data(form, validation_messages, records, allow_empty_data(form))
+  validation_messages = report_data(validation_messages, records, allow_empty_data(form))
 
   return(validation_messages)
 })

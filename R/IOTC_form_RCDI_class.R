@@ -360,7 +360,7 @@ setMethod("common_data_validation_summary",
 
             # Strata issues / summary
 
-            validation_messages = report_strata(form, validation_messages, strata)
+            validation_messages = report_strata(validation_messages, strata)
 
             # Strata checks
 
@@ -375,26 +375,34 @@ setMethod("common_data_validation_summary",
             if(quarters$incomplete$number > 0)
               validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all quarters within the strata in row(s) #", paste0(quarters$incomplete$row_indexes, collapse = ", "))))
 
-            if(quarters$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing quarter in row(s) #", paste0(quarters$missing$row_indexes, collapse = ", "))))
+            if(quarters$missing$number > 0) {
+              if(quarters$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "B", text = paste0(quarters$missing$number, " missing quarters")))
 
-            if(quarters$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid quarter value in row(s) #", paste0(quarters$invalid$row_indexes, collapse = ", "), ". Please use only 1-4 for Q1-Q4 or 0 for 'entire year'")))
+              for(row in quarters$missing$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "B", text = paste0("Missing quarter in row #", row)))
+            }
+
+            if(quarters$invalid$number > 0) {
+              if(quarters$invalid$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(quarters$invalid$number," invalid quarter values provided. Please use only 1-4 for Q1-Q4 or 0 for 'entire year'")))
+
+              for(row in quarters$invalid$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "B", text = paste0("Invalid quarter in row #", row)))
+            }
 
             if(quarters$overlapping$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Data is provided for overlapping quarters within the strata in row(s) #", paste0(quarters$overlapping$row_indexes, collapse = ", "))))
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "B", text = paste0("Data is provided for overlapping quarters within the strata in row(s) #", paste0(quarters$overlapping$row_indexes, collapse = ", "))))
 
             # FISHERIES (1 per row *and* part of the stratum)
 
-            validation_messages = report_fisheries(form, validation_messages, checks_strata_main$fisheries, "C")
+            validation_messages = report_fisheries(validation_messages, checks_strata_main$fisheries, "C")
 
             # TARGET SPECIES (1 per row *and* part of the stratum)
 
-            validation_messages = report_target_species(form, validation_messages, checks_strata_main$target_species, "D")
+            validation_messages = report_target_species(validation_messages, checks_strata_main$target_species, "D")
 
             # MAIN AREAS (1 per row *and* part of the stratum)
 
-            validation_messages = report_IOTC_area(form, validation_messages, checks_strata_main$IOTC_main_areas, "E")
+            validation_messages = report_IOTC_area(validation_messages, checks_strata_main$IOTC_main_areas, "E")
 
             ## Original data
 
@@ -402,23 +410,23 @@ setMethod("common_data_validation_summary",
 
             # DATA TYPES (1 per row, although not part of the stratum)
 
-            validation_messages = report_data_type(form, validation_messages, checks_strata_original_data$type, "G")
+            validation_messages = report_data_type(validation_messages, checks_strata_original_data$type, "G")
 
             # DATA SOURCES (1 per row *and* part of the stratum)
 
-            validation_messages = report_data_source(form, validation_messages, checks_strata_original_data$source, "H")
+            validation_messages = report_data_source(validation_messages, checks_strata_original_data$source, "H")
 
             # DATA PROCESSINGS (1 per row *and* part of the stratum)
 
-            validation_messages = report_data_processing(form, validation_messages, checks_strata_original_data$processing, "I")
+            validation_messages = report_data_processing(validation_messages, checks_strata_original_data$processing, "I")
 
             # COVERAGE TYPES (1 per row, although not part of the stratum)
 
-            validation_messages = report_coverage_type(form, validation_messages, checks_strata$coverage$type, "J")
+            validation_messages = report_coverage_type(validation_messages, checks_strata$coverage$type, "J")
 
             # COVERAGE VALUES (1 per row, although not part of the stratum)
 
-            validation_messages = report_coverage_value(form, validation_messages, checks_strata$coverage$type, "J")
+            validation_messages = report_coverage_value(validation_messages, checks_strata$coverage$type, "J")
 
             ###
 
@@ -426,67 +434,15 @@ setMethod("common_data_validation_summary",
 
             ## Empty rows / columns
 
-            validation_messages = report_data(form, validation_messages, records, FALSE)
+            validation_messages = report_data(validation_messages, records, FALSE)
 
             ## Species
 
-            species = checks_records$species
-
-            species_row = spreadsheet_rows_for(form, 2)
-
-            if(species$aggregates$number > 0) { # Aggregates
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", row = species_row, text = paste0(species$aggregates$number, " aggregated species codes reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
-
-              for(col in species$aggregates$col_indexes)
-                validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", row = species_row, column = col, text = paste0("Aggregated species codes reported in column ", col)))
-            }
-
-            if(species$missing$number > 0) { # Missing
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species$missing$number, " missing species codes")))
-
-              for(col in species$missing$col_indexes)
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, column = col, text = paste0("Missing species code in column ", col)))
-            }
-
-            if(species$invalid$number > 0) { # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species$invalid$number, " invalid species code reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
-
-              for(col in species$invalid$col_indexes)
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = species_row, column = col, text = paste0("Invalid species code in column ", col)))
-            }
+            validation_messages = report_species(validation_messages, checks_records$species, spreadsheet_rows_for(form, 2))
 
             ## Catches
 
-            catches = checks_records$catch_values
-
-            if(catches$positive$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$positive$number, " positive catch value(s) reported")))
-
-            if(catches$na$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(catches$na$number, " empty catch value(s) reported for all strata / species combinations")))
-
-            if(catches$zero$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0(catches$zero$number, " catch value(s) explicitly reported as zero: consider leaving the cells empty instead")))
-
-            if(catches$negative$number > 0) {
-              if(catches$negative$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$negative$number, " negative catch values reported")))
-
-              for(n in 1:nrow(catches$negative$cells)) {
-                cell = catches$negative$cells[n]
-
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Negative catch value reported in cell ", cell$INDEXES)))
-              }
-            }
-
-            if(catches$non_num$number > 0) {
-              if(catches$non_num$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(catches$non_num$number, " non-numeric catch values reported")))
-
-              for(n in 1:nrow(catches$non_num$cells)) {
-                cell = catches$non_num$cells[n]
-
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = cell$ROW, column = cell$COL, text = paste0("Non-numeric catch value reported in cell ", cell$INDEXES)))
-              }
-            }
+            validation_messages = report_catches(validation_messages, checks_records$catch_values)
 
             return(validation_messages)
           }
