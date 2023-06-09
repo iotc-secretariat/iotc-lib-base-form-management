@@ -309,7 +309,7 @@ report_species = function(message_list, species_validation, species_row) {
   }
 
   if(species_validation$invalid$number > 0) { # Invalid
-    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species_validation$invalid$number, " invalid species code|(s) reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
+    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species_validation$invalid$number, " invalid species code(s) reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy species codes")))
 
     for(col in species_validation$invalid$col_indexes)
       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = species_row, column = col, text = paste0("Invalid species code in column ", col)))
