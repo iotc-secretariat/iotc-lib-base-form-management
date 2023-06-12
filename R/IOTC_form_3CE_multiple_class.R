@@ -25,7 +25,7 @@ setMethod("allow_empty_data", "IOTCForm3CEMultiple", function(form) {
   return(TRUE)
 })
 
-setMethod("estimation_column", "IOTCForm3CE", function(form) {
+setMethod("estimation_column", "IOTCForm3CEMultiple", function(form) {
   return("F")
 })
 
