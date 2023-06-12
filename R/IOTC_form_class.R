@@ -302,45 +302,26 @@ setMethod("validation_summary", "IOTCForm", function(form) {
       validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = error_message))
   })
 
-  # TEMPORARILY
+  tryCatch({ # Unfortunately this doesn't seem to work with some type of errors, which are de-facto uncatchable
+    if(!is.null(validation_results)) {
+      metadata_validation_results = validation_results$metadata
+      data_validation_results     = validation_results$data
 
-  if(!is.null(validation_results)) {
-    metadata_validation_results = validation_results$metadata
-    data_validation_results     = validation_results$data
+      common_metadata_validation_messages = common_metadata_validation_summary(form, metadata_validation_results)
+      metadata_validation_messages        = metadata_validation_summary       (form, metadata_validation_results)
+      data_validation_messages            = data_validation_summary           (form, metadata_validation_results, data_validation_results)
 
-    common_metadata_validation_messages = common_metadata_validation_summary(form, metadata_validation_results)
-    metadata_validation_messages        = metadata_validation_summary       (form, metadata_validation_results)
-    data_validation_messages            = data_validation_summary           (form, metadata_validation_results, data_validation_results)
+      all_validation_messages = rbind(common_metadata_validation_messages@messages,
+                                      metadata_validation_messages@messages,
+                                      data_validation_messages@messages)
+    } else {
+      all_validation_messages = validation_messages@messages
+    }
+  }, error = function(cond) {
+    l_error(cond)
 
-    all_validation_messages = rbind(common_metadata_validation_messages@messages,
-                                    metadata_validation_messages@messages,
-                                    data_validation_messages@messages)
-  } else {
-    all_validation_messages = validation_messages@messages
-  }
-
-  if(FALSE) {
-    tryCatch({ # Unfortunately this doesn't seem to work with some type of errors, which are de-facto uncatchable
-      if(!is.null(validation_results)) {
-        metadata_validation_results = validation_results$metadata
-        data_validation_results     = validation_results$data
-
-        common_metadata_validation_messages = common_metadata_validation_summary(form, metadata_validation_results)
-        metadata_validation_messages        = metadata_validation_summary       (form, metadata_validation_results)
-        data_validation_messages            = data_validation_summary           (form, metadata_validation_results, data_validation_results)
-
-        all_validation_messages = rbind(common_metadata_validation_messages@messages,
-                                        metadata_validation_messages@messages,
-                                        data_validation_messages@messages)
-      } else {
-        all_validation_messages = validation_messages@messages
-      }
-    }, error = function(cond) {
-      l_error(cond)
-
-      all_validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered while producing validation summary for the form! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", cond$message)))
-    })
-  }
+    all_validation_messages <<- add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("Undetected bug encountered while producing validation summary for the form! Please report this message to IOTC-Statistics@fao.org, including a copy of the file you uploaded: ", cond$message)))
+  })
 
   info_messages    = all_validation_messages[LEVEL == "INFO"]
   warning_messages = all_validation_messages[LEVEL == "WARN"]

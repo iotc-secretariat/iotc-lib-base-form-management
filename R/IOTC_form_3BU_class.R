@@ -51,7 +51,7 @@ setMethod("extract_metadata", list(form = "IOTCForm3BU", common_metadata = "list
   )
 
   metadata$data_specifications = list(
-    type_of_data = trim(as.character(metadata_sheet[23, 4])),
+    type_of_data = trim(as.character(metadata_sheet[23, 4]))
   )
 
   return(metadata)
@@ -413,10 +413,10 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3BU", metadata_val
   if(!general_information$reporting_month$available)
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "G", text = "The reporting month is mandatory"))
   else if(!general_information$reporting_month$valid)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "G", text = paste0("The reporting month (", general_info$reporting_month$value, ") is invalid: please use only 1-12 for Jan-Dec")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "G", text = paste0("The reporting month (", general_information$reporting_month$value, ") is invalid: please use only 1-12 for Jan-Dec")))
   else if(general_information$reporting_year$valid) {
-    date = paste0(general_info$reporting_year$value,  '-',
-                  str_sub(paste0("00", general_info$reporting_month$value), -2),
+    date = paste0(general_information$reporting_year$value,  '-',
+                  str_sub(paste0("00", general_information$reporting_month$value), -2),
                   '-01')
 
     current_date = format(Sys.time(), "%Y-%m-%d")
@@ -434,26 +434,26 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3BU", metadata_val
   if(!general_information$vessel$IOTC_number$available) {
     validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = "The vessel IOTC number (IOTCxxxxxx) is mandatory"))
   } else if(!general_information$vessel$IOTC_number$valid) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is incorrect, as it should be in the form 'IOTC' followed by six digits")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_information$vessel$IOTC_number$value, ") is incorrect, as it should be in the form 'IOTC' followed by six digits")))
   }
 
   ## Vessel mapping onto the RAV
 
   if(!general_information$vessel$mapped) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is not mapped onto any RAV vessel")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_information$vessel$IOTC_number$value, ") is not mapped onto any RAV vessel")))
   } else if(!general_information$vessel$current) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is mapped on a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") but this is currently non-authorized to operate in the IOTC area of competence")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_information$vessel$IOTC_number$value, ") is mapped on a RAV vessel (", general_information$vessel$flag$current, " / ", general_information$vessel$gear, " / ", general_information$vessel$name$current, ") but this is currently non-authorized to operate in the IOTC area of competence")))
   } else {
     if(general_information$vessel$gear != "PS") {
-      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") using ", general_info$vessel$gear, " instead of PS as gear")))
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_information$vessel$IOTC_number$value, ") identifies a RAV vessel (", general_information$vessel$flag$current, " / ", general_information$vessel$gear, " / ", general_information$vessel$name$current, ") using ", general_information$vessel$gear, " instead of PS as gear")))
     }
 
     if(general_information$vessel$flag$differ) {
-      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different flag (", general_info$vessel$flag$current, ") than the one provided (", general_info$vessel$flag$value, ")")))
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_information$vessel$IOTC_number$value, ") identifies a vessel (", general_information$vessel$flag$current, " / ", general_information$vessel$gear, " / ", general_information$vessel$name$current, ") with a different flag (", general_information$vessel$flag$current, ") than the one provided (", general_information$vessel$flag$value, ")")))
     }
 
     if(general_information$vessel$name$differ) {
-      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different name (", general_info$vessel$name$current, ") than the one provided (", general_info$vessel$name$value, ")")))
+      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_information$vessel$IOTC_number$value, ") identifies a vessel (", general_information$vessel$flag$current, " / ", general_information$vessel$gear, " / ", general_information$vessel$name$current, ") with a different name (", general_information$vessel$name$current, ") than the one provided (", general_information$vessel$name$value, ")")))
     }
   }
 
@@ -481,22 +481,14 @@ setMethod("data_validation_summary",
             ### STRATA AND RECORDS
 
             strata  = data_validation_results$strata
+            records = data_validation_results$records
+
             checks_strata  = strata$checks
+            checks_records = records$checks
 
             # Strata issues / summary
 
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$total$number, " total strata")))
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$non_empty$number, " non-empty strata")))
-            validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = paste0(strata$unique$number, " unique strata")))
-
-            if(strata$empty_rows$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_rows$number, " empty strata detected: see row(s) #", paste0(strata$empty_rows$row_indexes, collapse = ", "))))
-
-            if(strata$empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$empty_columns$number, " empty strata columns detected: see column(s) ", paste0(strata$empty_columns$col_indexes, collapse = ", "))))
-
-            if(strata$duplicate$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
+            validation_messages = report_strata(validation_messages, strata)
 
             if(strata$incomplete$number > 0) {
               #validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Data", text = paste0("Data is not provided for all days of the month within the strata in row(s) #", paste0(strata$incomplete$row_indexes, collapse = ", "))))
@@ -514,31 +506,33 @@ setMethod("data_validation_summary",
 
             day_of_month_checks = checks_strata_main$day_of_month
 
-            if(day_of_month_checks$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing day of month in row(s) #", paste0(day_of_month_checks$missing$row_indexes, collapse = ", "))))
+            if(day_of_month_checks$missing$number > 0) {
+              if(day_of_month_checks$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "B", text = paste0(day_of_month_checks$missing$number, " missing day(s) of month")))
 
-            if(day_of_month_checks$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid day of month value in row(s) #", paste0(day_of_month_checks$invalid$row_indexes, collapse = ", "), ". Please use only 1-31 (with upper limit depending on the month of reporting)")))
+              for(row in day_of_month_checks$missing$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "B", text = paste0("Missing day of month in row #", row)))
+            }
+
+            if(day_of_month_checks$invalid$number > 0) {
+              if(day_of_month_checks$invalid$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "B", text = paste0(day_of_month_checks$invalid$number, " invalid day(s) of month. Please use only 1-31 (with upper limit depending on the month of reporting)")))
+
+              for(row in day_of_month_checks$invalid$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "B", text = paste0("Invalid day of month in row #", row)))
+            }
 
             buoy_id_checks = checks_strata_main$buoy_id
 
-            if(buoy_id_checks$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing buoy ID in row(s) #", paste0(buoy_id_checks$missing$row_indexes, collapse = ", "))))
+            if(buoy_id_checks$missing$number > 0) {
+              if(buoy_id_checks$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(buoy_id_checks$missing$number, " missing buoy IDs")))
+
+              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Missing buoy ID in row #", row)))
+            }
 
             # Data issues / summary
 
-            records = data_validation_results$records
-            checks_records = records$checks
+            ## Empty rows / columns
 
-            empty_rows = records$empty_rows
-
-            if(empty_rows$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_rows$number, " empty data records detected: see row(s) #", paste0(empty_rows$row_indexes, collapse = ", "))))
-
-            empty_columns = records$empty_columns
-
-            if(empty_columns$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(empty_columns$number, " empty data columns detected: see column(s) ", paste0(empty_columns$col_indexes, collapse = ", "))))
+            validation_messages = report_data(validation_messages, records, FALSE)
 
             ## Latitude / longitude
 
@@ -547,39 +541,71 @@ setMethod("data_validation_summary",
 
             ### Latitude
 
-            if(latitude$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing latitude in row(s) #", paste0(latitude$missing$row_indexes, collapse = ", "))))
+            if(latitude$missing$number > 0) {
+              if(latitude$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D", text = paste0(latitude$missing$number, " missing latitude value(s)")))
 
-            if(latitude$non_numeric$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Non-numeric latitude in row(s) #", paste0(latitude$non_numeric$row_indexes, collapse = ", "))))
+              for(row in latitude$missing$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Missing latitude in row #", row)))
+            }
 
-            if(latitude$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid latitude in row(s) #", paste0(latitude$invalid$row_indexes, collapse = ", "))))
+            if(latitude$non_numeric$number > 0) {
+              if(latitude$non_numeric$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D", text = paste0(latitude$non_numeric$number, " non-numeric latitude value(s)")))
+
+              for(row in latitude$non_numeric$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Non-numeric latitude value in row #", row)))
+            }
+
+            if(latitude$invalid$number > 0) {
+              if(latitude$invalid$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D", text = paste0(latitude$invalid$number, " invalid latitude value(s)")))
+
+              for(row in latitude$invalid$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Invalid latitude value in row #", row)))
+            }
 
             ### Longitude
 
-            if(longitude$missing$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing longitude in row(s) #", paste0(longitude$missing$row_indexes, collapse = ", "))))
+            if(longitude$missing$number > 0) {
+              if(longitude$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "E", text = paste0(longitude$missing$number, " missing longitude value(s)")))
 
-            if(longitude$non_numeric$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Non-numeric longitude in row(s) #", paste0(longitude$non_numeric$row_indexes, collapse = ", "))))
+              for(row in longitude$missing$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "E", text = paste0("Missing longitude in row #", row)))
+            }
 
-            if(longitude$invalid$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid longitude in row(s) #", paste0(longitude$invalid$row_indexes, collapse = ", "))))
+            if(longitude$non_numeric$number > 0) {
+              if(longitude$non_numeric$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "E", text = paste0(longitude$non_numeric$number, " non-numeric longitude value(s)")))
 
+              for(row in longitude$non_numeric$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "E", text = paste0("Non-numeric longitude value in row #", row)))
+            }
+
+            if(longitude$invalid$number > 0) {
+              if(longitude$invalid$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "E", text = paste0(longitude$invalid$number, " invalid longitude value(s)")))
+
+              for(row in longitude$invalid$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "E", text = paste0("Invalid longitude value in row #", row)))
+            }
             ## Coordinates
 
             coordinates = checks_records$coordinates
 
             ### Outside IO
 
-            if(coordinates$outside_IO$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Coordinates are outside of the Indian Ocean area in row(s) #", paste0(coordinates$outside_IO$row_indexes, collapse = ", "))))
+            if(coordinates$outside_IO$number > 0) {
+              if(coordinates$outside_IO$number > 1)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D+E", text = paste0(coordinates$outside_IO$number, " coordinates are outside of the Indian Ocean area")))
+
+              for(row in coordinates$outside_IO$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D+E", text = paste0("Coordinates are outside of the Indian Ocean area in row #", row)))
+            }
 
             ### On land
 
-            if(coordinates$on_land$number > 0)
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Coordinates appear to identify a point on land in row(s) #", paste0(coordinates$on_land$row_indexes, collapse = ", "))))
+            if(coordinates$on_land$number > 0) {
+              if(coordinates$on_land$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D+E", text = paste0(coordinates$on_land$number, " coordinates appear to identify a point on land")))
+
+              for(row in coordinates$on_land$row_indexes)
+                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D+E", text = paste0("Coordinates appear to identify a point on land in row #", row)))
+            }
 
             return(validation_messages)
           }
