@@ -416,8 +416,14 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
   # Data issues / summary
 
   ## Empty rows / columns
+  return(
+    report_data(
+      validation_messages,
+      records,
+      allow_empty_data(form))
+  )
+})
 
-  validation_messages = report_data(validation_messages, records, allow_empty_data(form))
-
-  return(validation_messages)
+setMethod("allow_empty_data", "IOTCFormCESF", function(form) {
+  return(TRUE)
 })
