@@ -9,8 +9,8 @@ setGeneric("grid_validator", function(form) {
   standardGeneric("grid_validator")
 })
 
-setGeneric("allow_empty_data", function(form) {
-  standardGeneric("allow_empty_data")
+setGeneric("allow_empty_data_multiple", function(form) {
+  standardGeneric("allow_empty_data_multiple")
 })
 
 setGeneric("optional_strata_columns", function(form) {
@@ -508,7 +508,13 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   ## Empty rows / columns
 
-  validation_messages = report_data(validation_messages, records, allow_empty_data(form))
+  validation_messages =
 
-  return(validation_messages)
+  return(
+    report_data(
+      validation_messages,
+      records,
+      allow_empty_data_multiple(form)
+    )
+  )
 })

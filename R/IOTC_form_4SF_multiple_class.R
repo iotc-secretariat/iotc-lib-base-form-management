@@ -21,7 +21,7 @@ setMethod("grid_validator", "IOTCForm4SFMultiple", function(form) {
   return(is_grid_CE_SF_valid)
 })
 
-setMethod("allow_empty_data", "IOTCForm4SFMultiple", function(form) {
+setMethod("allow_empty_data_multiple", "IOTCForm4SFMultiple", function(form) {
   return(FALSE)
 })
 

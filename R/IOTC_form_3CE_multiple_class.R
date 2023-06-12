@@ -21,7 +21,7 @@ setMethod("grid_validator", "IOTCForm3CEMultiple", function(form) {
   return(is_grid_AR_valid)
 })
 
-setMethod("allow_empty_data", "IOTCForm3CEMultiple", function(form) {
+setMethod("allow_empty_data_multiple", "IOTCForm3CEMultiple", function(form) {
   return(TRUE)
 })
 

@@ -184,63 +184,63 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm4SF", metadata_val
   ## Species
 
   if(!general_information$species$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The species is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = "The species is mandatory"))
   else if(!general_information$species$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
   else if(general_information$species$multiple)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided species (", general_information$target_species$code, ") correspond to a species aggregate. Please refer to ", reference_codes("legacy", "species"), " for a list of valid, distinct species codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$target_species$code, ") correspond to a species aggregate. Please refer to ", reference_codes("legacy", "species"), " for a list of valid, distinct species codes")))
 
   ## Measurements
 
   ### Type
 
   if(!measurements$type$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The measurement type is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "G", text = "The measurement type is mandatory"))
   else if(!measurements$type$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided measurement type (", measurements$type$code, ") is not valid. Please refer to ", reference_codes("biological", "typesOfMeasurement"), " for a list of valid measurement type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "G", text = paste0("The provided measurement type (", measurements$type$code, ") is not valid. Please refer to ", reference_codes("biological", "typesOfMeasurement"), " for a list of valid measurement type codes")))
 
   if(measurements$type$valid && measurements$type$code == "LN")
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", text = paste0("The provided measurement type (", measurements$type$code, ") refers to individual lengths: the measurement unit will be assumed to be centimeters (cm)")))
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", row = 25, column = "G", text = paste0("The provided measurement type (", measurements$type$code, ") refers to individual lengths: the measurement unit will be assumed to be centimeters (cm)")))
 
   if(measurements$type$valid && measurements$type$code == "WG")
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", text = paste0("The provided measurement type (", measurements$type$code, ") refers to individual weights: the measurement unit will be assumed to be kilograms (kg)")))
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", row = 25, column = "G", text = paste0("The provided measurement type (", measurements$type$code, ") refers to individual weights: the measurement unit will be assumed to be kilograms (kg)")))
 
   ### Measure
 
   if(!measurements$measure$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The measure is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = "The measure is mandatory"))
   else if(!measurements$measure$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided measure (", measurements$type$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = paste0("The provided measure (", measurements$type$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure codes")))
 
   ### Measuring tool
 
   if(!measurements$tool$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The measuring tool is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "G", text = "The measuring tool is mandatory"))
   else if(!measurements$tool$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided measuring tool (", measurements$tool$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTools"), " for a list of valid measuring tool codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "G", text = paste0("The provided measuring tool (", measurements$tool$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTools"), " for a list of valid measuring tool codes")))
 
   ### Size interval
 
   if(!measurements$interval$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The size interval is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 28, column = "G", text = "The size interval is mandatory"))
   else if(!measurements$interval$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided size interval (", measurements$interval$value, ") is not valid. Please ensure to provide a numeric value greater than zero")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 28, column = "G", text = paste0("The provided size interval (", measurements$interval$value, ") is not valid. Please ensure to provide a numeric value greater than zero")))
 
   ## Fate
 
   ### Type
 
   if(!fate$type$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The type of fate is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 30, column = "G", text = "The type of fate is mandatory"))
   else if(!fate$type$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided type of fate (", fate$fate$code, ") is not valid. Please refer to ", reference_codes("biological", "typesOfFate"), " for a list of valid fate type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 30, column = "G", text = paste0("The provided type of fate (", fate$fate$code, ") is not valid. Please refer to ", reference_codes("biological", "typesOfFate"), " for a list of valid fate type codes")))
 
   ### Code
 
   if(!fate$fate$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The fate is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 31, column = "G", text = "The fate is mandatory"))
   else if(!fate$fate$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fate (", fate$fate$code, ") is not valid. Please refer to ", reference_codes("biological", "fates"), " for a list of valid fate codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 31, column = "G", text = paste0("The provided fate (", fate$fate$code, ") is not valid. Please refer to ", reference_codes("biological", "fates"), " for a list of valid fate codes")))
 
   return(validation_messages)
 })

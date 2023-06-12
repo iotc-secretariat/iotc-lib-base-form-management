@@ -207,66 +207,66 @@ setMethod("common_metadata_validation_summary", signature(form = "IOTCForm", met
   ## Focal point
 
   if(!submission_information$focal_point$available$full_name)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The focal point full name is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row =  9, column = "D", text = "The focal point full name is mandatory"))
 
   if(!submission_information$focal_point$available$e_mail)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The focal point e-mail is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 10, column = "D", text = "The focal point e-mail is mandatory"))
 
   ## Organization
 
   if(!submission_information$organization$available$full_name)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The organization name is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row =  9, column = "G", text = "The organization name is mandatory"))
 
   if(!submission_information$organization$available$e_mail)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = "The organization e-mail is not available"))
+    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata",  row = 10, column = "G", text = "The organization e-mail is not available"))
 
   ## Reference dates
 
   if(!submission_information$reference_dates$finalization$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The finalization date is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 12, column = "D", text = "The finalization date is mandatory"))
   else if(!submission_information$reference_dates$finalization$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The finalization date (", submission_information$reference_dates$finalization$value, ") is not valid or is set in the future")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 12, column = "D", text = paste0("The finalization date (", submission_information$reference_dates$finalization$value, ") is not valid or is set in the future")))
 
   if(!submission_information$reference_dates$submission$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The submission date is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 13, column = "D", text = "The submission date is mandatory"))
   else if(!submission_information$reference_dates$submission$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") is not valid or is set in the future")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 13, column = "D", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") is not valid or is set in the future")))
 
   if( submission_information$reference_dates$finalization$valid &&
       submission_information$reference_dates$submission$valid &&
       !submission_information$reference_dates$checks$dates_are_coherent)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") should follow the finalization date (", submission_information$reference_dates$finalization$value, ")")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 12, column = "D", text = paste0("The submission date (", submission_information$reference_dates$submission$value, ") should follow the finalization date (", submission_information$reference_dates$finalization$value, ")")))
 
   # General information
 
   ## Reporting year
 
   if(!general_information$reporting_year$available)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = "The reporting year is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "D", text = "The reporting year is mandatory"))
   else if(!general_information$reporting_year$valid)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The reporting year (", general_information$reporting_year$value, ") must not be in the future")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "D", text = paste0("The reporting year (", general_information$reporting_year$value, ") must not be in the future")))
 
   ## Reporting entity
 
   if(!general_information$reporting_entity$available)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = "The reporting entity is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 19, column = "D", text = "The reporting entity is mandatory"))
   else if(!general_information$reporting_entity$valid)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") is not valid. Please refer to ", reference_codes("admin", "entities"), " for a list of valid entity codes")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 19, column = "D", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") is not valid. Please refer to ", reference_codes("admin", "entities"), " for a list of valid entity codes")))
 
   ## Flag country
 
   if(!general_information$flag_country$available)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = "The flag country is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "D", text = "The flag country is mandatory"))
   else if(!general_information$flag_country$valid)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided flag country (", general_information$flag_country$code, ") is not valid. Please refer to ", reference_codes("admin", "countries"), " for a list of valid country codes")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "D", text = paste0("The provided flag country (", general_information$flag_country$code, ") is not valid. Please refer to ", reference_codes("admin", "countries"), " for a list of valid country codes")))
 
   if( general_information$reporting_entity$valid &
       general_information$flag_country$valid &
      !general_information$fleet$valid)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") do not identify any valid fleet")))
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 19, column = "D", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") do not identify any valid fleet")))
 
   if(general_information$fleet$valid)
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") identify ", general_information$fleet$code, " ('", general_information$fleet$name, "') as fleet")))
+    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata",  row = 19, column = "D", text = paste0("The provided reporting entity (", general_information$reporting_entity$code, ") and flag country (", general_information$flag_country$code, ") identify ", general_information$fleet$code, " ('", general_information$fleet$name, "') as fleet")))
 
   l_debug(paste0("IOTCForm.common_metadata_validation_summary: ", Sys.time() - start))
 

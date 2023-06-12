@@ -146,7 +146,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3CE", metadata_val
 
   if(fishery$valid && fishery$category == "SURFACE") {
     if(raising$valid && raising$code != "RT")
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("Data for surface fisheries (", fishery$code, ") must be fully raised to totals, i.e., data raising shall be 'RT' (currently: ", raising$code, ")")))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 29, column = "D", text = paste0("Data for surface fisheries (", fishery$code, ") must be fully raised to totals, i.e., data raising shall be 'RT' (currently: ", raising$code, ")")))
   }
 
   ## Effort units
@@ -154,30 +154,30 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3CE", metadata_val
   ### Primary
 
   if(!effort_units$primary$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The primary effort unit is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "G", text = "The primary effort unit is mandatory"))
   else if(!effort_units$primary$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided primary effort unit (", effort_units$primary$code, ") is not valid. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "G", text = paste0("The provided primary effort unit (", effort_units$primary$code, ") is not valid. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort type codes")))
 
   ### Secondary
 
   if(!effort_units$secondary$available)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = "The provision of a secondary effort unit is recommended"))
+    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 26, column = "G", text = "The provision of a secondary effort unit is recommended"))
   else if(!effort_units$secondary$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided secondary effort unit (", effort_units$secondary$code, ") is not valid. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = paste0("The provided secondary effort unit (", effort_units$secondary$code, ") is not valid. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort type codes")))
 
   ### Tertiary
 
   if(!effort_units$tertiary$available)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = "The tertiary effort type is recommended"))
+    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 27, column = "G", text = "The tertiary effort type is recommended"))
   else if(!effort_units$tertiary$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided tertiary effort unit (", effort_units$tertiary$code, ") is not valid. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "G", text = paste0("The provided tertiary effort unit (", effort_units$tertiary$code, ") is not valid. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort type codes")))
 
   ## Catch unit
 
   if(!catch_unit$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The catch unit type is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 29, column = "G", text = "The catch unit type is mandatory"))
   else if(!catch_unit$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided catch unit type (", catch_unit$code, ") is not valid. Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 29, column = "G", text = paste0("The provided catch unit type (", catch_unit$code, ") is not valid. Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch type codes")))
 
   return(validation_messages)
 })

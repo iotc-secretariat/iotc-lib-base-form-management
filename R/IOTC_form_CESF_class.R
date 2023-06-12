@@ -169,63 +169,63 @@ setMethod("metadata_validation_summary", list(form = "IOTCFormCESF", metadata_va
   ## Fishery
 
   if(!general_information$fishery$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The fishery is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 18, column = "G", text = "The fishery is mandatory"))
   else {
     if(general_information$fishery$multiple)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fishery (", general_information$fishery$code, ") is a fishery aggregate")))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 18, column = "G", text = paste0("The provided fishery (", general_information$fishery$code, ") is a fishery aggregate")))
 
     if(!general_information$fishery$valid)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided fishery (", general_information$fishery$code, ") is not valid. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid fishery codes")))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 18, column = "G", text = paste0("The provided fishery (", general_information$fishery$code, ") is not valid. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid fishery codes")))
   }
 
   ## Species
 
   if(!general_information$target_species$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The target species is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 19, column = "G", text = "The target species is mandatory"))
   else if(!general_information$target_species$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided target species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 19, column = "G", text = paste0("The provided target species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
 
   # Data specifications
 
   ## Type of data
 
   if(!data_specifications$type_of_data$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The type of data is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = "The type of data is mandatory"))
   else if(!data_specifications$type_of_data$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided type of data (", data_specifications$type_of_data$code, ") is not valid. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = paste0("The provided type of data (", data_specifications$type_of_data$code, ") is not valid. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
 
   ## Data source
 
   if(!data_specifications$source$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The data source is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "D", text = "The data source is mandatory"))
   else if(!data_specifications$source$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided data source (", data_specifications$source$dataset, " / ", data_specifications$source$code, ") is not valid. Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes for the ", data_specifications$source$dataset, " dataset")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "D", text = paste0("The provided data source (", data_specifications$source$dataset, " / ", data_specifications$source$code, ") is not valid. Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes for the ", data_specifications$source$dataset, " dataset")))
 
   ## Data processing
 
   if(!data_specifications$processing$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The data processing is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 28, column = "D", text = "The data processing is mandatory"))
   else if(!data_specifications$processing$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided data processing (", data_specifications$source$dataset, " / ", data_specifications$processing$code, ") is not valid. Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes for the ", data_specifications$processing$dataset, " dataset")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 28, column = "D", text = paste0("The provided data processing (", data_specifications$source$dataset, " / ", data_specifications$processing$code, ") is not valid. Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes for the ", data_specifications$processing$dataset, " dataset")))
 
   ## Raising
 
   if(!data_specifications$raising$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The data raising is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 29, column = "D", text = "The data raising is mandatory"))
   else if(!data_specifications$raising$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided data raising (", data_specifications$raising$code, ") is not valid. Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 29, column = "D", text = paste0("The provided data raising (", data_specifications$raising$code, ") is not valid. Please refer to ", reference_codes("data", "raisings"), " for a list of valid data raising codes")))
 
   ## Coverage
 
   if(!data_specifications$coverage$type$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The coverage type is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 30, column = "D", text = "The coverage type is mandatory"))
   else if(!data_specifications$coverage$type$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided coverage type (", data_specifications$coverage$type$code, ") is not valid. Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid data coverage type codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 30, column = "D", text = paste0("The provided coverage type (", data_specifications$coverage$type$code, ") is not valid. Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid data coverage type codes")))
 
   if(!data_specifications$coverage$value$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = "The coverage value is mandatory"))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 31, column = "D", text = "The coverage value is mandatory"))
   else if(!data_specifications$coverage$value$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", text = paste0("The provided coverage value (", data_specifications$coverage$value$value, ") is not valid, as it should be numeric, higher than 0 and less than (or equal) to 100 (%)")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 31, column = "D", text = paste0("The provided coverage value (", data_specifications$coverage$value$value, ") is not valid, as it should be numeric, higher than 0 and less than (or equal) to 100 (%)")))
 
   return(validation_messages)
 })
@@ -420,10 +420,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
     report_data(
       validation_messages,
       records,
-      allow_empty_data(form))
+      allow_empty_data(form)
+    )
   )
-})
-
-setMethod("allow_empty_data", "IOTCFormCESF", function(form) {
-  return(TRUE)
 })
