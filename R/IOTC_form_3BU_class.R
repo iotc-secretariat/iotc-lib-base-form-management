@@ -50,6 +50,10 @@ setMethod("extract_metadata", list(form = "IOTCForm3BU", common_metadata = "list
     IOTC_number = trim(as.character(metadata_sheet[18, 7]))
   )
 
+  metadata$data_specifications = list(
+    type_of_data = trim(as.character(metadata_sheet[23, 4])),
+  )
+
   return(metadata)
 })
 
@@ -91,6 +95,7 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
   metadata = form@metadata
   general_information = metadata$general_information
+  data_specifications = metadata$data_specifications
 
   # Reporting month
 
@@ -173,7 +178,17 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
       )
     )
 
-  ## TO BE EXTENDED TO INCLUDE VALIDATION OF REPORTING MONTH AND VESSEL NAME / IOTC NUMBER
+  common_metadata_validation_results$data_specifications = list()
+
+  data_type_available = is_provided(data_specifications$type_of_data)
+  data_type_valid     = data_type_available && is_data_type_valid(data_specifications$type_of_data)
+
+  common_metadata_validation_results$data_specifications$type_of_data =
+    list(
+      available = data_type_available,
+      code      = data_specifications$type_of_data,
+      valid     = data_type_valid
+    )
 
   return(common_metadata_validation_results)
 })
@@ -388,15 +403,18 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3BU", metadata_val
 
   validation_messages = new("MessageList")
 
-  general_info = metadata_validation_results$general_information
+  general_information = metadata_validation_results$general_information
+  data_specifications = metadata_validation_results$data_specifications
 
-  # Reference month
+  # General information
 
-  if(!general_info$reporting_month$available)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = "The reporting month is mandatory"))
-  else if(!general_info$reporting_month$valid)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The reporting month (", general_info$reporting_month$value, ") is invalid: please use only 1-12 for Jan-Dec")))
-  else if(general_info$reporting_year$valid) {
+  ## Reference month
+
+  if(!general_information$reporting_month$available)
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "G", text = "The reporting month is mandatory"))
+  else if(!general_information$reporting_month$valid)
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "G", text = paste0("The reporting month (", general_info$reporting_month$value, ") is invalid: please use only 1-12 for Jan-Dec")))
+  else if(general_information$reporting_year$valid) {
     date = paste0(general_info$reporting_year$value,  '-',
                   str_sub(paste0("00", general_info$reporting_month$value), -2),
                   '-01')
@@ -404,39 +422,49 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3BU", metadata_val
     current_date = format(Sys.time(), "%Y-%m-%d")
 
     if(date > current_date) {
-      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The reporting year and month identify a date in the future (", date, ")")))
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 18, column = "D+G", text = paste0("The reporting year and month identify a date in the future (", date, ")")))
     }
   }
 
-  # Vessel name
+  ## Vessel name
 
-  if(!general_info$vessel$name$available)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = "The vessel name is missing"))
+  if(!general_information$vessel$name$available)
+    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 19, column = "G", text = "The vessel name is missing"))
 
-  if(!general_info$vessel$IOTC_number$available) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = "The vessel IOTC number (IOTCxxxxxx) is mandatory"))
-  } else if(!general_info$vessel$IOTC_number$valid) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is incorrect, as it should be in the form 'IOTC' followed by six digits")))
+  if(!general_information$vessel$IOTC_number$available) {
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = "The vessel IOTC number (IOTCxxxxxx) is mandatory"))
+  } else if(!general_information$vessel$IOTC_number$valid) {
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is incorrect, as it should be in the form 'IOTC' followed by six digits")))
   }
 
-  # Vessel mapping onto the RAV
+  ## Vessel mapping onto the RAV
 
-  if(!general_info$vessel$mapped) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is not mapped onto any RAV vessel")))
-  } else if(!general_info$vessel$current) {
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is mapped on a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") but this is currently non-authorized to operate in the IOTC area of competence")))
+  if(!general_information$vessel$mapped) {
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is not mapped onto any RAV vessel")))
+  } else if(!general_information$vessel$current) {
+    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") is mapped on a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") but this is currently non-authorized to operate in the IOTC area of competence")))
   } else {
-    if(general_info$vessel$gear != "PS") {
-      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") using ", general_info$vessel$gear, " instead of PS as gear")))
-    }
-    if(general_info$vessel$flag$differ) {
-      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different flag (", general_info$vessel$flag$current, ") than the one provided (", general_info$vessel$flag$value, ")")))
+    if(general_information$vessel$gear != "PS") {
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a RAV vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") using ", general_info$vessel$gear, " instead of PS as gear")))
     }
 
-    if(general_info$vessel$name$differ) {
-      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different name (", general_info$vessel$name$current, ") than the one provided (", general_info$vessel$name$value, ")")))
+    if(general_information$vessel$flag$differ) {
+      validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different flag (", general_info$vessel$flag$current, ") than the one provided (", general_info$vessel$flag$value, ")")))
+    }
+
+    if(general_information$vessel$name$differ) {
+      validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 20, column = "G", text = paste0("The provided vessel IOTC number (", general_info$vessel$IOTC_number$value, ") identifies a vessel (", general_info$vessel$flag$current, " / ", general_info$vessel$gear, " / ", general_info$vessel$name$current, ") with a different name (", general_info$vessel$name$current, ") than the one provided (", general_info$vessel$name$value, ")")))
     }
   }
+
+  # Data specifications
+
+  ## Type of data
+
+  if(!data_specifications$type_of_data$available)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = "The type of data is mandatory"))
+  else if(!data_specifications$type_of_data$valid)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = paste0("The provided type of data (", data_specifications$type_of_data$code, ") is not valid. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
 
   return(validation_messages)
 })
