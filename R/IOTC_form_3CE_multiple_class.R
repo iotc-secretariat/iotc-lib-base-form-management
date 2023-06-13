@@ -651,7 +651,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
   }
 
   if(catch_units$invalid$number > 0) {    # Invalid
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number, " invalid catch unit codes. Please refer to ", reference_codes("fishery", "catchUnits"), " for a list of valid catch unit codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$invalid$number, " invalid catch unit codes. Please refer to ", reference_codes("fishery", "catchUnits"), " for a list of valid catch unit codes")))
 
     for(col in catch_units$invalid$col_indexes) {
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Invalid catch unit in column ", col)))
