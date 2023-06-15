@@ -188,18 +188,31 @@ setMethod("extract_data", "IOTCForm3CE", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
-  strata = form_data[4:nrow(form_data)][, 2:7]
+  has_data = nrow(form_data) >= 4
+
+  strata = form_data[4:ifelse(has_data, nrow(form_data), 4)][, first_strata_column(form):last_strata_column(form)]
+
+  if(!has_data) {
+    strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
+  }
+
   colnames(strata) = c("MONTH", "GRID_CODE", "ESTIMATION_CODE", "PRIMARY_EFFORT", "SECONDARY_EFFORT", "TERTIARY_EFFORT")
 
   strata[, MONTH    := as.integer(MONTH)]
 
-  records = form_data[3:nrow(form_data), 8:ncol(form_data)]
+  records = form_data[3:ifelse(has_data, nrow(form_data), 3), first_data_column(form):ncol(form_data)]
 
   species_codes = unlist(lapply(records[1], trim), use.names = FALSE)
 
-  # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
-  records_original = records[2:nrow(records)]
-  records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+  if(has_data) {
+    # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
+    records_original = records[2:nrow(records)]
+    records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+  } else {
+    records_original = as.data.table(matrix(nrow = 0, ncol = length(species_codes)))
+    colnames(records_original) = species_codes
+    records          = records_original
+  }
 
   return(
     list(

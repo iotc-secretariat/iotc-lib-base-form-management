@@ -379,7 +379,30 @@ setGeneric("spreadsheet_cols_for", function(form, col_indexes) {
 
 # Doesn't need to be extended
 setMethod("spreadsheet_cols_for", signature(form = "IOTCForm", col_indexes = "numeric"), function(form, col_indexes) {
-  first_col = first_data_column(form)
+  return(
+    calculate_spreadsheet_cols_for(form, col_indexes, FALSE)
+  )
+})
+
+#' @export
+setGeneric("spreadsheet_cols_for_strata", function(form, col_indexes) {
+  standardGeneric("spreadsheet_cols_for_strata")
+})
+
+# Doesn't need to be extended
+setMethod("spreadsheet_cols_for_strata", signature(form = "IOTCForm", col_indexes = "numeric"), function(form, col_indexes) {
+  return(
+    calculate_spreadsheet_cols_for(form, col_indexes, TRUE)
+  )
+})
+
+setGeneric("calculate_spreadsheet_cols_for", function(form, col_indexes, for_strata) {
+  standardGeneric("calculate_spreadsheet_cols_for")
+})
+
+# Doesn't need to be extended
+setMethod("calculate_spreadsheet_cols_for", signature(form = "IOTCForm", col_indexes = "numeric", for_strata = "logical"), function(form, col_indexes, for_strata) {
+  first_col = ifelse(for_strata, first_strata_column(form), first_data_column(form))
 
   return(
     EXCEL_COLUMNS[first_col - 1 + col_indexes]

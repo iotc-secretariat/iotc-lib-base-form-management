@@ -9,28 +9,34 @@ report_strata = function(message_list, strata_validation) {
   message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$non_empty$number, " non-empty strata")))
   message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$unique$number,    " unique strata"   )))
 
-  # FATAL messages on empty rows
+  # FATAL message on no strata
 
-  if(strata_validation$empty_rows$number > 0) {
-    if(strata_validation$empty_rows$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(strata_validation$empty_rows$number, " empty strata detected")))
+  if(strata_validation$total == 0) {
+    message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0("Zero strata detected")))
+  } else {
+    # FATAL messages on empty rows
 
-    for(row in strata_validation$empty_rows$row_indexes)
-      message_list = add(message_list, new("Message", level = "FATAL", source = "Data", row = row, text = paste0("Empty stratum detected at row #", row)))
-  }
+    if(strata_validation$empty_rows$number > 0) {
+      if(strata_validation$empty_rows$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(strata_validation$empty_rows$number, " empty strata detected")))
 
-  # FATAL messages on empty columns
-
-  if(strata_validation$empty_columns$number > 0) {
-    if(strata_validation$empty_columns$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(strata_validation$empty_columns$number, " empty strata columns detected")))
-
-    for(col in strata_validation$empty_columns$col_indexes)
-       message_list = add(message_list, new("Message", level = "FATAL", source = "Data", column = col, text = paste0("Empty stratum column detected at column ", col)))
+      for(row in strata_validation$empty_rows$row_indexes)
+        message_list = add(message_list, new("Message", level = "FATAL", source = "Data", row = row, text = paste0("Empty stratum detected at row #", row)))
     }
 
-  # FATAL messages on duplicate strata
+    # FATAL messages on empty columns
 
-  if(strata_validation$duplicate$number > 0)
-    message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(strata_validation$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata_validation$duplicate$row_indexes, collapse = ", "))))
+    if(strata_validation$empty_columns$number > 0) {
+      if(strata_validation$empty_columns$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(strata_validation$empty_columns$number, " empty strata columns detected")))
+
+      for(col in strata_validation$empty_columns$col_indexes)
+         message_list = add(message_list, new("Message", level = "FATAL", source = "Data", column = col, text = paste0("Empty stratum column detected at column ", col)))
+      }
+
+    # FATAL messages on duplicate strata
+
+    if(strata_validation$duplicate$number > 0)
+      message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(strata_validation$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata_validation$duplicate$row_indexes, collapse = ", "))))
+  }
 
   return(message_list)
 }
@@ -268,23 +274,29 @@ report_data = function(message_list, data_validation, allow_empty_records) {
   #message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$non_empty$number, " non-empty strata")))
   #message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$unique$number,    " unique strata"   )))
 
-  # FATAL messages on empty rows
+  # FATAL / WARNING message on no records
 
-  if(data_validation$empty_rows$number > 0 && !allow_empty_records) {
-    if(data_validation$empty_rows$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(data_validation$empty_rows$number, " empty data records detected")))
+  if(data_validation$total == 0) {
+    message_list = add(message_list, new("Message", level = ifelse(allow_empty_records, "WARN", "FATAL"), source = "Data", text = paste0("Zero data records detected")))
+  } else {
+    # FATAL messages on empty rows
 
-    for(row in data_validation$empty_rows$row_indexes) {
-      message_list = add(message_list, new("Message", level = "FATAL", source = "Data", row = row, text = paste0("Empty data record detected at row #", row)))
+    if(data_validation$empty_rows$number > 0 && !allow_empty_records) {
+      if(data_validation$empty_rows$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(data_validation$empty_rows$number, " empty data records detected")))
+
+      for(row in data_validation$empty_rows$row_indexes) {
+        message_list = add(message_list, new("Message", level = "FATAL", source = "Data", row = row, text = paste0("Empty data record detected at row #", row)))
+      }
     }
-  }
 
-  # FATAL messages on empty columns
+    # FATAL messages on empty columns
 
-  if(data_validation$empty_columns$number > 0) {
-    if(data_validation$empty_columns$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(data_validation$empty_columns$number, " empty data columns detected")))
+    if(data_validation$empty_columns$number > 0) {
+      if(data_validation$empty_columns$number > 1) message_list = add(message_list, new("Message", level = "FATAL", source = "Data", text = paste0(data_validation$empty_columns$number, " empty data columns detected")))
 
-    for(col in data_validation$empty_columns$col_indexes) {
-      message_list = add(message_list, new("Message", level = "FATAL", source = "Data", column = col, text = paste0("Empty data column detected at column ", col)))
+      for(col in data_validation$empty_columns$col_indexes) {
+        message_list = add(message_list, new("Message", level = "FATAL", source = "Data", column = col, text = paste0("Empty data column detected at column ", col)))
+      }
     }
   }
 

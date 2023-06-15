@@ -39,7 +39,14 @@ setMethod("extract_data", "IOTCForm1RC", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
-  strata = form_data[4:nrow(form_data)][, first_strata_column(form):last_strata_column(form)]
+  has_data = nrow(form_data) >= 4
+
+  strata = form_data[4:ifelse(has_data, nrow(form_data), 4)][, first_strata_column(form):last_strata_column(form)]
+
+  if(!has_data) {
+    strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
+  }
+
   colnames(strata) = c("QUARTER", "FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE",
                        "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE",
                        "COVERAGE_TYPE_CODE", "COVERAGE")
@@ -47,13 +54,19 @@ setMethod("extract_data", "IOTCForm1RC", function(form) {
   strata[, QUARTER    := as.integer(QUARTER)]
   strata[, COVERAGE   := round(as.numeric(COVERAGE),   0)]
 
-  records = form_data[3:nrow(form_data), first_data_column(form):ncol(form_data)]
+  records = form_data[3:ifelse(has_data, nrow(form_data), 3), first_data_column(form):ncol(form_data)]
 
   species_codes = unlist(lapply(records[1], trim), use.names = FALSE)
 
-  # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
-  records_original = records[4:nrow(records)]
-  records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+  if(has_data) {
+    # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
+    records_original = records[2:nrow(records)]
+    records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+  } else {
+    records_original = as.data.table(matrix(nrow = 0, ncol = length(species_codes)))
+    colnames(records_original) = species_codes
+    records          = records_original
+  }
 
   return(
     list(

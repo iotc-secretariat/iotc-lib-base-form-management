@@ -89,12 +89,12 @@ setMethod("validate_data",
             missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
 
             missing_data_sources     = which( is.na(strata$DATA_SOURCE_CODE))
-            invalid_data_sources     = which(!is_data_source_valid(form_dataset_code(form), strata$DATA_SOURCE_CODE))
+            invalid_data_sources     = which(!is.na(strata$DATA_SOURCE_CODE) & !is_data_source_valid(form_dataset_code(form), strata$DATA_SOURCE_CODE))
             invalid_data_sources     = invalid_data_sources[ ! invalid_data_sources %in% missing_data_sources ]
             missing_data_sources     = missing_data_sources[ ! missing_data_sources %in% strata_empty_rows ]
 
             missing_data_processings = which( is.na(strata$DATA_PROCESSING_CODE))
-            invalid_data_processings = which(!is_data_processing_valid(form_dataset_code(form), strata$DATA_PROCESSING_CODE))
+            invalid_data_processings = which(!is.na(strata$DATA_PROCESSING_CODE) & !is_data_processing_valid(form_dataset_code(form), strata$DATA_PROCESSING_CODE))
             invalid_data_processings = invalid_data_processings[ ! invalid_data_processings %in% missing_data_processings ]
             missing_data_processings = missing_data_processings[ ! missing_data_processings %in% strata_empty_rows ]
 
@@ -133,7 +133,7 @@ setMethod("validate_data",
                   ),
                   empty_columns = list(
                     number      = length(strata_empty_columns),
-                    col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
+                    col_indexes = spreadsheet_cols_for_strata(form, strata_empty_columns)
                   ),
                   total = list(
                     number = total_strata

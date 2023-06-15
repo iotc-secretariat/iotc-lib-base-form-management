@@ -61,17 +61,29 @@ setMethod("extract_data", "IOTCForm3BU", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
-  strata = form_data[(first_data_row(form) - 2):nrow(form_data)][, first_strata_column(form):last_strata_column(form)]
+  has_data = nrow(form_data) >= 4
+
+  strata = form_data[4:ifelse(has_data, nrow(form_data), 4)][, first_strata_column(form):last_strata_column(form)]
+
+  if(!has_data) {
+    strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
+  }
+
   colnames(strata) = c("DAY_OF_MONTH", "BUOY_ID")
 
   strata[, DAY_OF_MONTH := as.integer(DAY_OF_MONTH)]
   strata[, BUOY_ID      := trim(as.character(BUOY_ID))]
 
-  records = form_data[(first_data_row(form) - 2):nrow(form_data), first_data_column(form):ncol(form_data)]
+  records = form_data[3:ifelse(has_data, nrow(form_data), 3), first_data_column(form):ncol(form_data)]
 
-  # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
-  records_original = records #[2:nrow(records)]
-  records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 10)) })]
+  if(has_data) {
+    # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
+    records_original = records #[2:nrow(records)]
+    records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 10)) })]
+  } else {
+    records_original = as.data.table(matrix(nrow = 0, ncol = 2))
+    records          = records_original
+  }
 
   colnames(records_original) = c("LATITUDE", "LONGITUDE")
   colnames(records)          = c("LATITUDE", "LONGITUDE")
@@ -245,7 +257,7 @@ setMethod("validate_strata",
                 ),
                 empty_columns = list(
                   number      = length(strata_empty_columns),
-                  col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
+                  col_indexes = spreadsheet_cols_for_strata(form, strata_empty_columns)
                 ),
                 total = list(
                   number = total_strata

@@ -279,7 +279,7 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
         ),
         empty_columns = list(
           number      = length(strata_empty_columns),
-          col_indexes = spreadsheet_cols_for(form, strata_empty_columns)
+          col_indexes = spreadsheet_cols_for_strata(form, strata_empty_columns)
         ),
         total = list(
           number = total_strata
