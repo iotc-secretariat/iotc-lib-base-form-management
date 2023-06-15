@@ -95,15 +95,18 @@ setMethod("extract_data", "IOTCForm3CEMultiple", function(form) {
   records = form_data[2:nrow(form_data), first_data_column(form):ncol(form_data)]
 
   species_codes    = unlist(lapply(records[1], trim), use.names = FALSE)
+  if(length(species_codes) == 1 && is.na(species_codes[1])) species_codes = NA
+
   catch_unit_codes = unlist(lapply(records[2], trim), use.names = FALSE)
+  if(length(catch_unit_codes) == 1 && is.na(catch_unit_codes[1])) catch_unit_codes = NA
 
   if(has_data) {
     # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
     records_original = records[3:nrow(records)]
     records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
   } else {
-    records_original = as.data.table(matrix(nrow = 0, ncol = length(species_codes)))
-    colnames(records_original) = species_codes
+    records_original = as.data.table(matrix(nrow = 0, ncol = ifelse(is.na(species_codes), 0, length(species_codes))))
+    if(!is.na(species_codes)) colnames(records_original) = species_codes
     records          = records_original
   }
 
