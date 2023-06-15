@@ -201,7 +201,7 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
 
   data_validation_results$strata$checks$main$grids$wrong = list(
     number       = length(wrong_grid_types),
-    row_indexes  = wrong_grid_types,
+    row_indexes  = spreadsheet_rows_for(form, wrong_grid_types),
     codes        = strata$GRID_CODE[wrong_grid_types],
     codes_unique = unique(strata$GRID_CODE[wrong_grid_types])
   )

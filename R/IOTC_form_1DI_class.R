@@ -309,7 +309,7 @@ setMethod("data_validation_summary",
             # Data issues / summary
 
             conditions = checks_records$conditions
-            conditions_row = 3
+            conditions_row = 5
 
             if(conditions$missing$number > 0) {   # Missing
               if(conditions$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, text = paste0(conditions$missing$number , " missing condition codes")))

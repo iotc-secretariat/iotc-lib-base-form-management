@@ -236,6 +236,21 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
 
   data_validation_results = callNextMethod(form, metadata_validation_results)
 
+  has_primary_effort_set   = metadata_validation_results$data_specifications$effort_units$primary$available
+  has_secondary_effort_set = metadata_validation_results$data_specifications$effort_units$secondary$available
+  has_tertiary_effort_set  = metadata_validation_results$data_specifications$effort_units$tertiary$available
+
+  current_strata_empty_columns = data_validation_results$strata$empty_columns
+
+  # Removes the 'empty strata columns' identified for effort measures that are not set
+  if(!has_primary_effort_set)   current_strata_empty_columns$col_indexes = current_strata_empty_columns$col_indexes[which(current_strata_empty_columns$col_indexes != "E")]
+  if(!has_secondary_effort_set) current_strata_empty_columns$col_indexes = current_strata_empty_columns$col_indexes[which(current_strata_empty_columns$col_indexes != "F")]
+  if(!has_tertiary_effort_set)  current_strata_empty_columns$col_indexes = current_strata_empty_columns$col_indexes[which(current_strata_empty_columns$col_indexes != "G")]
+
+  current_strata_empty_columns$number = length(current_strata_empty_columns$col_indexes)
+
+  data_validation_results$strata$empty_columns = current_strata_empty_columns
+
   strata  = form@data$strata
 
   strata_empty_rows    = find_empty_rows(strata)
@@ -316,9 +331,6 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
 
   # Check that effort values are > 0 when provided, and that if there's an effort, then the corresponding code is
   # set in the metadata
-
-  has_secondary_effort = FALSE
-  has_tertiary_effort  = FALSE
 
   missing_primary_efforts = which( is.na(strata$PRIMARY_EFFORT))
   invalid_primary_efforts = which(!is_effort_valid(strata$PRIMARY_EFFORT))

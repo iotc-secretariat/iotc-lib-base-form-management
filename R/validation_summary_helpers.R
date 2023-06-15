@@ -387,7 +387,7 @@ report_effort_values = function(message_list, effort_value_validation, type = "p
     }
   } else {
     if(effort_value_validation$values_provided) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = "Secondary effort values provided, but no secondary effort unit is found in the metadata"))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0("Effort values provided, but no ", type, " effort unit is found in the metadata")))
     }
   }
 
