@@ -141,7 +141,7 @@ setMethod("validate_data",
             unique_strata    = non_empty_strata[ ! non_empty_strata %in% duplicate_strata ]
 
             missing_discard_reasons = which( is.na(strata$DISCARD_REASON_CODE))
-            invalid_discard_reasons = which(!is_discard_reason_valid(strata$DISCARD_REASON_CODE))
+            invalid_discard_reasons = which(!is.na(strata$DISCARD_REASON_CODE) & !is_discard_reason_valid(strata$DISCARD_REASON_CODE))
             invalid_discard_reasons = invalid_discard_reasons[ ! invalid_discard_reasons %in% missing_discard_reasons ]
             missing_discard_reasons = missing_discard_reasons[ ! missing_discard_reasons %in% strata_empty_rows ]
 
