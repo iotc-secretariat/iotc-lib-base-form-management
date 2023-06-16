@@ -74,7 +74,7 @@ setMethod("extract_data", "IOTCForm3BU", function(form) {
   strata[, DAY_OF_MONTH := as.integer(DAY_OF_MONTH)]
   strata[, BUOY_ID      := trim(as.character(BUOY_ID))]
 
-  records = form_data[3:ifelse(has_data, nrow(form_data), 3), first_data_column(form):ncol(form_data)]
+  records = form_data[4:ifelse(has_data, nrow(form_data), 4), first_data_column(form):ncol(form_data)]
 
   if(has_data) {
     # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...

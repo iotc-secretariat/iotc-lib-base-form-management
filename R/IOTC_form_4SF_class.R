@@ -251,19 +251,31 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
-  strata = form_data[4:nrow(form_data)][, 2:6]
+  has_data = nrow(form_data) >= 4
+
+  strata = form_data[4:ifelse(has_data, nrow(form_data), 4)][, first_strata_column(form):last_strata_column(form)]
+
+  if(!has_data) {
+    strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
+  }
+
   colnames(strata) = c("MONTH", "GRID_CODE", "SEX_CODE", "ESTIMATION_CODE", "SIZE_CLASS_LOW")
 
   strata[, SIZE_CLASS_LOW := round(as.numeric(SIZE_CLASS_LOW), 0)]
   strata[, MONTH    := as.integer(MONTH)]
 
-  records = form_data[4:nrow(form_data), 7:ncol(form_data)]
+  records = form_data[4:ifelse(has_data, nrow(form_data), 4), first_data_column(form):ncol(form_data)]
 
-  colnames(records) = c("NUM_SAMPLES", "NUM_FISH")
-  records_original = records
+  if(has_data) {
+    records_original = data.table(NUM_SAMPLES = records[, 1], NUM_FISH = records[, 2])
+    # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
+    records = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+  } else {
+    records_original = as.data.table(matrix(nrow = 0, ncol = 2))
+    colnames(records_original) = c("NUM_SAMPLES", "NUM_FISH")
 
-  # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
-  records = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+    records          = records_original
+  }
 
   return(
     list(
@@ -388,21 +400,20 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
   sizes_original = records$data$CE_SF_data_original
   sizes          = records$data$CE_SF_data
 
-  numeric_sizes =
-    sizes_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
+  numeric_sizes = sizes_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
 
-  non_num_sizes_samples  = numeric_sizes$NUM_SAMPLES == FALSE #sum(numeric_sizes$NUM_SAMPLES == FALSE, na.rm = TRUE)
-  non_num_sizes_fish     = numeric_sizes$NUM_FISH == FALSE    #sum(numeric_sizes$NUM_FISH    == FALSE, na.rm = TRUE)
+  non_num_sizes_samples  = numeric_sizes$NUM_SAMPLES == FALSE
+  non_num_sizes_fish     = numeric_sizes$NUM_FISH    == FALSE
 
-  na_samples       = which(non_num_sizes_samples == FALSE    & is.na(sizes$NUM_SAMPLES), arr.ind = TRUE) #sum(non_num_sizes_samples == TRUE & is.na(sizes$NUM_SAMPLES), na.rm = TRUE)
-  zero_samples     = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES == 0,   arr.ind = TRUE) #sum(non_num_sizes_samples == TRUE & sizes$NUM_SAMPLES == 0,   na.rm = TRUE)
-  positive_samples = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES  > 0,   arr.ind = TRUE) #sum(non_num_sizes_samples == TRUE & sizes$NUM_SAMPLES  > 0,   na.rm = TRUE)
-  negative_samples = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES  < 0,   arr.ind = TRUE) #sum(non_num_sizes_samples == TRUE & sizes$NUM_SAMPLES  < 0,   na.rm = TRUE)
+  na_samples       = which(non_num_sizes_samples == FALSE    & is.na(sizes$NUM_SAMPLES), arr.ind = TRUE)
+  zero_samples     = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES == 0,   arr.ind = TRUE)
+  positive_samples = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES  > 0,   arr.ind = TRUE)
+  negative_samples = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES  < 0,   arr.ind = TRUE)
 
-  na_fish       = which(non_num_sizes_fish == FALSE  & is.na(sizes$NUM_FISH), arr.ind = TRUE) #sum(non_num_sizes_fish == TRUE    & is.na(sizes$NUM_FISH), na.rm = TRUE)
-  zero_fish     = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH == 0, arr.ind = TRUE) #sum(non_num_sizes_fish == TRUE    & sizes$NUM_FISH == 0,   na.rm = TRUE)
-  positive_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  > 0, arr.ind = TRUE) #sum(non_num_sizes_fish == TRUE    & sizes$NUM_FISH  > 0,   na.rm = TRUE)
-  negative_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  < 0, arr.ind = TRUE) #sum(non_num_sizes_fish == TRUE    & sizes$NUM_FISH  < 0,   na.rm = TRUE)
+  na_fish       = which(non_num_sizes_fish == FALSE  & is.na(sizes$NUM_FISH), arr.ind = TRUE)
+  zero_fish     = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH == 0, arr.ind = TRUE)
+  positive_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  > 0, arr.ind = TRUE)
+  negative_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  < 0, arr.ind = TRUE)
 
   data_validation_results$records$checks = list(
     samples = list(

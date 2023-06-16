@@ -82,7 +82,14 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
   form_metadata = form@original_metadata
   form_data     = form@original_data
 
-  strata = form_data[4:nrow(form_data)][, c(2:21)]
+  has_data = nrow(form_data) >= 4
+
+  strata = form_data[4:ifelse(has_data, nrow(form_data), 4)][, first_strata_column(form):last_strata_column(form)]
+
+  if(!has_data) {
+    strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
+  }
+
   colnames(strata) = c("MONTH", "FISHERY_CODE", "TARGET_SPECIES_CODE", "GRID_CODE", "SPECIES_CODE", "SEX_CODE", "FATE_TYPE_CODE", "FATE_CODE", "ESTIMATION_CODE",
                        "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE", "DATA_RAISING_CODE",
                        "COVERAGE_TYPE_CODE", "COVERAGE",
@@ -91,14 +98,17 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
 
   strata[, MONTH    := as.integer(MONTH)]
 
-  records = form_data[2:nrow(form_data), 22:23]
+  records = form_data[4:ifelse(has_data, nrow(form_data), 4), first_data_column(form):ncol(form_data)]
 
-  # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
-  num_samples_original = records[3:nrow(records), 1]
-  num_fish_original    = records[3:nrow(records), 2]
-
-  num_samples = num_samples_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
-  num_fish    = num_fish_original   [, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+  if(has_data) {
+    records_original = data.table(NUM_SAMPLES = records[, 1], NUM_FISH = records[, 2])
+    # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
+    records = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
+  } else {
+    records_original = as.data.table(matrix(nrow = 0, ncol = 2))
+    colnames(records_original) = c("NUM_SAMPLES", "NUM_FISH")
+    records          = records_original
+  }
 
   l_debug(paste0("IOTCForm4SFMultiple.extract_data: ", Sys.time() - start))
 
@@ -108,12 +118,12 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
       records =
         list(
           data = list(
-            CE_SF_data_original  = data.table(NUM_SAMPLES = num_samples_original, NUM_FISH = num_fish_original),
-            CE_SF_data           = data.table(NUM_SAMPLES = num_samples, NUM_FISH = num_fish),
-            num_samples_original = num_samples_original,
-            num_samples          = num_samples,
-            num_fish_original    = num_fish_original,
-            num_fish             = num_fish
+            CE_SF_data_original  = records_original,
+            CE_SF_data           = records,
+            num_samples_original = records_original$NUM_SAMPLES,
+            num_samples          = records$NUM_SAMPLES,
+            num_fish_original    = records_original$NUM_FISH,
+            num_fish             = records$NUM_FISH
           )
         )
     )
@@ -243,7 +253,7 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
   missing_fate_type = missing_fate_type[ ! missing_fate_type %in% strata_empty_rows ]
 
   missing_fate = which( is.na(strata$FATE_CODE))
-  invalid_fate = which(!is_fate_valid(strata$FATE_TYPE_CODE, strata$FATE_CODE))
+  invalid_fate = which(!is.na(strata$FATE_CODE) & !is_fate_valid(strata$FATE_TYPE_CODE, strata$FATE_CODE))
   invalid_fate = invalid_fate[ ! invalid_fate %in% missing_fate ]
   missing_fate = missing_fate[ ! missing_fate %in% strata_empty_rows ]
 
@@ -253,17 +263,17 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
   ### Measurement type / measure / tool code
 
   missing_measurement_type = which( is.na(strata$MEASUREMENT_TYPE_CODE))
-  invalid_measurement_type = which(!is_measurement_type_valid(strata$MEASUREMENT_TYPE_CODE))
+  invalid_measurement_type = which(!is.na(strata$MEASUREMENT_TYPE_CODE) & !is_measurement_type_valid(strata$MEASUREMENT_TYPE_CODE))
   invalid_measurement_type = invalid_measurement_type[ ! invalid_measurement_type %in% missing_measurement_type ]
   missing_measurement_type = missing_measurement_type[ ! missing_measurement_type %in% strata_empty_rows ]
 
   missing_measure = which( is.na(strata$MEASURE_CODE))
-  invalid_measure = which(!is_measurement_valid(strata$MEASUREMENT_TYPE_CODE, strata$MEASURE_CODE))
+  invalid_measure = which(!is.na(strata$MEASURE_CODE) & !is_measurement_valid(strata$MEASUREMENT_TYPE_CODE, strata$MEASURE_CODE))
   invalid_measure = invalid_measure[ ! invalid_measure %in% missing_measure ]
   missing_measure = missing_measure[ ! missing_measure %in% strata_empty_rows ]
 
   missing_measuring_tool = which( is.na(strata$MEASURING_TOOL_CODE))
-  invalid_measuring_tool = which(!is_measuring_tool_valid(strata$MEASUREMENT_TYPE_CODE, strata$MEASURING_TOOL_CODE))
+  invalid_measuring_tool = which(!is.na(strata$MEASURING_TOOL_CODE) & !is_measuring_tool_valid(strata$MEASUREMENT_TYPE_CODE, strata$MEASURING_TOOL_CODE))
   invalid_measuring_tool = invalid_measuring_tool[ ! invalid_measuring_tool %in% missing_measuring_tool ]
   missing_measuring_tool = missing_measuring_tool[ ! missing_measuring_tool %in% strata_empty_rows ]
 
@@ -425,22 +435,22 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
 
   records = form@data$records$data
 
-  num_samples_original = records$num_samples_original[[1]]
-  num_samples          = records$num_samples[[1]]
+  num_samples_original = records$num_samples_original
+  num_samples          = records$num_samples
 
   is_value_numeric = function(value) { return(is.na(value) | is_numeric(value)) }
 
-  numeric_num_samples = is_value_numeric(num_samples_original)
+  numeric_num_samples = ifelse(length(num_samples_original) == 0, num_samples_original, is_value_numeric(num_samples_original))
 
   na_samples       = which(numeric_num_samples == TRUE & is.na(num_samples), arr.ind = TRUE)
   zero_samples     = which(numeric_num_samples == TRUE & num_samples == 0,   arr.ind = TRUE)
   negative_samples = which(numeric_num_samples == TRUE & num_samples  < 0,   arr.ind = TRUE)
   positive_samples = which(numeric_num_samples == TRUE & num_samples  > 0,   arr.ind = TRUE)
 
-  num_fish_original    = records$num_fish_original[[1]]
-  num_fish             = records$num_fish[[1]]
+  num_fish_original = records$num_fish_original
+  num_fish          = records$num_fish
 
-  numeric_num_fish = is_value_numeric(num_fish_original)
+  numeric_num_fish = ifelse(length(num_fish_original) == 0, num_fish_original, is_value_numeric(num_fish_original))
 
   na_fish       = which(numeric_num_fish == TRUE & is.na(num_fish), arr.ind = TRUE)
   zero_fish     = which(numeric_num_fish == TRUE & num_fish == 0,   arr.ind = TRUE)

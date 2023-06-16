@@ -269,6 +269,11 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
   incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("GRID_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
+  non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
+  duplicate_strata = which(strata$OCCURRENCES > 1)   #which(strata_duplicated$COUNT > 1)
+  duplicate_strata = duplicate_strata[ ! duplicate_strata %in% strata_empty_rows ]
+  unique_strata    = non_empty_strata[ ! non_empty_strata %in% duplicate_strata ]
+
   grid_size = function(code) {
     return(
       fifelse(is.na(code) | code == "",
@@ -311,11 +316,6 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
     codes        = strata$GRID_CODE[wrong_grid_types],
     codes_unique = unique(strata$GRID_CODE[wrong_grid_types])
   )
-
-  non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
-  duplicate_strata = which(strata$OCCURRENCES > 1)   #which(strata_duplicated$COUNT > 1)
-  duplicate_strata = duplicate_strata[ ! duplicate_strata %in% strata_empty_rows ]
-  unique_strata    = non_empty_strata[ ! non_empty_strata %in% duplicate_strata ]
 
   data_validation_results$strata$duplicate =
     list(
@@ -548,7 +548,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
 
   ## Species
 
-  validation_messages = report_species(validation_messages, checks_records$species, spreadsheet_rows_for(form, 2))
+  validation_messages = report_species(validation_messages, checks_records$species, 6)
 
   ## Catches
 

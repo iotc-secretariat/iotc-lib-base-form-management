@@ -405,7 +405,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
   }
 
   if(estimations$invalid$number > 0) { # Applies to 3CE and 4SF
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(estimations$invalid$number, " invalid estimation code(s) reported. Please refer to ", reference_codes("data", "estimates"), " for a list of valid estimation codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = estimation_col, text = paste0(estimations$invalid$number, " invalid estimation code(s) reported. Please refer to ", reference_codes("data", "estimates"), " for a list of valid estimation codes")))
 
     for(row in estimations$invalid$row_indexes)
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = estimation_col, text = paste0("Invalid estimation code in row #", row)))
