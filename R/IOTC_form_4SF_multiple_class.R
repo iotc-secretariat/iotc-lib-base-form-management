@@ -96,6 +96,9 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
                        "MEASUREMENT_TYPE_CODE", "MEASURE_CODE", "MEASURING_TOOL_CODE",
                        "SIZE_CLASS_LOW", "SIZE_CLASS_HIGH")
 
+  strata[, SIZE_CLASS_LOW  := floor(as.numeric(SIZE_CLASS_LOW))]
+  strata[, SIZE_CLASS_HIGH := floor(as.numeric(SIZE_CLASS_HIGH))]
+
   strata[, MONTH    := as.integer(MONTH)]
 
   records = form_data[4:ifelse(has_data, nrow(form_data), 4), first_data_column(form):ncol(form_data)]
@@ -107,7 +110,7 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
   } else {
     records_original = as.data.table(matrix(nrow = 0, ncol = 2))
     colnames(records_original) = c("NUM_SAMPLES", "NUM_FISH")
-    records          = records_original
+    records = records_original
   }
 
   l_debug(paste0("IOTCForm4SFMultiple.extract_data: ", Sys.time() - start))
@@ -119,11 +122,7 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
         list(
           data = list(
             CE_SF_data_original  = records_original,
-            CE_SF_data           = records,
-            num_samples_original = records_original$NUM_SAMPLES,
-            num_samples          = records$NUM_SAMPLES,
-            num_fish_original    = records_original$NUM_FISH,
-            num_fish             = records$NUM_FISH
+            CE_SF_data           = records
           )
         )
     )
@@ -435,27 +434,23 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
 
   records = form@data$records$data
 
-  num_samples_original = records$num_samples_original
-  num_samples          = records$num_samples
+  sizes_original = records$data$CE_SF_data_original
+  sizes          = records$data$CE_SF_data
 
-  is_value_numeric = function(value) { return(is.na(value) | is_numeric(value)) }
+  numeric_sizes = sizes_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
 
-  numeric_num_samples = ifelse(length(num_samples_original) == 0, num_samples_original, is_value_numeric(num_samples_original))
+  non_num_sizes_samples  = numeric_sizes$NUM_SAMPLES == FALSE
+  non_num_sizes_fish     = numeric_sizes$NUM_FISH    == FALSE
 
-  na_samples       = which(numeric_num_samples == TRUE & is.na(num_samples), arr.ind = TRUE)
-  zero_samples     = which(numeric_num_samples == TRUE & num_samples == 0,   arr.ind = TRUE)
-  negative_samples = which(numeric_num_samples == TRUE & num_samples  < 0,   arr.ind = TRUE)
-  positive_samples = which(numeric_num_samples == TRUE & num_samples  > 0,   arr.ind = TRUE)
+  na_samples       = which(non_num_sizes_samples == FALSE    & is.na(sizes$NUM_SAMPLES), arr.ind = TRUE)
+  zero_samples     = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES == 0,   arr.ind = TRUE)
+  positive_samples = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES  > 0,   arr.ind = TRUE)
+  negative_samples = which(numeric_sizes$NUM_SAMPLES == TRUE & sizes$NUM_SAMPLES  < 0,   arr.ind = TRUE)
 
-  num_fish_original = records$num_fish_original
-  num_fish          = records$num_fish
-
-  numeric_num_fish = ifelse(length(num_fish_original) == 0, num_fish_original, is_value_numeric(num_fish_original))
-
-  na_fish       = which(numeric_num_fish == TRUE & is.na(num_fish), arr.ind = TRUE)
-  zero_fish     = which(numeric_num_fish == TRUE & num_fish == 0,   arr.ind = TRUE)
-  negative_fish = which(numeric_num_fish == TRUE & num_fish  < 0,   arr.ind = TRUE)
-  positive_fish = which(numeric_num_fish == TRUE & num_fish  > 0,   arr.ind = TRUE)
+  na_fish       = which(non_num_sizes_fish == FALSE  & is.na(sizes$NUM_FISH), arr.ind = TRUE)
+  zero_fish     = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH == 0, arr.ind = TRUE)
+  positive_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  > 0, arr.ind = TRUE)
+  negative_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  < 0, arr.ind = TRUE)
 
   l_debug(paste0("IOTCForm4SFMultiple.validate_data (XII): ", Sys.time() - start))
 
@@ -478,8 +473,8 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
         row_indexes = spreadsheet_rows_for(form, negative_samples)
       ),
       non_num  = list(
-        number = length(which(numeric_num_samples == FALSE)),
-        row_indexes = spreadsheet_rows_for(form, which(numeric_num_samples == FALSE))
+        number = length(which(non_num_sizes_samples == TRUE)),
+        row_indexes = spreadsheet_rows_for(form, which(non_num_sizes_samples == TRUE))
       )
     ),
     fish = list(
@@ -500,8 +495,8 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
         row_indexes = spreadsheet_rows_for(form, negative_fish)
       ),
       non_num  = list(
-        number = length(which(numeric_num_fish == FALSE)),
-        row_indexes = spreadsheet_rows_for(form, which(numeric_num_fish == FALSE))
+        number = length(which(non_num_sizes_fish == TRUE)),
+        row_indexes = spreadsheet_rows_for(form, which(non_num_sizes_fish == TRUE))
       )
     )
   )

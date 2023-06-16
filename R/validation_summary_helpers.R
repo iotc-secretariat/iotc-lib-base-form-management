@@ -5,9 +5,11 @@
 report_strata = function(message_list, strata_validation) {
   # Generic INFO messages on strata composition
 
-  message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$total$number,     " total strata"    )))
-  message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$non_empty$number, " non-empty strata")))
-  message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$unique$number,    " unique strata"   )))
+  if(strata_validation$total$number > 0) {
+    message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$total$number,     " total strata"    )))
+    message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$non_empty$number, " non-empty strata")))
+    message_list = add(message_list, new("Message", level = "INFO", source = "Data", text = paste0(strata_validation$unique$number,    " unique strata"   )))
+  }
 
   # FATAL message on no strata
 

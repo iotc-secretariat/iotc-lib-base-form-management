@@ -261,7 +261,8 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
 
   colnames(strata) = c("MONTH", "GRID_CODE", "SEX_CODE", "ESTIMATION_CODE", "SIZE_CLASS_LOW")
 
-  strata[, SIZE_CLASS_LOW := round(as.numeric(SIZE_CLASS_LOW), 0)]
+  strata[, SIZE_CLASS_LOW  := floor(as.numeric(SIZE_CLASS_LOW))]
+
   strata[, MONTH    := as.integer(MONTH)]
 
   records = form_data[4:ifelse(has_data, nrow(form_data), 4), first_data_column(form):ncol(form_data)]
@@ -273,8 +274,7 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
   } else {
     records_original = as.data.table(matrix(nrow = 0, ncol = 2))
     colnames(records_original) = c("NUM_SAMPLES", "NUM_FISH")
-
-    records          = records_original
+    records = records_original
   }
 
   return(
