@@ -211,8 +211,8 @@ setMethod("extract_data", "IOTCForm3CE", function(form) {
     records_original = records[2:nrow(records)]
     records          = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
   } else {
-    records_original = as.data.table(matrix(nrow = 0, ncol = ifelse(is.na(species_codes), 0, length(species_codes))))
-    if(!is.na(species_codes)) colnames(records_original) = species_codes
+    records_original = as.data.table(matrix(nrow = 0, ncol = ifelse(is_available(species_codes), 0, length(species_codes))))
+    if(!is_available(species_codes)) colnames(records_original) = species_codes
     records          = records_original
   }
 
