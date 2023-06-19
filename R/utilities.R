@@ -60,10 +60,13 @@ reference_codes = function(domain, codelist) {
 
 find_empty_rows = function(data_table) {
   return(
-    data_table[
-      rowSums(is.na(data_table)) == ncol(data_table),
-      which = TRUE
-    ]
+    ifelse(
+      nrow(data_table) == 0, as.integer(c()),
+      data_table[
+        rowSums(is.na(data_table)) == ncol(data_table),
+        which = TRUE
+      ]
+    )
   )
 }
 
@@ -77,8 +80,10 @@ has_empty_rows = function(data_table) {
 
 find_empty_columns = function(data_table) {
   return(
-    which(
-      colSums(is.na(data_table)) == nrow(data_table)
+    ifelse(ncol(data_table) == 0, as.integer(c()),
+           which(
+             colSums(is.na(data_table)) == nrow(data_table)
+           )
     )
   )
 }
