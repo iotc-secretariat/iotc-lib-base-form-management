@@ -167,8 +167,8 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm3CE", metadata_val
 
   ### Tertiary
 
-  if(!effort_units$tertiary$available)
-    validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 27, column = "G", text = "The tertiary effort type is recommended"))
+  #if(!effort_units$tertiary$available)
+  #  validation_messages = add(validation_messages, new("Message", level = "WARN", source = "Metadata", row = 27, column = "G", text = "The tertiary effort type is recommended"))
   else if(!effort_units$tertiary$valid)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "G", text = paste0("The provided tertiary effort unit (", effort_units$tertiary$code, ") is not valid. Please refer to ", reference_codes("fisheries", "effortUnits"), " for a list of valid effort type codes")))
 
