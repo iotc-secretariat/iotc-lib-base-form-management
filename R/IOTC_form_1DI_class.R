@@ -378,3 +378,72 @@ setMethod("data_validation_summary",
             return(validation_messages)
           }
 )
+
+## OUTPUT
+
+setMethod("extract_output", list(form = "IOTCForm1DI", wide = "logical"),
+          function(form, wide) {
+            form = read(form)
+
+            form_metadata = extract_metadata(form, common_metadata(form@original_metadata))
+            form_data     = extract_data(form)
+
+            strata = form_data$strata
+            data   = form_data$records$data$catches
+
+            species_qualifiers = paste0(form_data$records$codes$species, "_",
+                                        form_data$records$codes$conditions, "_",
+                                        form_data$records$codes$raisings, "_",
+                                        form_data$records$codes$catch_units)
+
+            colnames(data) = species_qualifiers
+
+
+            year = form_metadata$general_information$reporting_year
+            fleet = fleets_for(form_metadata$general_information$reporting_entity,
+                               form_metadata$general_information$flag_country)
+
+            strata$YEAR                   = year
+            strata$REPORTING_ENTITY_CODE  = form_metadata$general_information$reporting_entity
+            strata$FLAG_COUNTRY_CODE      = form_metadata$general_information$flag_country
+            strata$FLEET_CODE             = fleet$FLEET_CODE
+
+            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE)
+            strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                YEAR, QUARTER,
+                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
+                                IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE)]
+
+            output_data = cbind(strata, data)
+
+            if(!wide) {
+              output_data = melt.data.table(output_data,
+                                            id.vars = 1:17,
+                                            value.name = "CATCH",
+                                            variable.name = "SPECIES_QUALIFIER_CODE")
+
+              species_qualifiers = str_split(string = output_data$SPECIES_QUALIFIER_CODE,
+                                             pattern = "\\_",
+                                             simplify = TRUE)
+
+              output_data[, SPECIES_CODE    := species_qualifiers[, 1]]
+              output_data[, CONDITION_CODE  := species_qualifiers[, 2]]
+              output_data[, RAISING_CODE    := species_qualifiers[, 3]]
+              output_data[, CATCH_UNIT_CODE := species_qualifiers[, 4]]
+
+              output_data$SPECIES_QUALIFIER_CODE = NULL
+
+              output_data = output_data[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                            YEAR, QUARTER,
+                                            FISHERY_CODE, TARGET_SPECIES_CODE,
+                                            GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                            DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
+                                            IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE,
+                                            SPECIES_CODE, CONDITION_CODE, RAISING_CODE, CATCH, CATCH_UNIT_CODE)]
+            }
+
+            return(output_data)
+          }
+)

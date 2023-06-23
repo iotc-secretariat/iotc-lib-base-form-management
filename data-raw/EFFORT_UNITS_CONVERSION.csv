@@ -1,0 +1,20 @@
+CODE,EFFORT_CODE,NAME_EN
+BO,BOATS,Number of boats
+DS,DAYS,Number of days at sea
+FD,FDAYS,Number of fishing days
+FH,FHOURS,Number of hours fishing
+HA,HAUL,Haul
+HK,HOOKS,Number of hooks
+LH,LH,Line-hours
+MD,MD,Men-days
+MH,MH,Man-hours
+NP,LINES,Number of lines (poles)
+NS,SETS,Number of sets
+NT,NETS,Net-days
+PS,SETS,Number of positive sets
+SD,SDAYS,Number of searching days
+SH,HOURS,Number of hours at sea
+SR,HRSRH,Number of hours searching
+ST,STDHR,Number of hours fishing standardized
+TR,TRIPS,Number of trips
+,UNCL,Unknown

@@ -556,3 +556,78 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
 
   return(validation_messages)
 })
+
+## OUTPUT
+
+setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
+          function(form, wide) {
+            form = read(form)
+
+            form_metadata = extract_metadata(form, common_metadata(form@original_metadata))
+            form_data     = extract_data(form)
+
+            strata = form_data$strata
+            data   = form_data$records$data$CE_SF_data
+            colnames(data) = form_data$records$codes$species
+
+            year = form_metadata$general_information$reporting_year
+            fleet = fleets_for(form_metadata$general_information$reporting_entity,
+                               form_metadata$general_information$flag_country)
+
+            strata$YEAR                  = year
+            strata$REPORTING_ENTITY_CODE = form_metadata$general_information$reporting_entity
+            strata$FLAG_COUNTRY_CODE     = form_metadata$general_information$flag_country
+            strata$FLEET_CODE            = fleet$FLEET_CODE
+
+            strata$FISHERY_CODE          = form_metadata$general_information$fishery
+            strata$TARGET_SPECIES_CODE   = form_metadata$general_information$target_species
+
+            strata$DATA_TYPE_CODE        = form_metadata$data_specifications$type_of_data
+            strata$DATA_SOURCE_CODE      = form_metadata$data_specifications$data_source
+            strata$DATA_PROCESSING_CODE  = form_metadata$data_specifications$data_processing
+            strata$DATA_RAISING_CODE     = form_metadata$data_specifications$data_raising
+            strata$COVERAGE_TYPE_CODE    = form_metadata$data_specifications$coverage_type
+            strata$COVERAGE              = form_metadata$data_specifications$coverage_value
+
+            strata$PRIMARY_EFFORT_CODE   = form_metadata$data_specifications$effort_units$primary
+            strata$SECONDARY_EFFORT_CODE = form_metadata$data_specifications$effort_units$secondary
+            strata$TERTIARY_EFFORT_CODE  = form_metadata$data_specifications$effort_units$tertiary
+            strata$CATCH_UNIT_CODE       = form_metadata$data_specifications$catch_unit
+
+            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE)
+            strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                YEAR, MONTH,
+                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
+                                GRID_CODE, ESTIMATION_CODE,
+                                PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT,
+                                CATCH_UNIT_CODE)]
+
+            output_data = cbind(strata, data)
+
+            if(!wide) {
+              output_data = melt.data.table(output_data,
+                                            id.vars = 1:25,
+                                            value.name = "CATCH",
+                                            variable.name = "SPECIES_CODE")
+
+              output_data =
+                output_data[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                YEAR, MONTH,
+                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
+                                GRID_CODE, ESTIMATION_CODE,
+                                PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT,
+                                SPECIES_CODE, CATCH, CATCH_UNIT_CODE)]
+
+              output_data = # To remove meaningless records (i.e., those with species and / or catch unit code set, but with NA as catch) and enable correct handlign of records with efforts only (for a given strata)
+                unique(
+                  output_data[is.na(CATCH), `:=`(SPECIES_CODE = NA, CATCH_UNIT_CODE = NA)]
+                )
+            }
+
+            return(output_data)
+          }
+)

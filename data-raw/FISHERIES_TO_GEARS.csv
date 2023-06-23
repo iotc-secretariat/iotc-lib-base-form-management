@@ -1,0 +1,71 @@
+FISHERY_CODE,GEAR_CODE,MAIN_GEAR_CODE,SCHOOL_TYPE_CODE,NAME_EN
+AG00,UNCL,UNCL,,Unidentified
+AG01,BBPS,BBPS,,Baitboat and purse seine
+AG02,GIHA,GIHA,,Gillnet and handline
+AG03,GIHT,GIHT,,"Gillnet, handline and trolling"
+AG04,,,,"Gillnet, hand line, trolling and small purse seines"
+AG05,G/L,GL,,Gillnet / longline
+AG06,,,,Handline and pole and line (mechanized boats)
+AG07,,,,Handline and pole and line (non-mechanized boats)
+AG08,HATR,HATR,,Handline and trolling
+AG09,HABBTR,HABBTR,,"Handline, trolling and pole and line"
+AG10,LLHA,LLHA,,Longline / handline
+AG11,LLTR,LLTR,,Longline and trolling
+AG12,RRBB,RRBB,,Rod-and-reel and pole and line
+AG13,,,,Trawl and lines
+AG14,,,,Handline and Beach seine
+BS,BS,BS,,Beach seine
+CN,CN,CN,,Cast net
+DL,DL,DL,,Dropline (vertical handline)
+DLLS,,DL,LA,Dropline on anchored-FAD
+DS,DSEI,DSEI,,Danish seine
+DSDM,DDSEI,DDSEI,,Demersal Danish seine
+GI,GILL,GILL,,Gillnet
+GIDR,DGN,DGN,,Driftnet
+GILF,GL,GL,,Gillnet (operated attached to a longline)
+GIOF,GIOF,GIOF,,Offshore gillnet
+HL,HAND,HAND,,Handline
+HLLS,HANP,HAND,LA,Handline with payao
+HLOF,HLOF,HLOF,,Offshore handline
+HR,HARP,HARP,,Harpoon
+LL,LL,LL,,Drifting longline (over 1800 hooks)
+LLCO,LLCO,LLCO,,Small longline
+LLEX,LLEX,LLEX,,Drifting longline (exploratory)
+SL,LLF,LLF,,Set longline
+LLFR,FLL,FLL,,Drifting longline (up to 1800 hooks)
+LLGI,LG,LG,,Longline (operated attached to Gillnet)
+LLSI,ELL,ELL,,Swordfish longline (semi-industrial)
+LLSK,SLL,SLL,,Shark longline
+LLSW,ELL,ELL,,Swordfish longline (Florida longline)
+LLTU,LL,LL,,Tuna longline
+LN,LIFT,LIFT,,Liftnet
+LNPA,,LIFT,LA,Liftnet on anchored-FAD
+PL,BB,BB,,Pole and line
+PLDF,,BB,FD,Dolphin associated school pole and line
+PLFS,,BB,FS,Free school pole and line
+PLIN,BBOF,BBOF,,Industrial pole and line
+PLME,BBM,BBM,,Pole and line (mechanized boats)
+PLNM,BBN,BBN,,Pole and line (non-mechanized boats)
+PLOF,BBOF,BBOF,,Pole and line (semi-industrial)
+PLPA,,BB,LA,Pole and line on anchored-FAD
+PS,PS,PS,,Tuna purse seine
+PSFS,PSFS,PS,FS,Free-school tuna purse seine
+PSLS,PSLS,PS,LS,Log-school tuna purse seine
+PSPA,PSP,PS,LA,Purse seine with payao
+PSRN,RIN,RIN,,Ringnet
+PSRO,RNOF,RNOF,,Offshore ringnet
+PSRP,RINP,RIN,LA,Ringnet with payao
+PSSA,PSS,PSS,LA,Coastal purse seine on anchored-FAD
+PSSF,PSS,PSS,FS,Free school coastal purse seine
+PSSP,SUPP,SUPP,,Supply vessel industrial purse seiner
+PSSS,PSS,PSS,,Small purse seines
+SN,FN,FN,,Setnet
+SP,SPOR,SPOR,,Sport fishing
+TL,TROL,TROL,,Trolling
+TLME,TROLM,TROLM,,Trolling (mechanized boats)
+TLNM,TROLN,TROLN,,Trolling (non-mechanized boats)
+TP,TRAP,TRAP,,Trap
+TR,TRAW,TRAW,,Trawl
+RR,RR,RR,,Rod and Reel
+,TROT,TROT,,Trotline
+,HOOK,HOOK,,Hook and line

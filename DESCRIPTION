@@ -9,10 +9,10 @@ License: Proprietary
 Encoding: UTF-8
 LazyData: true
 Depends:
-    stringr,
-    memoise,
     data.table,
+    lubridate,
     openxlsx,
+    stringr,
     iotc.core.utils.misc,
     iotc.data.reference.codelists,
     R (>= 2.10)

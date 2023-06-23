@@ -474,3 +474,9 @@ setGeneric("common_data_validation_summary", function(form, metadata_validation_
 setGeneric("data_validation_summary", function(form, metadata_validation_results, data_validation_results) {
   standardGeneric("data_validation_summary")
 })
+
+## OUTPUT
+
+setGeneric("extract_output", function(form, wide) {
+  standardGeneric("extract_output")
+})

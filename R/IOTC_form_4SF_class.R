@@ -269,6 +269,7 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
 
   if(has_data) {
     records_original = data.table(NUM_SAMPLES = records[, 1], NUM_FISH = records[, 2])
+    colnames(records_original) = c("NUM_SAMPLES", "NUM_FISH")
     # Might raise the "Warning in FUN(X[[i]], ...) : NAs introduced by coercion" message when catches include non-numeric values...
     records = records_original[, lapply(.SD, function(value) { return(round(as.numeric(value), 2)) })]
   } else {
@@ -525,3 +526,79 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
 
   return(validation_messages)
 })
+
+## OUTPUT
+
+setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
+          function(form, wide) {
+            form = read(form)
+
+            form_metadata = extract_metadata(form, common_metadata(form@original_metadata))
+            form_data     = extract_data(form)
+
+            strata = form_data$strata
+            data   = form_data$records$data$CE_SF_data
+
+            year = form_metadata$general_information$reporting_year
+            fleet = fleets_for(form_metadata$general_information$reporting_entity,
+                               form_metadata$general_information$flag_country)
+
+            strata$YEAR                  = year
+            strata$REPORTING_ENTITY_CODE = form_metadata$general_information$reporting_entity
+            strata$FLAG_COUNTRY_CODE     = form_metadata$general_information$flag_country
+            strata$FLEET_CODE            = fleet$FLEET_CODE
+
+            strata$FISHERY_CODE          = form_metadata$general_information$fishery
+            strata$TARGET_SPECIES_CODE   = form_metadata$general_information$target_species
+            strata$SPECIES_CODE          = form_metadata$general_information$species
+
+            strata$DATA_TYPE_CODE        = form_metadata$data_specifications$type_of_data
+            strata$DATA_SOURCE_CODE      = form_metadata$data_specifications$data_source
+            strata$DATA_PROCESSING_CODE  = form_metadata$data_specifications$data_processing
+            strata$DATA_RAISING_CODE     = form_metadata$data_specifications$data_raising
+            strata$COVERAGE_TYPE_CODE    = form_metadata$data_specifications$coverage_type
+            strata$COVERAGE              = form_metadata$data_specifications$coverage_value
+
+            strata$MEASUREMENT_TYPE_CODE = form_metadata$data_specifications$measurements$type
+            strata$MEASURE_CODE          = form_metadata$data_specifications$measurements$measure
+            strata$MEASURING_TOOL_CODE   = form_metadata$data_specifications$measurements$tool
+            #strata$SIZE_INTERVAL         = form_metadata$data_specifications$measurements$interval
+
+            strata$FATE_TYPE_CODE        = form_metadata$data_specifications$fate$type
+            strata$FATE_CODE             = form_metadata$data_specifications$fate$fate
+
+            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE)
+            strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                YEAR, MONTH,
+                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
+                                GRID_CODE, ESTIMATION_CODE,
+                                SPECIES_CODE, MEASUREMENT_TYPE_CODE, MEASURE_CODE, MEASURING_TOOL_CODE,
+                                FATE_TYPE_CODE, FATE_CODE, SEX_CODE,
+                                SIZE_CLASS_LOW, SIZE_CLASS_HIGH = SIZE_CLASS_LOW + as.numeric(form_metadata$data_specifications$measurements$interval) - 1,
+                                NUM_SAMPLES_STRATA = NA_real_)]
+
+            output_data = cbind(strata, data)
+
+            output_data[, NUM_SAMPLES := round(as.numeric(output_data$NUM_SAMPLES), 2)]
+            output_data[, NUM_FISH    := round(as.numeric(output_data$NUM_FISH), 2)]
+
+            output_data =
+              output_data[, NUM_SAMPLES_STRATA := sum(NUM_SAMPLES, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                                                                         YEAR, MONTH,
+                                                                                         FISHERY_CODE, TARGET_SPECIES_CODE,
+                                                                                         GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                                                                         DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
+                                                                                         GRID_CODE, ESTIMATION_CODE,
+                                                                                         SPECIES_CODE, MEASUREMENT_TYPE_CODE, MEASURE_CODE, MEASURING_TOOL_CODE,
+                                                                                         FATE_TYPE_CODE, FATE_CODE, SEX_CODE)]
+
+
+            if(!wide) {
+              output_data = output_data # no difference
+            }
+
+            return(output_data)
+          }
+)
