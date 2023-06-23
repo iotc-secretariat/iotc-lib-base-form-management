@@ -319,6 +319,6 @@ setMethod("extract_output", list(form = "IOTCForm1RC", wide = "logical"),
                                     variable.name = "SPECIES_CODE")
     }
 
-    return(output_data)
+    return(output_data[!is.na(CATCH) & CATCH > 0])
   }
 )

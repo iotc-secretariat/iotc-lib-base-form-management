@@ -16,8 +16,17 @@ convert_catch_unit = function(code) {
 convert_1RC = function(filename, source_code = "LO", quality_code = "GOOD") {
   form = new("IOTCForm1RC", path_to_file = filename)
 
-  output = extract_output(form, FALSE)
+  return(
+    do_convert_1RC(
+      extract_output(form, FALSE),
+      source_code,
+      quality_code
+    )
+  )
+}
 
+#' @export
+do_convert_1RC = function(output, source_code, quality_code) {
   output =
     output[, `:=`(START_DATE = quarter_to_date_start(YEAR, QUARTER),
                   END_DATE   = quarter_to_date_end  (YEAR, QUARTER))]
@@ -65,6 +74,7 @@ convert_3CE_multiple = function(filename, source_code = "LO", quality_code = "GO
   )
 }
 
+#' @export
 do_convert_3CE = function(output, source_code, quality_code) {
   output =
     output[, `:=`(START_DATE = month_to_date_start(YEAR, MONTH),
@@ -127,6 +137,7 @@ convert_4SF_multiple = function(filename, source_code = "LO", quality_code = "GO
   )
 }
 
+#' @export
 do_convert_4SF = function(output, source_code, quality_code) {
   output =
     output[, `:=`(START_DATE = month_to_date_start(YEAR, MONTH),

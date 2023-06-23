@@ -624,7 +624,7 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
 
               output_data = # To remove meaningless records (i.e., those with species and / or catch unit code set, but with NA as catch) and enable correct handlign of records with efforts only (for a given strata)
                 unique(
-                  output_data[is.na(CATCH), `:=`(SPECIES_CODE = NA, CATCH_UNIT_CODE = NA)]
+                  output_data[is.na(CATCH) | CATCH == 0, `:=`(SPECIES_CODE = NA, CATCH_UNIT_CODE = NA)]
                 )
             }
 
