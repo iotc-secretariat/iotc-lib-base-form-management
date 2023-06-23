@@ -416,6 +416,8 @@ setMethod("extract_output", list(form = "IOTCForm1DI", wide = "logical"),
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE)]
 
+            data = data[, lapply(.SD, function(value) { return(ifelse(is.na(value) | as.numeric(value) == 0, NA_real_, round(as.numeric(value), 2))) })]
+
             output_data = cbind(strata, data)
 
             if(!wide) {
@@ -435,15 +437,15 @@ setMethod("extract_output", list(form = "IOTCForm1DI", wide = "logical"),
 
               output_data$SPECIES_QUALIFIER_CODE = NULL
 
-              output_data = output_data[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
-                                            YEAR, QUARTER,
-                                            FISHERY_CODE, TARGET_SPECIES_CODE,
-                                            GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
-                                            DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
-                                            IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE,
-                                            SPECIES_CODE, CONDITION_CODE, RAISING_CODE, CATCH, CATCH_UNIT_CODE)]
+              output_data = output_data[!is.na(CATCH) & CATCH > 0, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                                                     YEAR, QUARTER,
+                                                                     FISHERY_CODE, TARGET_SPECIES_CODE,
+                                                                     GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                                                     DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
+                                                                     IOTC_MAIN_AREA_CODE, DISCARD_REASON_CODE,
+                                                                     SPECIES_CODE, CONDITION_CODE, RAISING_CODE, CATCH, CATCH_UNIT_CODE)]
             }
 
-            return(output_data[!is.na(CATCH) & CATCH > 0])
+            return(output_data)
           }
 )

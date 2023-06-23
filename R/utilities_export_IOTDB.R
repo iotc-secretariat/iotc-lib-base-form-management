@@ -101,14 +101,21 @@ do_convert_3CE = function(output, source_code, quality_code) {
   output[, TOTAL := sum(CATCH, na.rm = TRUE), by = .(CO, GEAR, YEAR, MONTH, SCHOOLTYPE, SIZE, Q, LAT, LON, EUNIT, EFFORT_CODE, CUNIT, EFFORT)]
   output[!is.na(EFFORT_CODE), EUNIT := EFFORT_CODE]
 
-  return(
+  output =
     dcast.data.table(
       data = output,
       formula = CO + GEAR + YEAR + MONTH + SCHOOLTYPE + SIZE + Q + LAT + LON + EUNIT + CUNIT + EFFORT + TOTAL ~ SPECIES_CODE,
       fun.aggregate = function(v) { return(sum(v, na.rm = TRUE)) },
       value.var = "CATCH"
     )
-  )
+
+  strata = output[, 1:13]
+  strata[TOTAL == 0, TOTAL := NA]
+
+  data   = output[, 14:ncol(output)]
+  data   = data[, lapply(.SD, function(value) { return(ifelse(is.na(value) | value == 0, NA_real_, round(as.numeric(value), 2))) })]
+
+  return(cbind(strata, data))
 }
 
 #' @export

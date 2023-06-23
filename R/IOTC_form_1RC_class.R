@@ -310,15 +310,17 @@ setMethod("extract_output", list(form = "IOTCForm1RC", wide = "logical"),
                         IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE,
                         CATCH_UNIT_CODE = "T")]
 
+    data = data[, lapply(.SD, function(value) { return(ifelse(is.na(value) | value == 0, NA_real_, round(as.numeric(value), 2))) })]
+
     output_data = cbind(strata, data)
 
     if(!wide) {
       output_data = melt.data.table(output_data,
                                     id.vars = 1:18,
                                     value.name = "CATCH",
-                                    variable.name = "SPECIES_CODE")
+                                    variable.name = "SPECIES_CODE")[!is.na(CATCH) & CATCH > 0]
     }
 
-    return(output_data[!is.na(CATCH) & CATCH > 0])
+    return(output_data)
   }
 )

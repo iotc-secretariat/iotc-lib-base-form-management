@@ -604,6 +604,8 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
                                 PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT,
                                 CATCH_UNIT_CODE)]
 
+            data = data[, lapply(.SD, function(value) { return(ifelse(is.na(value) | value == 0, NA_real_, round(as.numeric(value), 2))) })]
+
             output_data = cbind(strata, data)
 
             if(!wide) {
@@ -622,10 +624,10 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
                                 PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT,
                                 SPECIES_CODE, CATCH, CATCH_UNIT_CODE)]
 
-              output_data = # To remove meaningless records (i.e., those with species and / or catch unit code set, but with NA as catch) and enable correct handlign of records with efforts only (for a given strata)
-                unique(
-                  output_data[is.na(CATCH) | CATCH == 0, `:=`(SPECIES_CODE = NA, CATCH_UNIT_CODE = NA)]
-                )
+              # To remove meaningless records (i.e., those with species and / or catch unit code set, but with NA as catch) and enable correct handlign of records with efforts only (for a given strata)
+              output_data[is.na(CATCH) | CATCH == 0, `:=`(CATCH = NA, SPECIES_CODE = NA, CATCH_UNIT_CODE = NA)]
+
+              output_data = unique(output_data)[is.na(CATCH) | CATCH > 0]
             }
 
             return(output_data)
