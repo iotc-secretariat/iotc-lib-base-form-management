@@ -12,6 +12,7 @@ convert_catch_unit = function(code) {
   )
 }
 
+#' @export
 convert_1RC = function(filename, source_code = "LO", quality_code = "GOOD") {
   form = new("IOTCForm1RC", path_to_file = filename)
 
@@ -38,6 +39,7 @@ convert_1RC = function(filename, source_code = "LO", quality_code = "GOOD") {
   )
 }
 
+#' @export
 convert_3CE = function(filename, source_code = "LO", quality_code = "GOOD") {
   form = new("IOTCForm3CE", path_to_file = filename)
 
@@ -50,6 +52,7 @@ convert_3CE = function(filename, source_code = "LO", quality_code = "GOOD") {
   )
 }
 
+#' @export
 convert_3CE_multiple = function(filename, source_code = "LO", quality_code = "GOOD") {
   form = new("IOTCForm3CEMultiple", path_to_file = filename)
 
@@ -98,6 +101,7 @@ do_convert_3CE = function(output, source_code, quality_code) {
   )
 }
 
+#' @export
 convert_4SF = function(filename, source_code = "LO", quality_code = "GOOD") {
   form = new("IOTCForm4SF", path_to_file = filename)
 
@@ -110,6 +114,7 @@ convert_4SF = function(filename, source_code = "LO", quality_code = "GOOD") {
   )
 }
 
+#' @export
 convert_4SF_multiple = function(filename, source_code = "LO", quality_code = "GOOD") {
   form = new("IOTCForm4SFMultiple", path_to_file = filename)
 
@@ -127,6 +132,8 @@ do_convert_4SF = function(output, source_code, quality_code) {
     output[, `:=`(START_DATE = month_to_date_start(YEAR, MONTH),
                   END_DATE   = month_to_date_end  (YEAR, MONTH))]
 
+  output = merge(output, MEASURE_MAPPINGS, by.x = "MEASURE_CODE", by.y = "CODE", all.x = TRUE)
+
   return(
     output[, .(Country = FLAG_COUNTRY_CODE,
                ReportingCountry = REPORTING_ENTITY_CODE,
@@ -137,7 +144,7 @@ do_convert_4SF = function(output, source_code, quality_code) {
                Species = SPECIES_CODE,
                SchoolType = SCHOOL_TYPE_CODE,
                Source = source_code,
-               MeasType = MEASURE_CODE,
+               MeasType = MEASURE_TYPE_CODE,
                RaisingCode = DATA_RAISING_CODE,
                #SampleSize = round(as.numeric(NUM_SAMPLES), 2),
                SampleSize = round(as.numeric(NUM_SAMPLES_STRATA), 2),

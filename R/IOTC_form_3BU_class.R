@@ -631,3 +631,48 @@ setMethod("common_data_validation_summary",
             return(new("MessageList"))
           }
 )
+
+## OUTPUT
+
+setMethod("extract_output", list(form = "IOTCForm3BU", wide = "logical"),
+          function(form, wide) {
+            form = read(form)
+
+            form_metadata = extract_metadata(form, common_metadata(form@original_metadata))
+            form_data     = extract_data(form)
+
+            strata = form_data$strata
+            data   = form_data$records$data$positions
+
+            year  = form_metadata$general_information$reporting_year
+            month = form_metadata$general_information$reporting_month
+            fleet = fleets_for(form_metadata$general_information$reporting_entity,
+                               form_metadata$general_information$flag_country)
+
+            vessel_name   = form_metadata$general_information$vessel$name
+            vessel_number = form_metadata$general_information$vessel$IOTC_number
+
+            strata$YEAR                   = year
+            strata$MONTH                  = month
+            strata$REPORTING_ENTITY_CODE  = form_metadata$general_information$reporting_entity
+            strata$FLAG_COUNTRY_CODE      = form_metadata$general_information$flag_country
+            strata$FLEET_CODE             = fleet$FLEET_CODE
+            strata$VESSEL_NAME            = vessel_name
+            strata$VESSEL_IOTC_NUMBER     = vessel_number
+            strata$TYPE_OF_DATA           = form_metadata$data_specifications$type_of_data
+
+            strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
+                                VESSEL_NAME, VESSEL_IOTC_NUMBER, TYPE_OF_DATA,
+                                YEAR, MONTH, DAY = DAY_OF_MONTH,
+                                BUOY_ID)]
+
+            output_data = cbind(strata, data)
+
+            if(!wide) {
+              output_data = output_data
+            }
+
+            return(output_data)
+          }
+)
+

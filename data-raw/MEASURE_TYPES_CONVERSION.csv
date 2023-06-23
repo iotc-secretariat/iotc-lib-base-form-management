@@ -1,0 +1,27 @@
+TYPE_OF_MEASUREMENT_CODE,CODE,MEASURE_TYPE_CODE,NAME_EN
+LN,CF,CF,Cleithrum-fork of the tail length
+LN,CK,CKL,Cleithrum-keel length
+LN,CL,CL,Carapace Length (total carapace length - notch to notch)
+LN,DF,LDF,Dorsal fork length (anterior insertion of the dorsal fin to the fork of the tail)
+LN,EF,EFL,Eye to fork length (caudal margin of eye to the fork of the tail)
+LN,FD,MLD,First dorsal length also called pre-dorsal length (tip of the upper jaw to the insertion of the first dorsal spine)
+LN,FL,FL,Tip of snout-fork of the tail length
+LN,JF,,Upper jaw to the fork of the tail length (tip of upper jaw to fork of tail)
+LN,PA,PAL,Pectoral-anal length (anterior insertion of pectoral fin to posterior rim of the anal fin);
+LN,PC,PCL,Precaudal Length (tip of head to anterior portion of the caudal keel)
+LN,PD,PDUL,Pectoral-dorsal length (anterior insertion of the pectoral fin to the anterior insertion of the second dorsal fin)
+LN,PF,PCL,Pectoral fork length (anterior insertion of pectoral fin to the fork of the tail)
+LN,TL,TL,"Total length (for sharks: from tip of snout to extreme end of tail in a straight line, for seabirds: tip of bill to tip of tail)"
+LN,TW,TW,Total width (total disc width)
+LN,UN,UNCL,Unknown
+LN,WL,,Wing length (bend of the wing to the tip of the longest primary feathers)
+WG,GG,GGT,Gilled-and-gutted (bill-off)
+WG,GO,,Gutted only (gills left)
+WG,GT,,"Gilled, gutted and tailed"
+WG,HD,HDD,Headed-and-gutted
+WG,HG,,"Headed, gutted and tailed"
+WG,HT,,Headed and tailed
+WG,PD,PPD,Headed and caudal peduncle-off
+WG,PR,,Processed (unspecified)
+WG,RD,RND,Unprocessed (round)
+WG,UN,UNCL,Unknown

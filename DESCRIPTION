@@ -38,4 +38,6 @@ Collate:
     'metadata.R'
     'reference_checks.R'
     'utilities.R'
+    'utilities_export.R'
+    'utilities_export_IOTDB.R'
     'validation_summary_helpers.R'
