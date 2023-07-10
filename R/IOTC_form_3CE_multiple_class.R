@@ -574,7 +574,8 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
       validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = "The provided fishery belongs to the 'surface' category and therefore catches are assumed to be reported in live-weight equivalent and raised to totals by default"))
     }
 
-    if(data_specifications$catch_unit$code == "NO" && fishery_info$category != "LONGLINE") {
+    if(!is.na(data_specifications$catch_unit$code) && data_specifications$catch_unit$code == "NO" &&
+       !is.na(fishery_info$category) &&  fishery_info$category != "LONGLINE") {
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = "Catches shall be provided in weight (either kg or t)"))
     }
   }
