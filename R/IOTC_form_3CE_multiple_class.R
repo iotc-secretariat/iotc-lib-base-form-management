@@ -55,7 +55,7 @@ setMethod("validate_months_multiple", list(form = "IOTCForm3CEMultiple", strata 
 
   l_info("IOTCForm3CEMultiple.validate_months")
 
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
@@ -90,7 +90,8 @@ setMethod("extract_data", "IOTCForm3CEMultiple", function(form) {
                        "COVERAGE_TYPE_CODE", "COVERAGE",
                        "PRIMARY_EFFORT_CODE", "PRIMARY_EFFORT", "SECONDARY_EFFORT_CODE", "SECONDARY_EFFORT", "TERTIARY_EFFORT_CODE", "TERTIARY_EFFORT")
 
-  strata[, MONTH    := as.integer(MONTH)]
+  strata[, MONTH_ORIGINAL := MONTH]
+  strata[, MONTH          := as.integer(MONTH)]
 
   records = form_data[2:nrow(form_data), first_data_column(form):ncol(form_data)]
 

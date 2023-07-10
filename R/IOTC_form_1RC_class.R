@@ -51,6 +51,9 @@ setMethod("extract_data", "IOTCForm1RC", function(form) {
                        "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE",
                        "COVERAGE_TYPE_CODE", "COVERAGE")
 
+  strata[, QUARTER_ORIGINAL  := QUARTER]
+  strata[, COVERAGE_ORIGINAL := COVERAGE]
+
   strata[, QUARTER    := as.integer(QUARTER)]
   strata[, COVERAGE   := round(as.numeric(COVERAGE),   0)]
 
@@ -92,8 +95,8 @@ setMethod("validate_quarters",
           function(form, strata) {
             l_info("IOTCForm1RC.validate_quarters")
 
-            all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
-            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+            all_year_quarter_strata = unique(strata[!is.na(QUARTER_ORIGINAL) & QUARTER == 0, .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
+            valid_quarters_strata   = strata[!is.na(QUARTER_ORIGINAL) & QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
             overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             incomplete_quarters_strata  = valid_quarters_strata[NUM_QUARTERS < 4]
@@ -132,8 +135,8 @@ setMethod("validate_data",
             strata[, OCCURRENCES := .N, by = .(QUARTER, FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
             # If all quarters are provided and valid, we check that they're also consistent...
-            all_year_quarter_strata = unique(strata[QUARTER == 0, .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
-            valid_quarters_strata   = strata[QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+            all_year_quarter_strata = unique(strata[!is.na(QUARTER_ORIGINAL) & QUARTER == 0, .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)])
+            valid_quarters_strata   = strata[!is.na(QUARTER_ORIGINAL) & QUARTER %in% 1:4, .(NUM_QUARTERS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
             overlapping_quarters_strata = merge(all_year_quarter_strata, valid_quarters_strata, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "IOTC_MAIN_AREA_CODE", "RETAIN_REASON_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
             incomplete_quarters_strata  = valid_quarters_strata[NUM_QUARTERS < 4]

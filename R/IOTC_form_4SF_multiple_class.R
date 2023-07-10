@@ -58,7 +58,7 @@ setMethod("validate_months_multiple", list(form = "IOTCForm4SFMultiple", strata 
 #                                                                               MEASUREMENT_TYPE_CODE, MEASURE_CODE,
 #                                                                               SIZE_CLASS_LOW, SIZE_CLASS_HIGH)]
 
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, SPECIES_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, SPECIES_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
@@ -99,7 +99,8 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
   strata[, SIZE_CLASS_LOW  := floor(as.numeric(SIZE_CLASS_LOW))]
   strata[, SIZE_CLASS_HIGH := floor(as.numeric(SIZE_CLASS_HIGH))]
 
-  strata[, MONTH    := as.integer(MONTH)]
+  strata[, MONTH_ORIGINAL := MONTH]
+  strata[, MONTH          := as.integer(MONTH)]
 
   records = form_data[4:ifelse(has_data, nrow(form_data), 4), first_data_column(form):ncol(form_data)]
 

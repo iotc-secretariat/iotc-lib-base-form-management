@@ -1,11 +1,15 @@
 #library(iotc.data.common.workflow.legacy)
 library(data.table)
+library(lubridate)
 library(openxlsx)
 library(stringr)
 library(iotc.core.db.data)
 library(iotc.data.reference.codelists)
 
-source("./data-raw/LOAD_RAV.R")
+#source("./data-raw/LOAD_RAV.R")
+source("./data-raw/READ_FISHERY_MAPPINGS.R")
+source("./data-raw/READ_EFFORT_MAPPINGS.R")
+source("./data-raw/READ_MEASURE_MAPPINGS.R")
 source("./R/constants.R")
 source("./R/utilities.R")
 source("./R/reference_checks.R")
@@ -13,6 +17,9 @@ source("./R/field_checks.R")
 source("./R/data_checks.R")
 source("./R/metadata.R")
 source("./R/forms.R")
+source("./R/validation_summary_helpers.R")
+source("./R/utilities_export.R")
+source("./R/utilities_export_IOTDB.R")
 
 debugSource("./R/Message_class.R",                 echo = TRUE)
 debugSource("./R/IOTC_form_class.R",               echo = TRUE)
@@ -33,6 +40,8 @@ FORM_1RC =
       original_name = "Form-1RC.xlsx"
   )
 
+
+extract_output
 #summary = validation_summary(FORM_1RC)
 
 FORM_1DI =

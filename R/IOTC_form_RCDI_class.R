@@ -36,14 +36,20 @@ setMethod("validate_data",
           function(form, metadata_validation_results) {
             l_info("IOTCFormRCDI.validate_data")
 
+            strata_orig = form@data$strata
+            strata_orig$QUARTER  = strata_orig$QUARTER_ORIGINAL
+            strata_orig$COVERAGE = strata_orig$COVERAGE_ORIGINAL
+            strata_orig$QUARTER_ORIGINAL  = NULL
+            strata_orig$COVERAGE_ORIGINAL = NULL
+
             strata  = form@data$strata
             records = form@data$records
 
             catch_data_original = records$data$catches_original
             catch_data          = records$data$catches
 
-            strata_empty_rows    = find_empty_rows(strata)
-            strata_empty_columns = find_empty_columns(strata)
+            strata_empty_rows    = find_empty_rows(strata_orig)
+            strata_empty_columns = find_empty_columns(strata_orig)
 
             strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
@@ -53,8 +59,8 @@ setMethod("validate_data",
             data_empty_rows    = find_empty_rows(catch_data)
             data_empty_columns = find_empty_columns(catch_data)
 
-            missing_quarters   = which( is.na(strata$QUARTER))
-            invalid_quarters   = which(!is_quarter_valid(strata$QUARTER))
+            missing_quarters   = which( is.na(strata$QUARTER_ORIGINAL))
+            invalid_quarters   = which(!is.na(strata$QUARTER_ORIGINAL) & !is_quarter_valid(strata$QUARTER))
             invalid_quarters   = invalid_quarters[ ! invalid_quarters %in% missing_quarters ]
             missing_quarters   = missing_quarters[ ! missing_quarters %in% strata_empty_rows]
 

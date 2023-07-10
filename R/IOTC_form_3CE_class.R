@@ -44,7 +44,7 @@ setMethod("last_strata_column", "IOTCForm3CE", function(form) {
 setMethod("validate_months", list(form = "IOTCForm3CE", strata = "data.table"), function(form, strata) {
   l_info("IOTCForm3CE.validate_months")
 
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
@@ -198,7 +198,8 @@ setMethod("extract_data", "IOTCForm3CE", function(form) {
 
   colnames(strata) = c("MONTH", "GRID_CODE", "ESTIMATION_CODE", "PRIMARY_EFFORT", "SECONDARY_EFFORT", "TERTIARY_EFFORT")
 
-  strata[, MONTH    := as.integer(MONTH)]
+  strata[, MONTH_ORIGINAL := MONTH]
+  strata[, MONTH          := as.integer(MONTH)]
 
   records = form_data[3:ifelse(has_data, nrow(form_data), 3), first_data_column(form):ncol(form_data)]
 
@@ -254,15 +255,18 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
   data_validation_results$strata$empty_columns = current_strata_empty_columns
 
   strata  = form@data$strata
+  strata_orig = form@data$strata
+  strata_orig$MONTH = strata_orig$MONTH_ORIGINAL
+  strata_orig$MONTH_ORIGINAL  = NULL
 
-  strata_empty_rows    = find_empty_rows(strata)
-  strata_empty_columns = find_empty_columns(strata[, 1:3]) # Effort values shall not be considered, as some of them (either secondary, or tertiary, or both) might be left all empty
+  strata_empty_rows    = find_empty_rows(strata_orig)
+  strata_empty_columns = find_empty_columns(strata_orig[, 1:3]) # Effort values shall not be considered, as some of them (either secondary, or tertiary, or both) might be left all empty
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
   strata[, OCCURRENCES := .N, by = .(MONTH, GRID_CODE)]
 
   # If all months are provided and valid, we check that they're also consistent...
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 

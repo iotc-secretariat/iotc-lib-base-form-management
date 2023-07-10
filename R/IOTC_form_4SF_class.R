@@ -44,7 +44,7 @@ setMethod("last_strata_column", "IOTCForm4SF", function(form) {
 setMethod("validate_months", list(form = "IOTCForm4SF", strata = "data.table"), function(form, strata) {
   l_info("IOTCForm4SF.validate_months")
 
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE, SEX_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE, SEX_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
@@ -263,7 +263,8 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
 
   strata[, SIZE_CLASS_LOW  := floor(as.numeric(SIZE_CLASS_LOW))]
 
-  strata[, MONTH    := as.integer(MONTH)]
+  strata[, MONTH_ORIGINAL := MONTH]
+  strata[, MONTH          := as.integer(MONTH)]
 
   records = form_data[4:ifelse(has_data, nrow(form_data), 4), first_data_column(form):ncol(form_data)]
 
@@ -298,15 +299,18 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
   data_validation_results = callNextMethod(form, metadata_validation_results)
 
   strata  = form@data$strata
+  strata_orig = form@data$strata
+  strata_orig$MONTH = strata_orig$MONTH_ORIGINAL
+  strata_orig$MONTH_ORIGINAL  = NULL
 
-  strata_empty_rows    = find_empty_rows(strata)
-  strata_empty_columns = find_empty_columns(strata[, c(1:3, 5)])
+  strata_empty_rows    = find_empty_rows(strata_orig)
+  strata_empty_columns = find_empty_columns(strata_orig[, c(1:3, 5)])
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
   strata[, OCCURRENCES := .N, by = .(MONTH, GRID_CODE, SEX_CODE, SIZE_CLASS_LOW)]
 
   # If all months are provided and valid, we check that they're also consistent...
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE, SEX_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE, SEX_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 

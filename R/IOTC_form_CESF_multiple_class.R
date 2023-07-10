@@ -48,14 +48,18 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
   start_VDD = Sys.time()
   l_info("IOTCFormCESFMultiple.validate_data")
 
+  strata_orig = form@data$strata
+  strata_orig$MONTH = strata_orig$MONTH_ORIGINAL
+  strata_orig$MONTH_ORIGINAL  = NULL
+
   strata  = form@data$strata
   records = form@data$records
 
   data_CE_SF_original = records$data$CE_SF_data_original
   data_CE_SF          = records$data$CE_SF_data
 
-  strata_empty_rows    = find_empty_rows(strata)
-  strata_empty_columns = find_empty_columns(strata)
+  strata_empty_rows    = find_empty_rows(strata_orig)
+  strata_empty_columns = find_empty_columns(strata_orig)
   strata_empty_columns = strata_empty_columns[which(!strata_empty_columns %in% optional_strata_columns(form))]
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
@@ -72,8 +76,8 @@ setMethod("validate_data", list(form = "IOTCFormCESFMultiple", metadata_validati
   l_debug(paste0("IOTCFormCESFMultiple.validate_data (II): ", Sys.time() - start_VD))
   start_VD = Sys.time()
 
-  missing_months   = which( is.na(strata$MONTH))
-  invalid_months   = which(!is_month_valid(strata$MONTH))
+  missing_months   = which( is.na(strata$MONTH_ORIGINAL))
+  invalid_months   = which(!is_month_valid(strata$MONTH_ORIGINAL))
 
   invalid_months   = invalid_months[ ! invalid_months %in% missing_months ]
   missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
