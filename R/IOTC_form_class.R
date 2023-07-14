@@ -477,6 +477,7 @@ setGeneric("data_validation_summary", function(form, metadata_validation_results
 
 ## OUTPUT
 
+#' @export
 setGeneric("extract_output", function(form, wide) {
   standardGeneric("extract_output")
 })
