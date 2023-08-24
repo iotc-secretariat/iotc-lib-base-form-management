@@ -68,7 +68,7 @@ report_fisheries = function(message_list, fisheries_validation, column) {
     message_list = add(message_list, new("Message", level = "WARN", source = "Data", column = column, text = paste0(fisheries_validation$aggregates$number, " aggregated fishery code(s) reported. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid legacy fishery codes")))
 
     for(row in fisheries_validation$aggregates$row_indexes) {
-      message_list = add(message_list, new("Message", level = "WARN", source = "Data", column = column, row = row, text = paste0("Aggregated fishery code reported in row #", row)))
+      message_list = add(message_list, new("Message", level = "WARN", source = "Data", column = column, row = row, text = paste0("Aggregated fishery code '", fisheries_validation$aggregates$codes[which(fisheries_validation$aggregates$row_indexes == row)], "' reported in row #", row)))
     }
   }
 
@@ -84,7 +84,7 @@ report_fisheries = function(message_list, fisheries_validation, column) {
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(fisheries_validation$invalid$number, " invalid fishery code(s) reported. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid legacy fishery codes")))
 
     for(row in fisheries_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid fishery code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid fishery code '", fisheries_validation$invalid$codes[which(fisheries_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -105,7 +105,7 @@ report_target_species = function(message_list, target_species_validation, column
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(target_species_validation$invalid$number, " invalid target species code(s) reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy fishery codes")))
 
      for(row in target_species_validation$invalid$row_indexes) {
-       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid target species code in row #", row)))
+       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid target species code '", target_species_validation$invalid$codes[which(target_species_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -126,7 +126,7 @@ report_IOTC_area = function(message_list, area_validation, column) {
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(area_validation$invalid$number, " invalid IOTC main area code(s) reported. Please refer to ", reference_codes("admin", "IOTCareasMain"), " for a list of valid IOTC main area codes")))
 
     for(row in area_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid IOTC main area code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid IOTC main area code '", area_validation$invalid$codes[which(area_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -147,7 +147,7 @@ report_data_type = function(message_list, data_type_validation, column) {
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(data_type_validation$invalid$number, " invalid data type code(s) reported. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
 
     for(row in data_type_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid data type code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid data type code '", data_type_validation$invalid$codes[which(data_type_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -168,7 +168,7 @@ report_data_source = function(message_list, data_source_validation, column) {
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(data_source_validation$invalid$number, " invalid data source code(s) reported. Please refer to ", reference_codes("data", "sources"), " for a list of valid data source codes for this dataset")))
 
     for(row in data_source_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid data source code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid data source code '", data_source_validation$invalid$codes[which(data_source_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -189,7 +189,7 @@ report_data_processing = function(message_list, data_processing_validation, colu
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(data_processing_validation$invalid$number, " invalid data processing code(s) reported. Please refer to ", reference_codes("data", "processings"), " for a list of valid data processing codes for this dataset")))
 
     for(row in data_processing_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid data processing code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid data processing code '", data_processing_validation$invalid$codes[which(data_processing_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -210,7 +210,7 @@ report_coverage_type = function(message_list, coverage_type_validation, column) 
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(coverage_type_validation$invalid$number, " invalid coverage type code(s) reported. Please refer to ", reference_codes("data", "coverageTypes"), " for a list of valid data coverage types")))
 
     for(row in coverage_type_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid coverage type code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid coverage type code '", coverage_type_validation$invalid$codes[which(coverage_type_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -315,7 +315,7 @@ report_species_column = function(message_list, species_validation, column = "F")
     if(species_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(species_validation$invalid$number, " invalid species codes")))
 
     for(row_index in species_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Invalid species code in row #", row_index)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Invalid species code '", species_validation$invalid$codes[which(species_validation$invalid$row_indexes == row_index)], "' in row #", row_index)))
     }
   }
 
@@ -323,7 +323,7 @@ report_species_column = function(message_list, species_validation, column = "F")
     if(species_validation$aggregates$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(species_validation$aggregates$number, " aggregate species codes")))
 
     for(row_index in species_validation$aggregates$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Aggregate species code in row #", row_index)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Aggregate species code '", species_validation$aggregates$codes[which(species_validation$aggregates$row_indexes == row_index)], "' in row #", row_index)))
     }
   }
 
@@ -409,7 +409,7 @@ report_effort_multiple = function(message_list, effort_validation, type = "prima
     if(effort_validation$value$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column_code, text = paste0(effort_validation$code$missing$number, " invalid ", type, " effort codes. Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
 
     for(row in effort_validation$code$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column_code, text = paste0("Invalid ", type, " effort code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column_code, text = paste0("Invalid ", type, " effort code '", effort_validation$invalid$codes[which(effort_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -447,7 +447,7 @@ report_sex = function(message_list, sex_validation, column = "D") {
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(sex_validation$invalid$number, " invalid sex code(s) reported. Please refer to ", reference_codes("biological", "sex"), " for a list of valid measuring sex codes")))
 
     for(row in sex_validation$invalid$row_indexes)
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid sex code in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid sex code '", sex_validation$invalid$codes[which(sex_validation$invalid$row_indexes == row)], "' in row #", row)))
   }
 
   return(message_list)
@@ -466,7 +466,7 @@ report_type_of_fate = function(message_list, type_of_fate_validation, column = "
     if(type_of_fate_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(type_of_fate_validation$invalid$number, " invalid type of fate(s). Please refer to ", reference_codes("biological", "typesOfFate"), " for a list of valid type of fate codes")))
 
     for(row in type_of_fate_validation$invalid$row_indexes)
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid type of fate in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid type of fate '", type_of_fate_validation$invalid$codes[which(type_of_fate_validation$invalid$row_indexes == row)], "' in row #", row)))
   }
 
   return(message_list)
@@ -485,7 +485,7 @@ report_fate = function(message_list, fate_validation, column = "I") {
     if(fate_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(fate_validation$invalid$number, " invalid fate(s). Please refer to ", reference_codes("biological", "fates"), " for a list of valid fate codes")))
 
     for(row in fate_validation$invalid$row_indexes)
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid fate in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid fate '", fate_validation$invalid$codes[which(fate_validation$invalid$row_indexes == row)], "' in row #", row)))
   }
 
   return(message_list)
@@ -504,7 +504,7 @@ report_type_of_measure = function(message_list, type_of_measure_validation, colu
     if(type_of_measure_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(type_of_measure_validation$invalid$number, " invalid type of measure(s). Please refer to ", reference_codes("biological", "typesOfMeasurement"), " for a list of valid type of measure codes")))
 
     for(row in type_of_measure_validation$invalid$row_indexes)
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid type of measure in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid type of measure '", type_of_measure_validation$invalid$codes[which(type_of_measure_validation$invalid$row_indexes == row)], "' in row #", row)))
   }
 
   return(message_list)
@@ -523,7 +523,7 @@ report_measure_type = function(message_list, measure_type_validation, column = "
     if(measure_type_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(measure_type_validation$invalid$number, " invalid measure type(s). Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure type codes")))
 
     for(row in measure_type_validation$invalid$row_indexes)
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid measure type in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid measure type '", measure_type_validation$invalid$codes[which(measure_type_validation$invalid$row_indexes == row)], "' in row #", row)))
   }
 
   return(message_list)
@@ -535,14 +535,14 @@ report_measuring_tool = function(message_list, measuring_tool_validation, column
     if(measuring_tool_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(measuring_tool_validation$missing$number, " missing measuring tool(s)")))
 
     for(row in measuring_tool_validation$missing$row_indexes)
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Missing measure type in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Missing measuring tool in row #", row)))
   }
 
   if(measuring_tool_validation$invalid$number > 0) {
     if(measuring_tool_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(measuring_tool_validation$invalid$number, " invalid measuring tool(s). Please refer to ", reference_codes("biological", "allMeasurementTools"), " for a list of valid measuring tool codes")))
 
     for(row in measuring_tool_validation$invalid$row_indexes)
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid measure type in row #", row)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid measuring tool '", measuring_tool_validation$invalid$codes[which(measuring_tool_validation$invalid$row_indexes == row)], "' in row #", row)))
   }
 
   return(message_list)
