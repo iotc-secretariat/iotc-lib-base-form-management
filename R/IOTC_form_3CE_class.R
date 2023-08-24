@@ -599,7 +599,7 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
             strata$TERTIARY_EFFORT_CODE  = form_metadata$data_specifications$effort_units$tertiary
             strata$CATCH_UNIT_CODE       = form_metadata$data_specifications$catch_unit
 
-            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE)
+            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
                                 FISHERY_CODE, TARGET_SPECIES_CODE,
