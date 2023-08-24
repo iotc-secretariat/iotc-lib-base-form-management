@@ -552,88 +552,31 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SFMultiple", metadata
 
   ## Species
 
-  species = checks_strata$main$species
+  validation_messages = report_species_column(validation_messages, checks_strata$main$species)
 
-  if(species$missing$number > 0) {
-    if(species$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(species$missing$number, " missing species codes")))
-
-    for(row_index in species$missing$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Missing species code in row #", row_index)))
-    }
-    #validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing species code in row(s) #", paste0(species$missing$row_indexes, collapse = ", "))))
-  }
-
-  if(species$invalid$number > 0) {
-    if(species$invalid$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(species$invalid$number, " invalid species codes")))
-
-    for(row_index in species$invalid$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Invalid species code in row #", row_index)))
-    }
-    #validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid species code in row(s) #", paste0(species$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid species codes")))
-  }
-
-  if(species$aggregates$number > 0) {
-    if(species$aggregates$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(species$aggregates$number, " aggregate species codes")))
-
-    for(row_index in species$aggregates$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Aggregate species code in row #", row_index)))
-    }
-    #validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Species code refers to a species aggregate in row(s) #", paste0(species$aggregates$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid distinct species codes")))
-  }
   ## Sex
 
   validation_messages = report_sex(validation_messages, checks_strata$main$sex)
 
   ## Fate type
 
-  fate_type = checks_strata$main$fate$type
-
-  if(fate_type$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing fate type code in row(s) #", paste0(fate_type$missing$row_indexes, collapse = ", "))))
-
-  if(fate_type$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid fate type code in row(s) #", paste0(fate_type$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "typesOfFate"), " for a list of valid fate type codes")))
+  validation_messages = report_type_of_fate(validation_messages, checks_strata$main$fate$type)
 
   ## Fate
 
-  fate = checks_strata$main$fate$fate
-
-  if(fate$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing fate code in row(s) #", paste0(fate$missing$row_indexes, collapse = ", "))))
-
-  if(fate$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid fate code in row(s) #", paste0(fate$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "fates"), " for a list of valid fate codes by type of fate")))
+  validation_messages = report_fate(validation_messages, checks_strata$main$fate$fate)
 
   ## Measurement type
 
-  measurement_type = checks_strata$measurement$type
-
-  if(measurement_type$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing measurement type code in row(s) #", paste0(measurement_type$missing$row_indexes, collapse = ", "))))
-
-  if(measurement_type$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid measurement type code in row(s) #", paste0(measurement_type$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "typesOfMeasurement"), " for a list of valid measurement type codes")))
+  validation_messages = report_type_of_measure(validation_messages, checks_strata$measurement$type)
 
   ## Measure
 
-  measure = checks_strata$measurement$measure
+  validation_messages = report_measure_type(validation_messages, checks_strata$measurement$measure)
 
-  if(measure$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing measure code in row(s) #", paste0(measure$missing$row_indexes, collapse = ", "))))
+  ## Measuring tool
 
-  if(measure$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid measure code in row(s) #", paste0(measure$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure codes by type of measurement")))
-
-
-  ## Measure
-
-  measuring_tool = checks_strata$measurement$measuring_tool
-
-  if(measuring_tool$missing$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Missing measuring tool code in row(s) #", paste0(measuring_tool$missing$row_indexes, collapse = ", "))))
-
-  if(measuring_tool$invalid$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid measuring tool code in row(s) #", paste0(measuring_tool$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("biological", "allMeasurementTools"), " for a list of valid measuring tool codes by type of measurement")))
+  validation_messages = report_measuring_tool(validation_messages, checks_strata$measurement$measuring_tool)
 
   # Data issues / summary
 
