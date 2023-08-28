@@ -583,6 +583,9 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
                                 SIZE_CLASS_LOW, SIZE_CLASS_HIGH = SIZE_CLASS_LOW + as.numeric(form_metadata$data_specifications$measurements$interval) - 1,
                                 NUM_SAMPLES_STRATA = NA_real_)]
 
+            strata[GEAR_CODE %in% c("ELL", "FLL", "LL", "PS") & DATA_SOURCE_CODE == "OB", GEAR_CODE := paste0(GEAR_CODE, "OB")]
+            strata[GEAR_CODE %in% c("PSFS", "PSLS") & DATA_SOURCE_CODE == "OB", GEAR_CODE := "PSOB"]
+
             output_data = cbind(strata, data)
 
             output_data[, NUM_SAMPLES := round(as.numeric(output_data$NUM_SAMPLES), 2)]
