@@ -665,7 +665,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
     if(catch_units$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number, " missing catch unit codes")))
 
     for(col in catch_units$missing$col_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Missing catch unit code in column ", column)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Missing catch unit code in column ", col)))
   }
 
   if(catch_units$invalid$number > 0) {    # Invalid

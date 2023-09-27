@@ -307,7 +307,7 @@ report_species_column = function(message_list, species_validation, column = "F")
     if(species_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(species_validation$missing$number, " missing species codes")))
 
     for(row_index in species_validation$missing$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Missing species code in row #", row_index)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = column, text = paste0("Missing species code in row #", row_index)))
     }
   }
 
@@ -315,7 +315,7 @@ report_species_column = function(message_list, species_validation, column = "F")
     if(species_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(species_validation$invalid$number, " invalid species codes")))
 
     for(row_index in species_validation$invalid$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Invalid species code '", species_validation$invalid$codes[which(species_validation$invalid$row_indexes == row_index)], "' in row #", row_index)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = column, text = paste0("Invalid species code '", species_validation$invalid$codes[which(species_validation$invalid$row_indexes == row_index)], "' in row #", row_index)))
     }
   }
 
@@ -323,7 +323,7 @@ report_species_column = function(message_list, species_validation, column = "F")
     if(species_validation$aggregates$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(species_validation$aggregates$number, " aggregate species codes")))
 
     for(row_index in species_validation$aggregates$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = "F", text = paste0("Aggregate species code '", species_validation$aggregates$codes[which(species_validation$aggregates$row_indexes == row_index)], "' in row #", row_index)))
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = column, text = paste0("Aggregate species code '", species_validation$aggregates$codes[which(species_validation$aggregates$row_indexes == row_index)], "' in row #", row_index)))
     }
   }
 
