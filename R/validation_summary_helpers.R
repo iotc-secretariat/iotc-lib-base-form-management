@@ -278,7 +278,7 @@ report_data = function(message_list, data_validation, allow_empty_records) {
 # SPECIES
 report_species = function(message_list, species_validation, species_row, species_domain = "legacy", species_codelist = "species") {
   if(species_validation$aggregates$number > 0) { # Aggregates
-    message_list = add(message_list, new("Message", level = "WARN", source = "Data", row = species_row, text = paste0(species_validation$aggregates$number, " aggregated species code(s) reported. Please refer to ", reference_codes(species_domain, species_codelist), " for a list of valid legacy species codes")))
+    message_list = add(message_list, new("Message", level = "WARN", source = "Data", row = species_row, text = paste0(species_validation$aggregates$number, " aggregated species code(s) reported. Please refer to ", reference_codes(species_domain, species_codelist), " for a list of valid species codes")))
 
     for(col in species_validation$aggregates$col_indexes)
       message_list = add(message_list, new("Message", level = "WARN", source = "Data", row = species_row, column = col, text = paste0("Aggregated species code '", species_validation$aggregates$codes[which(species_validation$aggregates$col_indexes == col)], "' reported in column ", col)))
@@ -292,7 +292,7 @@ report_species = function(message_list, species_validation, species_row, species
   }
 
   if(species_validation$invalid$number > 0) { # Invalid
-    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species_validation$invalid$number, " invalid species code(s) reported. Please refer to ", reference_codes(species_domain, species_codelist), " for a list of valid legacy species codes")))
+    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = species_row, text = paste0(species_validation$invalid$number, " invalid species code(s) reported. Please refer to ", reference_codes(species_domain, species_codelist), " for a list of valid species codes")))
 
     for(col in species_validation$invalid$col_indexes)
       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = species_row, column = col, text = paste0("Invalid species code '", species_validation$invalid$codes[which(species_validation$invalid$col_indexes == col)], "' in column ", col)))
