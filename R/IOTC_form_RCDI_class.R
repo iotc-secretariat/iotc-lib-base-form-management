@@ -31,6 +31,14 @@ setGeneric("validate_quarters", function(form, strata) {
   standardGeneric("validate_quarters")
 })
 
+setGeneric("get_all_species_references_domain_and_codelist", function(form) {
+  standardGeneric("get_all_species_references_domain_and_codelist")
+})
+
+setGeneric("get_all_species_references", function(form) {
+  standardGeneric("get_all_species_references")
+})
+
 setMethod("validate_data",
           list(form = "IOTCFormRCDI", metadata_validation_results = "list"),
           function(form, metadata_validation_results) {
@@ -77,7 +85,7 @@ setMethod("validate_data",
             fishery_aggregates = which(is_multiple_gear_fishery(strata$FISHERY_CODE))
 
             missing_target_species = which( is.na(strata$TARGET_SPECIES_CODE))
-            invalid_target_species = which(!is_species_valid(strata$TARGET_SPECIES_CODE))
+            invalid_target_species = which(!is_species_valid(strata$TARGET_SPECIES_CODE, get_all_species_references(form)))
             invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
             missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
 
@@ -115,10 +123,10 @@ setMethod("validate_data",
             missing_coverages        = missing_coverages[ ! missing_coverages %in% strata_empty_rows ]
 
             missing_species    = which( is.na(records$codes$species))
-            invalid_species    = which(!is_species_valid(records$codes$species))
+            invalid_species    = which(!is_species_valid(records$codes$species, get_all_species_references(form)))
             invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
 
-            species_aggregates = which(is_species_aggregate(records$codes$species))
+            species_aggregates = which(is_species_aggregate(records$codes$species, get_all_species_references(form)))
 
             numeric_catch_data =
               catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
@@ -444,7 +452,9 @@ setMethod("common_data_validation_summary",
 
             ## Species
 
-            validation_messages = report_species(validation_messages, checks_records$species, spreadsheet_rows_for(form, 2))
+            validation_messages = report_species(validation_messages, checks_records$species, spreadsheet_rows_for(form, 2),
+                                                 species_domain   = get_all_species_references_domain_and_codelist(form)$domain,
+                                                 species_codelist = get_all_species_references_domain_and_codelist(form)$codelist)
 
             ## Catches
 

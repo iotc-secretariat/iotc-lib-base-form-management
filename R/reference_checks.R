@@ -210,22 +210,22 @@ validate_grid_AR = function(grid_code, field = "Grid") {
 
 ## SPECIES
 
-species_for = function(species_code) {
+species_for = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES) {
   return(
-    iotc.data.reference.codelists::LEGACY_SPECIES[CODE %in% trim(species_code)]
+    reference_species_list[CODE %in% trim(species_code)]
   )
 }
 
-is_species_valid = function(species_code) {
+is_species_valid = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES) {
   return(
-    trim(species_code) %in% iotc.data.reference.codelists::LEGACY_SPECIES$CODE
+    trim(species_code) %in% reference_species_list$CODE
   )
 }
 
-validate_species = function(species_code, field = "Species") {
+validate_species = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES, field = "Species") {
   species_code = check_mandatory(trim(species_code), field)
 
-  species = species_for(species_code)
+  species = species_for(species_code, reference_species_list)
 
   if(nrow(species) == 0) stop(paste0("Unable to identify any valid species by code '", species_code, "'. Please refer to ", reference_codes("biological", "allSpecies"), " for a list of valid species codes"))
   if(nrow(species) >  1) stop(paste0("Multiple species identified by code '", species_code, "'")) # This should never happen...
@@ -233,10 +233,10 @@ validate_species = function(species_code, field = "Species") {
   return(species)
 }
 
-is_species_aggregate = function(species_code) {
+is_species_aggregate = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES) {
   species = data.table(CODE = species_code)
   species = merge(species,
-                  iotc.data.reference.codelists::LEGACY_SPECIES[, .(CODE, IS_AGGREGATE)],
+                  reference_species_list[, .(CODE, IS_AGGREGATE)],
                   by = "CODE",
                   all.x = TRUE,
                   sort = FALSE)
