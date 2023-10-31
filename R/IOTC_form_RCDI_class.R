@@ -85,7 +85,7 @@ setMethod("validate_data",
             fishery_aggregates = which(is_multiple_gear_fishery(strata$FISHERY_CODE))
 
             missing_target_species = which( is.na(strata$TARGET_SPECIES_CODE))
-            invalid_target_species = which(!is_species_valid(strata$TARGET_SPECIES_CODE, get_all_species_references(form)))
+            invalid_target_species = which(!is_species_valid(strata$TARGET_SPECIES_CODE)) # Checks target species against the default for 1RC and 1DI (iotc.data.reference.codelists::LEGACY_SPECIES)
             invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
             missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
 
@@ -123,7 +123,7 @@ setMethod("validate_data",
             missing_coverages        = missing_coverages[ ! missing_coverages %in% strata_empty_rows ]
 
             missing_species    = which( is.na(records$codes$species))
-            invalid_species    = which(!is_species_valid(records$codes$species, get_all_species_references(form)))
+            invalid_species    = which(!is_species_valid(records$codes$species, get_all_species_references(form))) # Checks target species against the specific codelist for 1RC and 1DI
             invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
 
             species_aggregates = which(is_species_aggregate(records$codes$species, get_all_species_references(form)))
@@ -214,8 +214,8 @@ setMethod("validate_data",
                         invalid = list(
                           number       = length(invalid_target_species),
                           row_indexes  = spreadsheet_rows_for(form, invalid_target_species),
-                          codes        = strata$TARGET_SPECIES_CODE[invalid_species],
-                          codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_species])
+                          codes        = strata$TARGET_SPECIES_CODE[invalid_target_species],
+                          codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_target_species])
                         ),
                         missing = list(
                           number      = length(missing_target_species),

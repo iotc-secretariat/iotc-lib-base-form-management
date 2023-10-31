@@ -104,7 +104,7 @@ report_target_species = function(message_list, target_species_validation, column
   if(target_species_validation$invalid$number > 0) {
     message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(target_species_validation$invalid$number, " invalid target species code(s) reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy fishery codes")))
 
-     for(row in target_species_validation$invalid$row_indexes) {
+    for(row in target_species_validation$invalid$row_indexes) {
        message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid target species code '", target_species_validation$invalid$codes[which(target_species_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
