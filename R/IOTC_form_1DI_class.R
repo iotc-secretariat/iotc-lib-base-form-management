@@ -126,10 +126,12 @@ setMethod("validate_quarters",
 )
 
 setMethod("get_all_species_references_domain_and_codelist", "IOTCForm1DI", function(form) {
+  print("1-DI.get_all_species_references_domain_and_codelist")
   return(list(domain = "biological", codelist = "allSpecies"))
 })
 
 setMethod("get_all_species_references", "IOTCForm1DI", function(form) {
+  print("1-DI.get_all_species_references")
   return(iotc.data.reference.codelists::SPECIES)
 })
 
