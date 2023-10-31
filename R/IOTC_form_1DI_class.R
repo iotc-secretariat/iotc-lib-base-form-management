@@ -126,12 +126,12 @@ setMethod("validate_quarters",
 )
 
 setMethod("get_all_species_references_domain_and_codelist", "IOTCForm1DI", function(form) {
-  print("1-DI.get_all_species_references_domain_and_codelist")
+  l_debug("1-DI.get_all_species_references_domain_and_codelist")
   return(list(domain = "biological", codelist = "allSpecies"))
 })
 
 setMethod("get_all_species_references", "IOTCForm1DI", function(form) {
-  print("1-DI.get_all_species_references")
+  l_debug("1-DI.get_all_species_references")
   return(iotc.data.reference.codelists::SPECIES)
 })
 
@@ -300,23 +300,7 @@ setMethod("data_validation_summary",
 
             # Part of the validation comes from the superclass
 
-            discard_reasons = checks_strata_main$discard_reasons
-
-            if(discard_reasons$missing$number > 0) {
-              if(discard_reasons$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(discard_reasons$missing$number, " missing discard reason codes")))
-
-              for(row in discard_reasons$missing$row_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Missing discard reason code in row #", row)))
-              }
-            }
-
-            if(discard_reasons$invalid$number > 0) {
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(discard_reasons$invalid$number, " invalid discard reason codes. Please refer to ", reference_codes("biological", "discardReasons"), " for a list of valid discard reason codes")))
-
-              for(row in discard_reasons$invalid$row_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Invalid discard reason code in row #", row)))
-              }
-            }
+            validation_messages = report_discard_reasons(validation_messages, checks_strata_main$discard_reasons)
 
             ## Original data
 
@@ -326,67 +310,32 @@ setMethod("data_validation_summary",
 
             # Data issues / summary
 
-            conditions = checks_records$conditions
-            conditions_row = 5
+            # Conditions at release
+            validation_messages = report_conditions   (validation_messages, checks_records$conditions,    conditions_row    = 5)
 
-            if(conditions$missing$number > 0) {   # Missing
-              if(conditions$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, text = paste0(conditions$missing$number , " missing condition codes")))
+            # Raising
+            validation_messages = report_raisings     (validation_messages, checks_records$data_raisings, raisings_row      = 6)
 
-              for(col in conditions$missing$col_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, column = col, text = paste0("Missing condition code in column ", col)))
-              }
-            }
+            # Discard units
+            validation_messages = report_discard_units(validation_messages, checks_records$catch_units,   discard_units_row = 7)
 
-            if(conditions$invalid$number > 0) {   # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, text = paste0(conditions$missing$number , " invalid condition code(s). Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes")))
+            # Species
+            species = checks_records$species
 
-              for(col in conditions$invalid$col_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = conditions_row, column = col, text = paste0("Invalid condition code in column ", col)))
-              }
-            }
+            # Part of the validation comes from the superclass
 
-            raisings = checks_records$data_raisings
-            raisings_row = conditions_row + 1
+            #if(species$multiple$number > 0)   # Multiple
+            #  validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Repeated species in column(s) #", paste0(species$multiple$col_indexes, collapse = ", "))))
 
-            if(raisings$missing$number > 0) {   # Missing
-              if(raisings$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, text = paste0(raisings$missing$number , " missing data raising codes")))
-
-              for(col in raisings$missing$col_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, column = col, text = paste0("Missing data raising code in column ", col)))
-              }
-            }
-
-            if(raisings$invalid$number > 0) {   # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, text = paste0(raisings$invalid$number , " invalid raising code(s). Please refer to ", reference_codes("biological", "raisings"), " for a list of valid data raising codes")))
-
-              for(col in raisings$invalid$col_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = raisings_row, column = col, text = paste0("Invalid raising code in column ", col)))
-              }
-            }
-
-            catch_units = checks_records$catch_units
-            catch_units_row = raisings_row + 1
-
-            if(catch_units$missing$number > 0) {   # Missing
-              if(catch_units$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number , " missing catch unit codes")))
-
-              for(col in catch_units$missing$col_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Missing catch unit code in column ", col)))
-              }
-            }
-
-            if(catch_units$invalid$number > 0) {   # Invalid
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, text = paste0(catch_units$missing$number , " invalid catch unit code(s). Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid catch unit codes")))
-
-              for(col in catch_units$invalid$col_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = catch_units_row, column = col, text = paste0("Invalid catch unit code in column ", col)))
-              }
-            }
-
+            # Stratifications
             stratifications = checks_records$stratifications
 
             if(stratifications$multiple$number > 0)   # Multiple
               validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Repeated species-condition-raising-catch units in column(s) ", paste0(stratifications$multiple$col_indexes, collapse = ", "))))
+
+            ## Discards
+
+            # Validation comes from the superclass
 
             return(validation_messages)
           }

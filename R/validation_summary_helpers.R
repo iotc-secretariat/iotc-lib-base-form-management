@@ -330,6 +330,105 @@ report_species_column = function(message_list, species_validation, column = "F")
   return(message_list)
 }
 
+# RETAIN REASONS (Form 1-RC)
+report_retain_reasons = function(message_list, retain_reasons_validation, column = "F") {
+  if(retain_reasons_validation$missing$number > 0) {
+    if(retain_reasons_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(retain_reasons_validation$missing$number, " missing retain reason code(s)")))
+
+    for(row_index in retain_reasons_validation$missing$row_indexes) {
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = column, text = paste0("Missing retain reason code in row #", row_index)))
+    }
+  }
+
+  if(retain_reasons_validation$invalid$number > 0) {
+    if(retain_reasons_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(retain_reasons_validation$invalid$number, " invalid retain reason code(s) reported. Please refer to ", reference_codes("biological", "retainReasons"), " for a list of valid retain reason codes")))
+
+    for(row_index in retain_reasons_validation$invalid$row_indexes) {
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = column, text = paste0("Invalid retain reason code '", retain_reasons_validation$invalid$codes[which(retain_reasons_validation$invalid$row_indexes == row_index)], "' in row #", row_index)))
+    }
+  }
+
+  return(message_list)
+}
+
+# DISCARD REASONS (Form 1-DI)
+report_discard_reasons = function(message_list, discard_reasons_validation, column = "F") {
+  if(discard_reasons_validation$missing$number > 0) {
+    if(discard_reasons_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(discard_reasons_validation$missing$number, " missing discard reason code(s)")))
+
+    for(row_index in discard_reasons_validation$missing$row_indexes) {
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = column, text = paste0("Missing discard reason code in row #", row_index)))
+    }
+  }
+
+  if(discard_reasons_validation$invalid$number > 0) {
+    if(discard_reasons_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(discard_reasons_validation$invalid$number, " invalid discard reason code(s) reported. Please refer to ", reference_codes("biological", "discardReasons"), " for a list of valid discard reason codes")))
+
+    for(row_index in discard_reasons_validation$invalid$row_indexes) {
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = as.integer(row_index), column = column, text = paste0("Invalid discard reason code '", discard_reasons_validation$invalid$codes[which(discard_reasons_validation$invalid$row_indexes == row_index)], "' in row #", row_index)))
+    }
+  }
+
+  return(message_list)
+}
+
+# CONDITIONS (Form 1-DI)
+report_conditions = function(message_list, conditions_validation, conditions_row) {
+  if(conditions_validation$missing$number > 0) { # Missing
+    if(conditions_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = conditions_row, text = paste0(conditions_validation$missing$number, " missing condition code(s)")))
+
+    for(col in conditions_validation$missing$col_indexes)
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = conditions_row, column = col, text = paste0("Missing condition code in column ", col)))
+  }
+
+  if(conditions_validation$invalid$number > 0) { # Invalid
+    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = conditions_row, text = paste0(conditions_validation$invalid$number, " invalid condition code(s) reported. Please refer to ", reference_codes("biological", "individualConditions"), " for a list of valid condition codes")))
+
+    for(col in conditions_validation$invalid$col_indexes)
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = conditions_row, column = col, text = paste0("Invalid condition code '", conditions_validation$invalid$codes[which(conditions_validation$invalid$col_indexes == col)], "' in column ", col)))
+  }
+
+  return(message_list)
+}
+
+# RAISINGS (Form 1-DI)
+report_raisings = function(message_list, raisings_validation, raisings_row) {
+  if(raisings_validation$missing$number > 0) { # Missing
+    if(raisings_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = raisings_row, text = paste0(raisings_validation$missing$number, " missing raising code(s)")))
+
+    for(col in raisings_validation$missing$col_indexes)
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = raisings_row, column = col, text = paste0("Missing raising code in column ", col)))
+  }
+
+  if(raisings_validation$invalid$number > 0) { # Invalid
+    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = raisings_row, text = paste0(raisings_validation$invalid$number, " invalid raising code(s) reported. Please refer to ", reference_codes("data", "raisings"), " for a list of valid raising codes")))
+
+    for(col in raisings_validation$invalid$col_indexes)
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = raisings_row, column = col, text = paste0("Invalid raising code '", raisings_validation$invalid$codes[which(raisings_validation$invalid$col_indexes == col)], "' in column ", col)))
+  }
+
+  return(message_list)
+}
+
+# DISCARD UNITS (Form 1-DI)
+report_discard_units = function(message_list, discard_units_validation, discard_units_row) {
+  if(discard_units_validation$missing$number > 0) { # Missing
+    if(discard_units_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = discard_units_row, text = paste0(discard_units_validation$missing$number, " missing discard unit code(s)")))
+
+    for(col in discard_units_validation$missing$col_indexes)
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = discard_units_row, column = col, text = paste0("Missing discard unit code in column ", col)))
+  }
+
+  if(discard_units_validation$invalid$number > 0) { # Invalid
+    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = discard_units_row, text = paste0(discard_units_validation$invalid$number, " invalid condition code(s) reported. Please refer to ", reference_codes("fisheries", "catchUnits"), " for a list of valid discard unit codes")))
+
+    for(col in discard_units_validation$invalid$col_indexes)
+      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = discard_units_row, column = col, text = paste0("Invalid discard unit code '", discard_units_validation$invalid$codes[which(discard_units_validation$invalid$col_indexes == col)], "' in column ", col)))
+  }
+
+  return(message_list)
+}
+
 # CATCHES (AS CELLS)
 report_catches = function(message_list, catches_validation) {
   if(catches_validation$positive$number > 0)

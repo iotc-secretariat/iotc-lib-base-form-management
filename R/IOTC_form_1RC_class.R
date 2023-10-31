@@ -117,12 +117,12 @@ setMethod("validate_quarters",
 )
 
 setMethod("get_all_species_references_domain_and_codelist", "IOTCForm1RC", function(form) {
-  print("1-RC.get_all_species_references_domain_and_codelist")
+  l_debug("1-RC.get_all_species_references_domain_and_codelist")
   return(list(domain = "legacy", codelist = "species"))
 })
 
 setMethod("get_all_species_references", "IOTCForm1RC", function(form) {
-  print("1-RC.get_all_species_references")
+  l_debug("1-RC.get_all_species_references")
   return(iotc.data.reference.codelists::LEGACY_SPECIES)
 })
 
@@ -249,23 +249,7 @@ setMethod("data_validation_summary",
 
             # Part of the validation comes from the superclass
 
-            retain_reasons = checks_strata_main$retain_reasons
-
-            if(retain_reasons$missing$number > 0) {
-              if(retain_reasons$missing$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(retain_reasons$missing$number, " missing retain reason codes")))
-
-              for(row in retain_reasons$missing$row_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Missing retain reason code in row #", row)))
-              }
-            }
-
-            if(retain_reasons$invalid$number > 0) {
-              validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "F", text = paste0(retain_reasons$missing$number, " invalid retain reason codes. Please refer to ", reference_codes("biological", "retainReasons"), " for a list of valid retain reason codes")))
-
-              for(row in retain_reasons$invalid$row_indexes) {
-                validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "F", text = paste0("Invalid retain reason code in row #", row)))
-              }
-            }
+            validation_messages = report_retain_reasons(validation_messages, checks_strata_main$retain_reasons)
 
             ## Original data
 
