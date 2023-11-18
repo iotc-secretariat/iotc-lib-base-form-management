@@ -121,9 +121,23 @@ upload_forms = function(version) {
   }
 }
 
+upload_outdated_forms = function(version) {
+  for(form in list.files("./forms/outdated", pattern = "*.xlsx")) {
+    folder = full_folder(version, FORMS_FOLDER)
+
+    print(paste0("Uploading form '", form, "' in ", folder, "..."))
+
+    CURL_FTPu(
+      filename   = paste0("./forms/outdated/", form),
+      target_url = ftp_url(paste0(folder, "/", form))
+    )
+  }
+}
+
 disseminate = function(version) {
   #initialize_version(version) # Actually this is not required, as the directory structure will be created on upload
   upload_forms(version)
+  upload_outdated_forms(version)
 }
 
 version = "1.0.0"
