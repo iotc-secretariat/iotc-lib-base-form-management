@@ -2,7 +2,7 @@ library(RCurl)
 library(stringr)
 
 SERVER_ROOT = "/var/www/static/reference"
-FORMS_FOLDER = "legacy-forms"
+FORMS_FOLDER = "forms"
 
 DATA_IOTC_SERVER_IP = Sys.getenv("DATA_IOTC_SERVER_IP")
 DATA_IOTC_USERNAME  = Sys.getenv("DATA_IOTC_USERNAME")
@@ -137,7 +137,7 @@ upload_outdated_forms = function(version) {
 disseminate = function(version) {
   #initialize_version(version) # Actually this is not required, as the directory structure will be created on upload
   upload_forms(version)
-  upload_outdated_forms(version)
+  #upload_outdated_forms(version)
 }
 
 version = "1.0.0"
