@@ -134,6 +134,8 @@ setMethod("validate_data",
             data_validation_results = callNextMethod(form, metadata_validation_results)
 
             strata  = form@data$strata
+            strata$IS_EMPTY = NULL # Otherwise the 'find_empty_rows' call below will never return anything meaningful...
+
             records = form@data$records
 
             catch_data_original = records$data$catches_original

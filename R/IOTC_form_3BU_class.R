@@ -317,6 +317,8 @@ setMethod("validate_data",
                                        31))
 
             strata  = form@data$strata
+            strata$IS_EMPTY = NULL
+
             records = form@data$records
 
             data_validation_results = list(

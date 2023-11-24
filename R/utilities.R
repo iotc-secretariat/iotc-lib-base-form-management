@@ -59,15 +59,16 @@ reference_codes = function(domain, codelist) {
 ### DATA TABLES
 
 find_empty_rows = function(data_table) {
-  rows =
-    ifelse(
-      nrow(data_table) == 0, integer(),
-      data_table[
-        rowSums(is.na(data_table)) == ncol(data_table),
-        which = TRUE
-      ]
-    )
+  if(nrow(data_table) == 0) rows = integer()
+  else rows = which(
+    rowSums(is.na(data_table)) == ncol(data_table)
+  )
+  #else rows = data_table[
+  #  rowSums(is.na(data_table)) == ncol(data_table),
+  #  which = TRUE
+  #]
 
+  # Is this really needed?
   if(!is_available(rows)) rows = integer()
 
   return(rows)
@@ -82,14 +83,13 @@ has_empty_rows = function(data_table) {
 }
 
 find_empty_columns = function(data_table) {
-  cols =
-    ifelse(
-      ncol(data_table) == 0, integer(),
+  if(ncol(data_table) == 0) cols = integer()
+  else cols =
       which(
         colSums(is.na(data_table)) == nrow(data_table)
       )
-    )
 
+# Is this really needed?
   if(!is_available(cols)) cols = integer()
 
   return(cols)

@@ -299,9 +299,12 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
   data_validation_results = callNextMethod(form, metadata_validation_results)
 
   strata  = form@data$strata
+  strata$IS_EMPTY = NULL
+
   strata_orig = form@data$strata
   strata_orig$MONTH = strata_orig$MONTH_ORIGINAL
   strata_orig$MONTH_ORIGINAL  = NULL
+  strata_orig$IS_EMPTY = NULL # Otherwise the 'find_empty_rows' call below will never return anything meaningful...
 
   strata_empty_rows    = find_empty_rows(strata_orig)
   strata_empty_columns = find_empty_columns(strata_orig[, c(1:3, 5)])

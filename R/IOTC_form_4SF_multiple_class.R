@@ -141,6 +141,7 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
   start = Sys.time()
 
   strata  = form@data$strata
+  strata$IS_EMPTY = NULL # Otherwise the 'find_empty_rows' call below will never return anything meaningful...
 
   strata_empty_rows    = find_empty_rows(strata)
   strata_empty_columns = find_empty_columns(strata[, 1:3]) # Effort values shall not be considered, as some of them (either secondary, or tertiary, or both) might be left all empty
