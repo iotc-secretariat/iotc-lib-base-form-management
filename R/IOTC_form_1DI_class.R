@@ -10,7 +10,7 @@ setMethod("form_type", "IOTCForm1DI", function(form) {
 })
 
 setMethod("form_version", "IOTCForm1DI", function(form) {
-  return("1.0.0-legacy")
+  return("1.0.0-interim")
 })
 
 setMethod("form_dataset_code", "IOTCForm1DI", function(form) {

@@ -1,6 +1,6 @@
-Package: iotc.data.common.workflow.legacy
+Package: iotc.data.common.workflow.interim
 Type: Package
-Title: IOTC data legacy workflow (common)
+Title: IOTC data interim workflow (common)
 Version: 0.2.0
 Author: Fabio Fiorellato
 Maintainer: Fabio Fiorellato <fabio.fiorellato@fao.org>
