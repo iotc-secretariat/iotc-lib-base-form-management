@@ -6,7 +6,7 @@ IOTCForm3BU = setClass(
 )
 
 setMethod("form_type", "IOTCForm3BU", function(form) {
-  return("3-BU")
+  return(c("3-BU", "3BU")) # For backwards compatibility
 })
 
 setMethod("form_version", "IOTCForm3BU", function(form) {

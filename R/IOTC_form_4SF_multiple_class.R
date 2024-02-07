@@ -6,7 +6,7 @@ IOTCForm4SFMultiple = setClass(
 )
 
 setMethod("form_type", "IOTCForm4SFMultiple", function(form) {
-  return("4-SF-multiple")
+  return(c("4-SF-multiple", "4SF-multiple")) # For backwards compatibility
 })
 
 setMethod("form_version", "IOTCForm4SFMultiple", function(form) {

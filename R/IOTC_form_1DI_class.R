@@ -6,7 +6,7 @@ IOTCForm1DI = setClass(
 )
 
 setMethod("form_type", "IOTCForm1DI", function(form) {
-  return("1-DI")
+  return(c("1-DI", "1DI")) # For backwards compatibility
 })
 
 setMethod("form_version", "IOTCForm1DI", function(form) {

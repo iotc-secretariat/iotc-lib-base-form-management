@@ -6,7 +6,7 @@ IOTCForm3CEMultiple = setClass(
 )
 
 setMethod("form_type", "IOTCForm3CEMultiple", function(form) {
-  return("3-CE-multiple")
+  return(c("3-CE-multiple", "3CE-multiple")) # For backwards compatibility
 })
 
 setMethod("form_version", "IOTCForm3CEMultiple", function(form) {

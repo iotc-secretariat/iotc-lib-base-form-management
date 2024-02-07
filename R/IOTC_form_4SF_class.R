@@ -6,7 +6,7 @@ IOTCForm4SF = setClass(
 )
 
 setMethod("form_type", "IOTCForm4SF", function(form) {
-  return("4-SF")
+  return(c("4-SF", "4SF")) # For backwards compatibility
 })
 
 setMethod("form_version", "IOTCForm4SF", function(form) {
