@@ -1,6 +1,6 @@
-Package: iotc.data.common.workflow.interim
+Package: iotc.base.form.management.interim
 Type: Package
-Title: IOTC data interim workflow (common)
+Title: IOTC form management libraries
 Version: 0.2.0
 Author: Fabio Fiorellato
 Maintainer: Fabio Fiorellato <fabio.fiorellato@fao.org>
