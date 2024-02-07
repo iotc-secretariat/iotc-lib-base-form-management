@@ -10,7 +10,7 @@ setMethod("form_type", "IOTCForm3CEMultiple", function(form) {
 })
 
 setMethod("form_version", "IOTCForm3CEMultiple", function(form) {
-  return("1.0.0-interim")
+  return("1.0.0")
 })
 
 setMethod("form_dataset_code", "IOTCForm3CEMultiple", function(form) {

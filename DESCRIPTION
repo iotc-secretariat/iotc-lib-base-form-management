@@ -1,4 +1,4 @@
-Package: iotc.base.form.management.interim
+Package: iotc.base.form.management
 Type: Package
 Title: IOTC form management libraries
 Version: 0.2.0

@@ -10,7 +10,7 @@ setMethod("form_type", "IOTCForm1RC", function(form) {
 })
 
 setMethod("form_version", "IOTCForm1RC", function(form) {
-  return("1.0.0-interim")
+  return("1.0.0")
 })
 
 setMethod("form_dataset_code", "IOTCForm1RC", function(form) {
