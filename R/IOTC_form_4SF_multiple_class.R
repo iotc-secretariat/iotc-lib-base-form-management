@@ -34,7 +34,7 @@ setMethod("optional_strata_columns", "IOTCForm4SFMultiple", function(form) {
 })
 
 setMethod("first_data_column", "IOTCForm4SFMultiple", function(form) {
-  return(which(EXCEL_COLUMNS == "V"))
+  return(which(EXCEL_COLUMNS == "U"))
 })
 
 setMethod("first_data_row", "IOTCForm4SFMultiple", function(form) {
@@ -46,24 +46,24 @@ setMethod("first_strata_column", "IOTCForm4SFMultiple", function(form) {
 })
 
 setMethod("last_strata_column", "IOTCForm4SFMultiple", function(form) {
-  return(which(EXCEL_COLUMNS == "U"))
+  return(which(EXCEL_COLUMNS == "T"))
 })
 
 setMethod("validate_months_multiple", list(form = "IOTCForm4SFMultiple", strata = "data.table"), function(form, strata) {
   start = Sys.time()
   l_info("IOTCForm4SFMultiple.validate_months")
 
-# valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
+# valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
 #                                                                               DATA_SOURCE_CODE, DATA_PROCESSING_CODE,
 #                                                                               MEASUREMENT_TYPE_CODE, MEASURE_CODE,
 #                                                                               SIZE_CLASS_LOW, SIZE_CLASS_HIGH)]
 
-  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, SPECIES_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, SPECIES_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
-# incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "GRID_CODE", "SPECIES_CODE", "SEX_CODE", "FATE_TYPE_CODE", "FATE_CODE",
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "SPECIES_CODE"))
+# incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "GRID_CODE", "SPECIES_CODE", "SEX_CODE", "FATE_TYPE_CODE", "FATE_CODE",
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "SPECIES_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
   l_debug(paste0("IOTCForm4SFMultiple.validate_months: ", Sys.time() - start))
@@ -90,7 +90,7 @@ setMethod("extract_data", "IOTCForm4SFMultiple", function(form) {
     strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
   }
 
-  colnames(strata) = c("MONTH", "FISHERY_CODE", "TARGET_SPECIES_CODE", "GRID_CODE", "SPECIES_CODE", "SEX_CODE", "FATE_TYPE_CODE", "FATE_CODE", "ESTIMATION_CODE",
+  colnames(strata) = c("MONTH", "FISHERY_CODE", "GRID_CODE", "SPECIES_CODE", "SEX_CODE", "FATE_TYPE_CODE", "FATE_CODE", "ESTIMATION_CODE",
                        "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE", "DATA_RAISING_CODE",
                        "COVERAGE_TYPE_CODE", "COVERAGE",
                        "MEASUREMENT_TYPE_CODE", "MEASURE_CODE", "MEASURING_TOOL_CODE",
@@ -150,16 +150,16 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
   start = Sys.time()
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
-  strata[, OCCURRENCES := .N, by = .(MONTH, FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
+  strata[, OCCURRENCES := .N, by = .(MONTH, FISHERY_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
                                      DATA_SOURCE_CODE, DATA_PROCESSING_CODE,
                                      MEASUREMENT_TYPE_CODE, MEASURE_CODE,
                                      SIZE_CLASS_LOW, SIZE_CLASS_HIGH)]
 
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, SPECIES_CODE)]
+  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, SPECIES_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "SPECIES_CODE"))
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "SPECIES_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
   l_debug(paste0("IOTCForm4SFMultiple.validate_data (III): ", Sys.time() - start))
@@ -180,8 +180,8 @@ setMethod("validate_data", list(form = "IOTCForm4SFMultiple", metadata_validatio
     )
   }
 
-  # Merges the fishery codes in the strata with the LEGACY_FISHERIES table in order to recover - when possible - the fishery category
-  fishery_categories = merge(strata, iotc.data.reference.codelists::LEGACY_FISHERIES[, .(CODE, FISHERY_CATEGORY)],
+  # Merges the fishery codes in the strata with the FISHERIES table in order to recover - when possible - the fishery category
+  fishery_categories = merge(strata, iotc.data.reference.codelists::FISHERIES[, .(CODE, FISHERY_CATEGORY)],
                              by.x = "FISHERY_CODE", by.y = "CODE")$FISHERY_CATEGORY
 
   grid_status    = data.table(FISHERY_CATEGORY_CODE = fishery_categories,
@@ -538,17 +538,17 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SFMultiple", metadata
   ## Main strata
 
   if(checks_strata$main$grids$invalid$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "E", text = paste0(checks_strata$main$grids$invalid$number, " invalid grid code(s) reported. Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes for this dataset")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D", text = paste0(checks_strata$main$grids$invalid$number, " invalid grid code(s) reported. Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes for this dataset")))
 
     for(row in checks_strata$main$grids$invalid$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "E", text = paste0("Invalid grid code in row #", row)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Invalid grid code in row #", row)))
   }
 
   if(checks_strata$main$grids$wrong$number > 0) {
-    if(checks_strata$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "E", text = paste0(checks_strata$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
+    if(checks_strata$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D", text = paste0(checks_strata$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
 
     for(row in checks_strata$main$grids$wrong$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "E", text = paste0("Wrong type of grid for the fishery in row #", row)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Wrong type of grid for the fishery in row #", row)))
   }
 
   ## Species
@@ -583,11 +583,11 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SFMultiple", metadata
 
   ## Number of samples
 
-  validation_messages = report_number_of_samples(validation_messages, checks_records$samples)
+  validation_messages = report_number_of_samples(validation_messages, checks_records$samples, column = "U")
 
   ## Number of fish
 
-  validation_messages = report_number_of_fish(validation_messages, checks_records$fish)
+  validation_messages = report_number_of_fish(validation_messages, checks_records$fish, column = "V")
 
   l_debug(paste0("IOTCForm4SFMultiple.data_validation_summary: ", Sys.time() - start))
 
@@ -618,7 +618,7 @@ setMethod("extract_output", list(form = "IOTCForm4SFMultiple", wide = "logical")
             strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
-                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                FISHERY_CODE,
                                 GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
@@ -637,7 +637,7 @@ setMethod("extract_output", list(form = "IOTCForm4SFMultiple", wide = "logical")
             output_data =
               output_data[, NUM_SAMPLES_STRATA := sum(NUM_SAMPLES, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                                                                          YEAR, MONTH,
-                                                                                         FISHERY_CODE, TARGET_SPECIES_CODE,
+                                                                                         FISHERY_CODE,
                                                                                          GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                                                                          DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                                                                          GRID_CODE, ESTIMATION_CODE,

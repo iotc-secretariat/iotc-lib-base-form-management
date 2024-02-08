@@ -65,7 +65,7 @@ report_months = function(message_list, months_validation, column = "B") {
 # FISHERIES
 report_fisheries = function(message_list, fisheries_validation, column) {
   if(fisheries_validation$aggregates$number > 0) {
-    message_list = add(message_list, new("Message", level = "WARN", source = "Data", column = column, text = paste0(fisheries_validation$aggregates$number, " aggregated fishery code(s) reported. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid legacy fishery codes")))
+    message_list = add(message_list, new("Message", level = "WARN", source = "Data", column = column, text = paste0(fisheries_validation$aggregates$number, " aggregated fishery code(s) reported. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes")))
 
     for(row in fisheries_validation$aggregates$row_indexes) {
       message_list = add(message_list, new("Message", level = "WARN", source = "Data", column = column, row = row, text = paste0("Aggregated fishery code '", fisheries_validation$aggregates$codes[which(fisheries_validation$aggregates$row_indexes == row)], "' reported in row #", row)))
@@ -81,31 +81,10 @@ report_fisheries = function(message_list, fisheries_validation, column) {
   }
 
   if(fisheries_validation$invalid$number > 0) {
-    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(fisheries_validation$invalid$number, " invalid fishery code(s) reported. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid legacy fishery codes")))
+    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(fisheries_validation$invalid$number, " invalid fishery code(s) reported. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes")))
 
     for(row in fisheries_validation$invalid$row_indexes) {
       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid fishery code '", fisheries_validation$invalid$codes[which(fisheries_validation$invalid$row_indexes == row)], "' in row #", row)))
-    }
-  }
-
-  return(message_list)
-}
-
-# TARGET SPECIES
-report_target_species = function(message_list, target_species_validation, column) {
-  if(target_species_validation$missing$number > 0) {
-    if(target_species_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(target_species_validation$missing$number, " missing target species code(s)")))
-
-    for(row in target_species_validation$missing$row_indexes) {
-      message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Missing target species code in row #", row)))
-    }
-  }
-
-  if(target_species_validation$invalid$number > 0) {
-    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(target_species_validation$invalid$number, " invalid target species code(s) reported. Please refer to ", reference_codes("legacy", "species"), " for a list of valid legacy fishery codes")))
-
-    for(row in target_species_validation$invalid$row_indexes) {
-       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("Invalid target species code '", target_species_validation$invalid$codes[which(target_species_validation$invalid$row_indexes == row)], "' in row #", row)))
     }
   }
 
@@ -276,7 +255,7 @@ report_data = function(message_list, data_validation, allow_empty_records) {
 }
 
 # SPECIES
-report_species = function(message_list, species_validation, species_row, species_domain = "legacy", species_codelist = "species") {
+report_species = function(message_list, species_validation, species_row, species_domain = "biological", species_codelist = "species") {
   if(species_validation$aggregates$number > 0) { # Aggregates
     message_list = add(message_list, new("Message", level = "WARN", source = "Data", row = species_row, text = paste0(species_validation$aggregates$number, " aggregated species code(s) reported. Please refer to ", reference_codes(species_domain, species_codelist), " for a list of valid species codes")))
 
@@ -331,7 +310,7 @@ report_species_column = function(message_list, species_validation, column = "F")
 }
 
 # RETAIN REASONS (Form 1-RC)
-report_retain_reasons = function(message_list, retain_reasons_validation, column = "F") {
+report_retain_reasons = function(message_list, retain_reasons_validation, column = "E") {
   if(retain_reasons_validation$missing$number > 0) {
     if(retain_reasons_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(retain_reasons_validation$missing$number, " missing retain reason code(s)")))
 
@@ -352,7 +331,7 @@ report_retain_reasons = function(message_list, retain_reasons_validation, column
 }
 
 # DISCARD REASONS (Form 1-DI)
-report_discard_reasons = function(message_list, discard_reasons_validation, column = "F") {
+report_discard_reasons = function(message_list, discard_reasons_validation, column = "E") {
   if(discard_reasons_validation$missing$number > 0) {
     if(discard_reasons_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", text = paste0(discard_reasons_validation$missing$number, " missing discard reason code(s)")))
 
@@ -493,7 +472,7 @@ report_effort_values = function(message_list, effort_value_validation, type = "p
 }
 
 ## 3CE - multiple
-report_effort_multiple = function(message_list, effort_validation, type = "primary", column_code = "M", column_value = "N") {
+report_effort_multiple = function(message_list, effort_validation, type = "primary", column_code = "L", column_value = "N") {
   # CODES
 
   if(effort_validation$code$missing$number > 0) {
@@ -553,7 +532,7 @@ report_sex = function(message_list, sex_validation, column = "D") {
 }
 
 # 4SF - multiple - TYPE OF FATE
-report_type_of_fate = function(message_list, type_of_fate_validation, column = "H") {
+report_type_of_fate = function(message_list, type_of_fate_validation, column = "G") {
   if(type_of_fate_validation$missing$number > 0) {
     if(type_of_measure_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(type_of_fate_validation$missing$number, " missing type of fate(s)")))
 
@@ -572,7 +551,7 @@ report_type_of_fate = function(message_list, type_of_fate_validation, column = "
 }
 
 # 4SF - multiple - FATE
-report_fate = function(message_list, fate_validation, column = "I") {
+report_fate = function(message_list, fate_validation, column = "H") {
   if(fate_validation$missing$number > 0) {
     if(fate_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(fate_validation$missing$number, " missing fate(s)")))
 
@@ -591,7 +570,7 @@ report_fate = function(message_list, fate_validation, column = "I") {
 }
 
 # 4SF - multiple - TYPE OF MEASURE
-report_type_of_measure = function(message_list, type_of_measure_validation, column = "Q") {
+report_type_of_measure = function(message_list, type_of_measure_validation, column = "P") {
   if(type_of_measure_validation$missing$number > 0) {
     if(type_of_measure_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(type_of_measure_validation$missing$number, " missing type of measure(s)")))
 
@@ -610,7 +589,7 @@ report_type_of_measure = function(message_list, type_of_measure_validation, colu
 }
 
 # 4SF - multiple - MEASURE TYPE
-report_measure_type = function(message_list, measure_type_validation, column = "R") {
+report_measure_type = function(message_list, measure_type_validation, column = "Q") {
   if(measure_type_validation$missing$number > 0) {
     if(measure_type_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(measure_type_validation$missing$number, " missing measure type(s)")))
 
@@ -629,7 +608,7 @@ report_measure_type = function(message_list, measure_type_validation, column = "
 }
 
 # 4SF - multiple - MEASURING TOOL
-report_measuring_tool = function(message_list, measuring_tool_validation, column = "S") {
+report_measuring_tool = function(message_list, measuring_tool_validation, column = "R") {
   if(measuring_tool_validation$missing$number > 0) {
     if(measuring_tool_validation$missing$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(measuring_tool_validation$missing$number, " missing measuring tool(s)")))
 

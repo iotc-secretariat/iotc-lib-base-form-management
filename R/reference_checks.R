@@ -86,13 +86,13 @@ validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets
 
 fisheries_for = function(fishery_code) {
   return(
-    iotc.data.reference.codelists::LEGACY_FISHERIES[CODE %in% trim(fishery_code)]
+    iotc.data.reference.codelists::FISHERIES[CODE %in% trim(fishery_code)]
   )
 }
 
 is_fishery_valid = function(fishery_code) {
   return(
-    trim(fishery_code) %in% iotc.data.reference.codelists::LEGACY_FISHERIES$CODE
+    trim(fishery_code) %in% iotc.data.reference.codelists::FISHERIES$CODE
   )
 }
 
@@ -110,7 +110,7 @@ validate_fishery = function(fishery_code, field = "Fishery") {
 is_multiple_gear_fishery = function(fishery_code) {
   fisheries = data.table(CODE = fishery_code)
   fisheries = merge(fisheries,
-                    iotc.data.reference.codelists::LEGACY_FISHERIES[, .(CODE, IS_AGGREGATE)],
+                    iotc.data.reference.codelists::FISHERIES[, .(CODE, IS_AGGREGATE)],
                     by = "CODE",
                     all.x = TRUE,
                     sort = FALSE)
@@ -123,7 +123,7 @@ is_multiple_gear_fishery = function(fishery_code) {
 fishery_type_for = function(fishery_code) {
   fisheries = data.table(CODE = fishery_code)
   fisheries = merge(fisheries,
-                    iotc.data.reference.codelists::LEGACY_FISHERIES[, .(CODE, FISHERY_TYPE_CODE)],
+                    iotc.data.reference.codelists::FISHERIES[, .(CODE, FISHERY_TYPE_CODE)],
                     by = "CODE",
                     all.x = TRUE,
                     sort = FALSE)

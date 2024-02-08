@@ -601,14 +601,14 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0("Invalid grid code in row(s) #", paste0(strata$checks$main$grids$invalid$row_indexes, collapse = ", "), ". Please refer to ", reference_codes("admin", "IOTCgridsAR"), " for a list of valid grid codes for this dataset")))
 
     for(row in strata$checks$main$grids$invalid$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Invalid grid code in row #", row)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Invalid grid code in row #", row)))
   }
 
   if(strata$checks$main$grids$wrong$number > 0) {
     if(strata$checks$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
 
     for(row_index in strata$checks$main$grids$wrong$row_indexes) {
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row_index, column = "E", text = paste0("Wrong grid code for fishery in row #", row_index)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row_index, column = "D", text = paste0("Wrong grid code for fishery in row #", row_index)))
     }
   }
 
@@ -633,24 +633,24 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
   same_effort_unit_st = same_effort_unit$secondary_tertiary
 
   if(same_effort_unit_ps$number > 0) {
-    if(same_effort_unit_ps$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "M & O", text = paste0(same_effort_unit_ps$number, " records with same primary / secondary effort unit codes")))
+    if(same_effort_unit_ps$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "L & N", text = paste0(same_effort_unit_ps$number, " records with same primary / secondary effort unit codes")))
 
     for(row in same_effort_unit_ps$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "M & O", text = paste0("Same primary / secondary effort unit codes in row #", row)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "L & N", text = paste0("Same primary / secondary effort unit codes in row #", row)))
   }
 
   if(same_effort_unit_pt$number > 0) {
-    if(same_effort_unit_pt$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "M & Q", text = paste0(same_effort_unit_pt$number, " records with same primary / tertiary effort unit codes")))
+    if(same_effort_unit_pt$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "L & P", text = paste0(same_effort_unit_pt$number, " records with same primary / tertiary effort unit codes")))
 
     for(row in same_effort_unit_pt$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "M & Q", text = paste0("Same primary / tertiary effort unit codes in row #", row)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "L & P", text = paste0("Same primary / tertiary effort unit codes in row #", row)))
   }
 
   if(same_effort_unit_st$number > 0) {
-    if(same_effort_unit_st$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "O & Q", text = paste0(same_effort_unit_st$number, " records with same secondary / tertiary effort unit codes")))
+    if(same_effort_unit_st$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "N & P", text = paste0(same_effort_unit_st$number, " records with same secondary / tertiary effort unit codes")))
 
     for(row in same_effort_unit_st$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "O & Q", text = paste0("Same secondary / tertiary effort unit codes in row #", row)))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "N & P", text = paste0("Same secondary / tertiary effort unit codes in row #", row)))
   }
 
   # Data issues / summary

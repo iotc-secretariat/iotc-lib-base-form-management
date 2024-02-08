@@ -186,9 +186,9 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm4SF", metadata_val
   if(!general_information$species$available)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = "The species is mandatory"))
   else if(!general_information$species$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$species$code, ") is not valid. Please refer to ", reference_codes("biological", "species"), " for a list of valid species codes")))
   else if(general_information$species$multiple)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$target_species$code, ") correspond to a species aggregate. Please refer to ", reference_codes("legacy", "species"), " for a list of valid, distinct species codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$species$code, ") correspond to a species aggregate. Please refer to ", reference_codes("biological", "species"), " for a list of valid, distinct species codes")))
 
   ## Measurements
 
@@ -556,7 +556,6 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
             strata$FLEET_CODE            = fleet$FLEET_CODE
 
             strata$FISHERY_CODE          = form_metadata$general_information$fishery
-            strata$TARGET_SPECIES_CODE   = form_metadata$general_information$target_species
             strata$SPECIES_CODE          = form_metadata$general_information$species
 
             strata$DATA_TYPE_CODE        = form_metadata$data_specifications$type_of_data
@@ -577,7 +576,7 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
             strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
-                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                FISHERY_CODE,
                                 GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
@@ -597,7 +596,7 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
             output_data =
               output_data[, NUM_SAMPLES_STRATA := sum(NUM_SAMPLES, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                                                                          YEAR, MONTH,
-                                                                                         FISHERY_CODE, TARGET_SPECIES_CODE,
+                                                                                         FISHERY_CODE,
                                                                                          GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                                                                          DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                                                                          GRID_CODE, ESTIMATION_CODE,

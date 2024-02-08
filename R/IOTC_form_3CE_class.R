@@ -590,7 +590,6 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
             strata$FLEET_CODE            = fleet$FLEET_CODE
 
             strata$FISHERY_CODE          = form_metadata$general_information$fishery
-            strata$TARGET_SPECIES_CODE   = form_metadata$general_information$target_species
 
             strata$DATA_TYPE_CODE        = form_metadata$data_specifications$type_of_data
             strata$DATA_SOURCE_CODE      = form_metadata$data_specifications$data_source
@@ -607,7 +606,7 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
             strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
-                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                FISHERY_CODE,
                                 GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
@@ -620,14 +619,14 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
 
             if(!wide) {
               output_data = melt.data.table(output_data,
-                                            id.vars = 1:25,
+                                            id.vars = 1:24,
                                             value.name = "CATCH",
                                             variable.name = "SPECIES_CODE")
 
               output_data =
                 output_data[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
-                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                FISHERY_CODE,
                                 GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
@@ -639,7 +638,7 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
 
               output_data[, TOTAL_CATCH := sum(CATCH, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                                                             YEAR, MONTH,
-                                                                            FISHERY_CODE, TARGET_SPECIES_CODE,
+                                                                            FISHERY_CODE,
                                                                             GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                                                             DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                                                             GRID_CODE, ESTIMATION_CODE,

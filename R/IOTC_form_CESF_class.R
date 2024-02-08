@@ -27,7 +27,6 @@ setMethod("extract_metadata", list(form = "IOTCFormCESF", common_metadata = "lis
   metadata_sheet = form@original_metadata
 
   common_metadata$general_information$fishery        = trim(as.character(metadata_sheet[16, 7]))
-  common_metadata$general_information$target_species = trim(as.character(metadata_sheet[17, 7]))
 
   data_specifications = list(
     type_of_data    = trim(as.character(metadata_sheet[23, 4])),
@@ -55,7 +54,7 @@ setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_valid
   fishery_valid            = fishery_valid && !fishery_multiple
 
   fishery = ifelse(fishery_available && fishery_valid, fisheries_for(general_information$fishery), NA)
-  fishery = iotc.data.reference.codelists::LEGACY_FISHERIES[CODE == fishery]
+  fishery = iotc.data.reference.codelists::FISHERIES[CODE == fishery]
 
   fishery_group    = ifelse(fishery_valid, fishery$FISHERY_GROUP_CODE, NA)
   fishery_type     = ifelse(fishery_valid, fishery$FISHERY_TYPE_CODE , NA)
@@ -70,18 +69,6 @@ setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_valid
       group     = fishery_group,
       type      = fishery_type,
       category  = fishery_category
-    )
-
-  target_species_available = is_provided(general_information$target_species)
-  target_species_valid     = target_species_available && is_species_valid(general_information$target_species)
-  target_species_multiple  = target_species_valid && is_species_aggregate(general_information$target_species)
-
-  common_metadata_validation_results$general_information$target_species =
-    list(
-      available = target_species_available,
-      code      = general_information$target_species,
-      multiple  = target_species_multiple,
-      valid     = target_species_valid
     )
 
   common_metadata_validation_results$data_specifications = list()
@@ -175,15 +162,8 @@ setMethod("metadata_validation_summary", list(form = "IOTCFormCESF", metadata_va
       validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 18, column = "G", text = paste0("The provided fishery (", general_information$fishery$code, ") is a fishery aggregate")))
 
     if(!general_information$fishery$valid)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 18, column = "G", text = paste0("The provided fishery (", general_information$fishery$code, ") is not valid. Please refer to ", reference_codes("legacy", "fisheries"), " for a list of valid fishery codes")))
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 18, column = "G", text = paste0("The provided fishery (", general_information$fishery$code, ") is not valid. Please refer to ", reference_codes("fisheries", "fisheries"), " for a list of valid fishery codes")))
   }
-
-  ## Species
-
-  if(!general_information$target_species$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 19, column = "G", text = "The target species is mandatory"))
-  else if(!general_information$target_species$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 19, column = "G", text = paste0("The provided target species (", general_information$target_species$code, ") is not valid. Please refer to ", reference_codes("legacy", "species"), " for a list of valid species codes")))
 
   # Data specifications
 

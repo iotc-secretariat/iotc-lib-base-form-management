@@ -84,11 +84,6 @@ setMethod("validate_data",
             fishery_types = fishery_type_for(strata$FISHERY_CODE)
             fishery_aggregates = which(is_multiple_gear_fishery(strata$FISHERY_CODE))
 
-            missing_target_species = which( is.na(strata$TARGET_SPECIES_CODE))
-            invalid_target_species = which(!is_species_valid(strata$TARGET_SPECIES_CODE)) # Checks target species against the default for 1RC and 1DI (iotc.data.reference.codelists::LEGACY_SPECIES)
-            invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
-            missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
-
             missing_IOTC_areas = which( is.na(strata$IOTC_MAIN_AREA_CODE))
             invalid_IOTC_areas = which(!is_IOTC_main_area_valid(strata$IOTC_MAIN_AREA_CODE))
             invalid_IOTC_areas = invalid_IOTC_areas[ ! invalid_IOTC_areas %in% missing_IOTC_areas ]
@@ -197,29 +192,17 @@ setMethod("validate_data",
                         ),
                         types = list(
                           artisanal = list(
-                            number      = length(which(fishery_types == "AR")),
-                            row_indexes = spreadsheet_rows_for(form, which(fishery_types == "AR"))
+                            number      = length(which(fishery_types %in% c("SU", "SS", "SI", "RC"))),
+                            row_indexes = spreadsheet_rows_for(form, which(fishery_types %in% c("SU", "SS", "SI", "RC")))
                           ),
                           semi_industrial = list(
-                            number      = length(which(fishery_types == "SI")),
-                            row_indexes = spreadsheet_rows_for(form, which(fishery_types == "SI"))
+                            number      = length(which(fishery_types == "IS")),
+                            row_indexes = spreadsheet_rows_for(form, which(fishery_types == "IS"))
                           ),
                           industrial = list(
-                            number      = length(which(fishery_types == "IN")),
-                            row_indexes = spreadsheet_rows_for(form, which(fishery_types == "IN"))
+                            number      = length(which(fishery_types %in% c("IS", "IN", "EX"))),
+                            row_indexes = spreadsheet_rows_for(form, which(fishery_types %in% c("IS", "IN", "EX")))
                           )
-                        )
-                      ),
-                      target_species = list(
-                        invalid = list(
-                          number       = length(invalid_target_species),
-                          row_indexes  = spreadsheet_rows_for(form, invalid_target_species),
-                          codes        = strata$TARGET_SPECIES_CODE[invalid_target_species],
-                          codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_target_species])
-                        ),
-                        missing = list(
-                          number      = length(missing_target_species),
-                          row_indexes = spreadsheet_rows_for(form, missing_target_species)
                         )
                       ),
                       IOTC_main_areas = list(
@@ -409,10 +392,6 @@ setMethod("common_data_validation_summary",
             # FISHERIES (1 per row *and* part of the stratum)
 
             validation_messages = report_fisheries(validation_messages, checks_strata_main$fisheries, "C")
-
-            # TARGET SPECIES (1 per row *and* part of the stratum)
-
-            validation_messages = report_target_species(validation_messages, checks_strata_main$target_species, "D")
 
             # MAIN AREAS (1 per row *and* part of the stratum)
 
