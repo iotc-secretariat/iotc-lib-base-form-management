@@ -26,7 +26,6 @@ debugSource("./R/IOTC_form_class.R",               echo = TRUE)
 debugSource("./R/IOTC_form_RCDI_class.R",          echo = TRUE)
 debugSource("./R/IOTC_form_1RC_class.R",           echo = TRUE)
 debugSource("./R/IOTC_form_1DI_class.R",           echo = TRUE)
-debugSource("./R/IOTC_form_3BU_class.R",           echo = TRUE)
 debugSource("./R/IOTC_form_CESF_class.R",          echo = TRUE)
 debugSource("./R/IOTC_form_CESF_multiple_class.R", echo = TRUE)
 debugSource("./R/IOTC_form_3CE_class.R",           echo = TRUE)
@@ -50,14 +49,6 @@ FORM_1DI =
   )
 
 summary = validation_summary(FORM_1DI)
-
-FORM_3BU =
-  new("IOTCForm3BU",
-      path_to_file  = "./test_forms/Form-3BU.xlsx",
-      original_name = "Form-3BU.xlsx"
-  )
-
-summary = validation_summary(FORM_3BU)
 
 FORM_3CE =
   new("IOTCForm3CE",
@@ -92,6 +83,3 @@ FORM_4SF_MUL =
   )
 
 summary = validation_summary(FORM_4SF_MUL)
-
-extract_output(FORM_4SF_MUL, wide = FALSE)
-summary$validation_messages[LEVEL == "ERROR"][order(ROW)]
