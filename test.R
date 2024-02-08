@@ -10,6 +10,7 @@ source("./data-raw/LOAD_RAV.R")
 source("./data-raw/READ_FISHERY_MAPPINGS.R")
 source("./data-raw/READ_EFFORT_MAPPINGS.R")
 source("./data-raw/READ_MEASURE_MAPPINGS.R")
+
 source("./R/constants.R")
 source("./R/utilities.R")
 source("./R/reference_checks.R")
@@ -36,8 +37,7 @@ debugSource("./R/IOTC_form_4SF_multiple_class.R",  echo = TRUE)
 
 FORM_1RC =
   new("IOTCForm1RC",
-      path_to_file  = "./test_forms/Form-1RC - interim.xlsx",
-      #path_to_file  = "./test_forms/AUS_2023_Form-1RC.xlsx",
+      path_to_file  = "./test/test_forms/old/Form-1RC.xlsx",
       original_name = "Form-1RC.xlsx"
   )
 

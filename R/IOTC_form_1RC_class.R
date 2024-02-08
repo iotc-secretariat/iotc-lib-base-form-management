@@ -120,7 +120,7 @@ setMethod("validate_quarters",
 
 setMethod("get_all_species_references_domain_and_codelist", "IOTCForm1RC", function(form) {
   l_debug("1-RC.get_all_species_references_domain_and_codelist")
-  return(list(domain = "legacy", codelist = "species"))
+  return(list(domain = "biological", codelist = "species"))
 })
 
 setMethod("get_all_species_references", "IOTCForm1RC", function(form) {
