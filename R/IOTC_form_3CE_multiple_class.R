@@ -718,11 +718,13 @@ setMethod("extract_output", list(form = "IOTCForm3CEMultiple", wide = "logical")
             strata$FLAG_COUNTRY_CODE     = form_metadata$general_information$flag_country
             strata$FLEET_CODE            = fleet$FLEET_CODE
 
-            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+            # Not required when using the new fishery codes
+            #strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
                                 FISHERY_CODE,
-                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                               #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
                                 PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT)]
@@ -750,7 +752,7 @@ setMethod("extract_output", list(form = "IOTCForm3CEMultiple", wide = "logical")
                 output_data[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
                                 FISHERY_CODE,
-                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                               #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
                                 PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT,
@@ -762,12 +764,14 @@ setMethod("extract_output", list(form = "IOTCForm3CEMultiple", wide = "logical")
               output_data[, TOTAL_CATCH := sum(CATCH, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                                                             YEAR, MONTH,
                                                                             FISHERY_CODE,
-                                                                            GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                                                           #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                                                             DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                                                             GRID_CODE, ESTIMATION_CODE,
                                                                             PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT)]
 
               output_data = unique(output_data)[is.na(TOTAL_CATCH) | CATCH > 0]
+
+              output_data$TOTAL_CATCH = NULL # Not required anymore
             }
 
             return(output_data)

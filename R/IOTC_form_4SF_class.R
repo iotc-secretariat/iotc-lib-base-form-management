@@ -573,11 +573,13 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
             strata$FATE_TYPE_CODE        = form_metadata$data_specifications$fate$type
             strata$FATE_CODE             = form_metadata$data_specifications$fate$fate
 
-            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+            # Not required when using the new fishery codes
+            #strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
                                 FISHERY_CODE,
-                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                               #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
                                 SPECIES_CODE, MEASUREMENT_TYPE_CODE, MEASURE_CODE, MEASURING_TOOL_CODE,
@@ -585,24 +587,20 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
                                 SIZE_CLASS_LOW, SIZE_CLASS_HIGH = SIZE_CLASS_LOW + as.numeric(form_metadata$data_specifications$measurements$interval) - 1,
                                 NUM_SAMPLES_STRATA = NA_real_)]
 
-            strata[GEAR_CODE %in% c("ELL", "FLL", "LL", "PS") & DATA_SOURCE_CODE == "OB", GEAR_CODE := paste0(GEAR_CODE, "OB")]
-            strata[GEAR_CODE %in% c("PSFS", "PSLS") & DATA_SOURCE_CODE == "OB", GEAR_CODE := "PSOB"]
-
             output_data = cbind(strata, data)
 
             output_data[, NUM_SAMPLES := round(as.numeric(output_data$NUM_SAMPLES), 2)]
-            output_data[, NUM_FISH    := round(as.numeric(output_data$NUM_FISH), 2)]
+            output_data[, NUM_FISH    := round(as.numeric(output_data$NUM_FISH),    2)]
 
             output_data =
               output_data[, NUM_SAMPLES_STRATA := sum(NUM_SAMPLES, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                                                                          YEAR, MONTH,
                                                                                          FISHERY_CODE,
-                                                                                         GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                                                                        #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                                                                          DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                                                                          GRID_CODE, ESTIMATION_CODE,
                                                                                          SPECIES_CODE, MEASUREMENT_TYPE_CODE, MEASURE_CODE, MEASURING_TOOL_CODE,
                                                                                          FATE_TYPE_CODE, FATE_CODE, SEX_CODE)]
-
 
             if(!wide) {
               output_data = output_data # no difference

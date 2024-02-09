@@ -603,11 +603,13 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
             strata$TERTIARY_EFFORT_CODE  = form_metadata$data_specifications$effort_units$tertiary
             strata$CATCH_UNIT_CODE       = form_metadata$data_specifications$catch_unit
 
-            strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+            # Not required when using the new fishery codes
+            #strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
                                 FISHERY_CODE,
-                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                               #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
                                 PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT,
@@ -619,7 +621,7 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
 
             if(!wide) {
               output_data = melt.data.table(output_data,
-                                            id.vars = 1:24,
+                                            id.vars = 1:21,
                                             value.name = "CATCH",
                                             variable.name = "SPECIES_CODE")
 
@@ -627,24 +629,26 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
                 output_data[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
                                 FISHERY_CODE,
-                                GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                               #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
                                 PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT,
                                 SPECIES_CODE, CATCH, CATCH_UNIT_CODE)]
 
-              # To remove meaningless records (i.e., those with species and / or catch unit code set, but with NA as catch) and enable correct handlign of records with efforts only (for a given strata)
+              # To remove meaningless records (i.e., those with species and / or catch unit code set, but with NA as catch) and enable correct handling of records with efforts only (for a given strata)
               output_data[is.na(CATCH) | CATCH == 0, `:=`(CATCH = NA, SPECIES_CODE = NA, CATCH_UNIT_CODE = NA)]
 
               output_data[, TOTAL_CATCH := sum(CATCH, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                                                             YEAR, MONTH,
                                                                             FISHERY_CODE,
-                                                                            GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                                                                           #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                                                             DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                                                             GRID_CODE, ESTIMATION_CODE,
                                                                             PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT)]
 
               output_data = unique(output_data)[is.na(TOTAL_CATCH) | CATCH > 0]
+
+              output_data$TOTAL_CATCH = NULL # Not required anymore
             }
 
             return(output_data)

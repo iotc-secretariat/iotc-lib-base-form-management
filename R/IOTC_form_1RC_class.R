@@ -302,11 +302,13 @@ setMethod("extract_output", list(form = "IOTCForm1RC", wide = "logical"),
     strata$FLAG_COUNTRY_CODE      = form_metadata$general_information$flag_country
     strata$FLEET_CODE             = fleet$FLEET_CODE
 
-    strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+    # Not required when using the new fishery codes
+    #strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+
     strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                         YEAR, QUARTER,
                         FISHERY_CODE,
-                        GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
+                       #GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                         DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                         IOTC_MAIN_AREA_CODE, RETAIN_REASON_CODE,
                         CATCH_UNIT_CODE = "T")]
@@ -317,7 +319,7 @@ setMethod("extract_output", list(form = "IOTCForm1RC", wide = "logical"),
 
     if(!wide) {
       output_data = melt.data.table(output_data,
-                                    id.vars = 1:17,
+                                    id.vars = 1:14,
                                     value.name = "CATCH",
                                     variable.name = "SPECIES_CODE")[!is.na(CATCH) & CATCH > 0]
     }

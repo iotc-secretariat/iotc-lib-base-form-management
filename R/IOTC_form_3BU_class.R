@@ -668,7 +668,7 @@ setMethod("extract_output", list(form = "IOTCForm3BU", wide = "logical"),
 
             output_data = cbind(strata, data)
 
-            if(!wide) {
+            if(!wide) { # No differences between wide / long versions of the outputs here
               output_data = output_data
             }
 

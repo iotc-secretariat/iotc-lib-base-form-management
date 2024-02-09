@@ -43,6 +43,9 @@ FORM_1RC =
 
 summary = validation_summary(FORM_1RC)
 
+out_1RC      = extract_output(FORM_1RC, wide = FALSE)
+out_1RC_wide = extract_output(FORM_1RC, wide = TRUE)
+
 FORM_1DI =
   new("IOTCForm1DI",
       path_to_file  = "./test/sample_forms/Form-1DI.xlsx",
@@ -50,6 +53,9 @@ FORM_1DI =
   )
 
 summary = validation_summary(FORM_1DI)
+
+out_1DI      = extract_output(FORM_1DI, wide = FALSE)
+out_1DI_wide = extract_output(FORM_1DI, wide = TRUE)
 
 FORM_3BU =
   new("IOTCForm3BU",
@@ -59,6 +65,9 @@ FORM_3BU =
 
 summary = validation_summary(FORM_3BU)
 
+out_3BU      = extract_output(FORM_3BU, wide = FALSE)
+out_3BU_wide = extract_output(FORM_3BU, wide = TRUE)
+
 FORM_3CE =
   new("IOTCForm3CE",
       path_to_file  = "./test/sample_forms/Form-3CE.xlsx",
@@ -66,6 +75,9 @@ FORM_3CE =
   )
 
 summary = validation_summary(FORM_3CE)
+
+out_3CE      = extract_output(FORM_3CE, wide = FALSE)
+out_3CE_wide = extract_output(FORM_3CE, wide = TRUE)
 
 FORM_3CE_MUL =
   new("IOTCForm3CEMultiple",
@@ -75,6 +87,9 @@ FORM_3CE_MUL =
 
 summary = validation_summary(FORM_3CE_MUL)
 
+out_3CE_MUL      = extract_output(FORM_3CE_MUL, wide = FALSE)
+out_3CE_MUL_wide = extract_output(FORM_3CE_MUL, wide = TRUE)
+
 FORM_4SF =
   new("IOTCForm4SF",
       path_to_file  = "./test/sample_forms/Form-4SF.xlsx",
@@ -83,6 +98,9 @@ FORM_4SF =
 
 summary = validation_summary(FORM_4SF)
 
+out_4SF      = extract_output(FORM_4SF, wide = FALSE)
+out_4SF_wide = extract_output(FORM_4SF, wide = TRUE)
+
 FORM_4SF_MUL =
   new("IOTCForm4SFMultiple",
       path_to_file  = "./test/sample_forms/Form-4SF-multiple.xlsx",
@@ -90,3 +108,6 @@ FORM_4SF_MUL =
   )
 
 summary = validation_summary(FORM_4SF_MUL)
+
+out_4SF_MUL      = extract_output(FORM_4SF_MUL, wide = FALSE)
+out_4SF_MUL_wide = extract_output(FORM_4SF_MUL, wide = TRUE)
