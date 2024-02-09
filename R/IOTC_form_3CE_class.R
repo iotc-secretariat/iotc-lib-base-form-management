@@ -501,15 +501,15 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
 
   ### STRATA AND RECORDS
 
-  # This is only true for 3CE / surface
-
   fishery_info        = metadata_validation_results$general_information$fishery
   data_specifications = metadata_validation_results$data_specifications
 
-  if(fishery_info$category == "SURFACE") {
+  # This only applies to 3CE / SURFACE
+  if(!is.na(fishery_info$category) && fishery_info$category == "SURFACE") {
     validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = "The provided fishery belongs to the 'surface' category and therefore catches are assumed to be reported in live-weight equivalent and raised to totals by default"))
   }
 
+  # This only applies to 3CE / !LONGLINE
   if(!is.na(data_specifications$catch_unit$code) && data_specifications$catch_unit$code == "NO" &&
      !is.na(fishery_info$category) &&  fishery_info$category != "LONGLINE") {
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", text = "Catches shall be provided in weight (either kg or t)"))

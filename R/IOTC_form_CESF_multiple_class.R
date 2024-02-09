@@ -437,10 +437,6 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESFMultiple", 
 
   validation_messages = report_fisheries(validation_messages, checks_strata_main$fisheries, "C")
 
-  ### Target species
-
-  validation_messages = report_target_species(validation_messages, checks_strata_main$target_species, "D")
-
   ### Grids
 
   grids = checks_strata_main$grids

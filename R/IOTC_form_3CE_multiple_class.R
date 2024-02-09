@@ -26,7 +26,7 @@ setMethod("allow_empty_data_multiple", "IOTCForm3CEMultiple", function(form) {
 })
 
 setMethod("estimation_column", "IOTCForm3CEMultiple", function(form) {
-  return("F")
+  return("E")
 })
 
 setMethod("optional_strata_columns", "IOTCForm3CEMultiple", function(form) {
@@ -34,7 +34,7 @@ setMethod("optional_strata_columns", "IOTCForm3CEMultiple", function(form) {
 })
 
 setMethod("first_data_column", "IOTCForm3CEMultiple", function(form) {
-  return(which(EXCEL_COLUMNS == "T"))
+  return(which(EXCEL_COLUMNS == "S"))
 })
 
 setMethod("first_data_row", "IOTCForm3CEMultiple", function(form) {
@@ -46,20 +46,19 @@ setMethod("first_strata_column", "IOTCForm3CEMultiple", function(form) {
 })
 
 setMethod("last_strata_column", "IOTCForm3CEMultiple", function(form) {
-  return(which(EXCEL_COLUMNS == "R"))
+  return(which(EXCEL_COLUMNS == "Q"))
 })
-
 
 setMethod("validate_months_multiple", list(form = "IOTCForm3CEMultiple", strata = "data.table"), function(form, strata) {
   start = Sys.time()
 
   l_info("IOTCForm3CEMultiple.validate_months")
 
-  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "GRID_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "GRID_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_months: ", Sys.time() - start))
@@ -85,7 +84,7 @@ setMethod("extract_data", "IOTCForm3CEMultiple", function(form) {
     strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
   }
 
-  colnames(strata) = c("MONTH", "FISHERY_CODE", "TARGET_SPECIES_CODE", "GRID_CODE", "ESTIMATION_CODE",
+  colnames(strata) = c("MONTH", "FISHERY_CODE", "GRID_CODE", "ESTIMATION_CODE",
                        "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE", "DATA_RAISING_CODE",
                        "COVERAGE_TYPE_CODE", "COVERAGE",
                        "PRIMARY_EFFORT_CODE", "PRIMARY_EFFORT", "SECONDARY_EFFORT_CODE", "SECONDARY_EFFORT", "TERTIARY_EFFORT_CODE", "TERTIARY_EFFORT")
@@ -148,14 +147,14 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   strata_empty_columns = find_empty_columns(strata[, 1:3]) # Effort values shall not be considered, as some of them (either secondary, or tertiary, or both) might be left all empty
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
-  strata[, OCCURRENCES := .N, by = .(MONTH, FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+  strata[, OCCURRENCES := .N, by = .(MONTH, FISHERY_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
   # If all months are provided and valid, we check that they're also consistent...
-  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
+  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, GRID_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "TARGET_SPECIES_CODE", "GRID_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "GRID_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
   l_info(paste0("IOTCForm3CEMultiple.validate_data (I): ", Sys.time() - start))
@@ -299,7 +298,7 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   ### Tertiary effort code + value
 
   missing_tertiary_effort_codes = which( is.na(strata$TERTIARY_EFFORT_CODE))
-  invalid_tertiary_effort_codes = which(!is.na(strata$TERTIARY_EFFORT_CODE) & !is_value_strictly_positive(strata$TERTIARY_EFFORT_CODE))
+  invalid_tertiary_effort_codes = which(!is_effort_unit_valid(strata$TERTIARY_EFFORT_CODE))
   invalid_tertiary_effort_codes = invalid_tertiary_effort_codes[ ! invalid_tertiary_effort_codes %in% missing_tertiary_effort_codes ]
   missing_tertiary_effort_codes = missing_tertiary_effort_codes[ ! missing_tertiary_effort_codes %in% strata_empty_rows ]
 
@@ -623,8 +622,8 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CEMultiple", metadata
   effort_primary   = checks_strata_efforts$primary
 
   validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$primary)
-  validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$secondary, "secondary", "O", "P")
-  validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$tertiary,  "tertiary",  "Q", "R")
+  validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$secondary, "secondary", "N", "O")
+  validation_messages = report_effort_multiple(validation_messages, checks_strata_efforts$tertiary,  "tertiary",  "P", "Q")
 
   same_effort_unit = checks_strata_efforts$same_unit
 
@@ -722,7 +721,7 @@ setMethod("extract_output", list(form = "IOTCForm3CEMultiple", wide = "logical")
             strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
             strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
-                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                FISHERY_CODE,
                                 GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
@@ -750,7 +749,7 @@ setMethod("extract_output", list(form = "IOTCForm3CEMultiple", wide = "logical")
               output_data =
                 output_data[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                 YEAR, MONTH,
-                                FISHERY_CODE, TARGET_SPECIES_CODE,
+                                FISHERY_CODE,
                                 GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                 DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                 GRID_CODE, ESTIMATION_CODE,
@@ -762,7 +761,7 @@ setMethod("extract_output", list(form = "IOTCForm3CEMultiple", wide = "logical")
 
               output_data[, TOTAL_CATCH := sum(CATCH, na.rm = TRUE), by = .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                                                                             YEAR, MONTH,
-                                                                            FISHERY_CODE, TARGET_SPECIES_CODE,
+                                                                            FISHERY_CODE,
                                                                             GEAR_CODE, MAIN_GEAR_CODE, SCHOOL_TYPE_CODE,
                                                                             DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE, DATA_RAISING_CODE, COVERAGE_TYPE_CODE, COVERAGE,
                                                                             GRID_CODE, ESTIMATION_CODE,

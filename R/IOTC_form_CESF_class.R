@@ -56,7 +56,7 @@ setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_valid
   fishery = ifelse(fishery_available && fishery_valid, fisheries_for(general_information$fishery), NA)
   fishery = iotc.data.reference.codelists::FISHERIES[CODE == fishery]
 
-  fishery_group    = ifelse(fishery_valid, fishery$FISHERY_GROUP_CODE, NA)
+  #fishery_group    = ifelse(fishery_valid, fishery$FISHERY_GROUP_CODE, NA)
   fishery_type     = ifelse(fishery_valid, fishery$FISHERY_TYPE_CODE , NA)
   fishery_category = ifelse(fishery_valid, fishery$FISHERY_CATEGORY,   NA)
 
@@ -66,7 +66,7 @@ setMethod("validate_metadata", list(form = "IOTCFormCESF", common_metadata_valid
       code      = general_information$fishery,
       multiple  = fishery_multiple,
       valid     = fishery_valid,
-      group     = fishery_group,
+      #group     = fishery_group,
       type      = fishery_type,
       category  = fishery_category
     )

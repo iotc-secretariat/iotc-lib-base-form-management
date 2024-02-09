@@ -37,7 +37,7 @@ debugSource("./R/IOTC_form_4SF_multiple_class.R",  echo = TRUE)
 
 FORM_1RC =
   new("IOTCForm1RC",
-      path_to_file  = "./test/test_forms/old/Form-1RC.xlsx",
+      path_to_file  = "./test/sample_forms/Form-1RC.xlsx",
       original_name = "Form-1RC.xlsx"
   )
 
@@ -45,7 +45,7 @@ summary = validation_summary(FORM_1RC)
 
 FORM_1DI =
   new("IOTCForm1DI",
-      path_to_file  = "./test_forms/Form-1DI - interim.xlsx",
+      path_to_file  = "./test/sample_forms/Form-1DI.xlsx",
       original_name = "Form-1DI.xlsx"
   )
 
@@ -53,7 +53,7 @@ summary = validation_summary(FORM_1DI)
 
 FORM_3BU =
   new("IOTCForm3BU",
-      path_to_file  = "./test_forms/Form-3BU.xlsx",
+      path_to_file  = "./test/sample_forms/Form-3BU.xlsx",
       original_name = "Form-3BU.xlsx"
   )
 
@@ -61,8 +61,7 @@ summary = validation_summary(FORM_3BU)
 
 FORM_3CE =
   new("IOTCForm3CE",
-      path_to_file  = "./test_forms/Form-3CE - interim.xlsx",
-      #path_to_file  = "./test_forms/AUS_2023_Form-3CE - PS.xlsx",
+      path_to_file  = "./test/sample_forms/Form-3CE.xlsx",
       original_name = "Form-3CE.xlsx"
   )
 
@@ -70,7 +69,7 @@ summary = validation_summary(FORM_3CE)
 
 FORM_3CE_MUL =
   new("IOTCForm3CEMultiple",
-      path_to_file  = "./test_forms/Form-3CE-multiple - interim.xlsx",
+      path_to_file  = "./test/sample_forms/Form-3CE-multiple.xlsx",
       original_name = "Form-3CE-multiple.xlsx"
   )
 
@@ -78,7 +77,7 @@ summary = validation_summary(FORM_3CE_MUL)
 
 FORM_4SF =
   new("IOTCForm4SF",
-      path_to_file  = "./test_forms/Form-4SF - interim.xlsx",
+      path_to_file  = "./test/sample_forms/Form-4SF.xlsx",
       original_name = "Form-4SF.xlsx"
   )
 
@@ -86,12 +85,8 @@ summary = validation_summary(FORM_4SF)
 
 FORM_4SF_MUL =
   new("IOTCForm4SFMultiple",
-      path_to_file  = "./test_forms/Form-4SF-multiple - interim.xlsx",
-      #path_to_file = "Z:\\Submissions\\2022\\EU\\EUESP\\SF\\2022_PS_EU.SPAIN_Form-4SF-multiple_PSFS&PSLS_Tunas&Bycatch_TEST.xlsx",
+      path_to_file  = "./test/sample_forms/Form-4SF-multiple.xlsx",
       original_name = "Form-4SF-multiple.xlsx"
   )
 
 summary = validation_summary(FORM_4SF_MUL)
-
-extract_output(FORM_4SF_MUL, wide = FALSE)
-summary$validation_messages[LEVEL == "ERROR"][order(ROW)]
