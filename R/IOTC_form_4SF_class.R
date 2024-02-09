@@ -210,7 +210,7 @@ setMethod("metadata_validation_summary", list(form = "IOTCForm4SF", metadata_val
   if(!measurements$measure$available)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = "The measure is mandatory"))
   else if(!measurements$measure$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = paste0("The provided measure (", measurements$type$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure codes")))
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = paste0("The provided measure (", measurements$measure$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure codes")))
 
   ### Measuring tool
 

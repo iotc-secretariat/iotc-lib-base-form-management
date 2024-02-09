@@ -506,7 +506,7 @@ setMethod("data_validation_summary", list(form = "IOTCForm3CE", metadata_validat
   fishery_info        = metadata_validation_results$general_information$fishery
   data_specifications = metadata_validation_results$data_specifications
 
-  if(fishery_info$category == "SURFACE") {
+  if(!is.na(fishery_info$category) && fishery_info$category == "SURFACE") {
     validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Data", text = "The provided fishery belongs to the 'surface' category and therefore catches are assumed to be reported in live-weight equivalent and raised to totals by default"))
   }
 
@@ -647,6 +647,8 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
 
               output_data = unique(output_data)[is.na(TOTAL_CATCH) | CATCH > 0]
             }
+
+            output_data$TOTAL_CATCH = NULL # Not required anymore
 
             return(output_data)
           }

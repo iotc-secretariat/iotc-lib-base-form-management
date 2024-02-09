@@ -299,7 +299,7 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
   ### Tertiary effort code + value
 
   missing_tertiary_effort_codes = which( is.na(strata$TERTIARY_EFFORT_CODE))
-  invalid_tertiary_effort_codes = which(!is.na(strata$TERTIARY_EFFORT_CODE) & !is_value_strictly_positive(strata$TERTIARY_EFFORT_CODE))
+  invalid_tertiary_effort_codes = which(!is_effort_unit_valid(strata$TERTIARY_EFFORT_CODE))
   invalid_tertiary_effort_codes = invalid_tertiary_effort_codes[ ! invalid_tertiary_effort_codes %in% missing_tertiary_effort_codes ]
   missing_tertiary_effort_codes = missing_tertiary_effort_codes[ ! missing_tertiary_effort_codes %in% strata_empty_rows ]
 
@@ -769,6 +769,8 @@ setMethod("extract_output", list(form = "IOTCForm3CEMultiple", wide = "logical")
                                                                             PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT)]
 
               output_data = unique(output_data)[is.na(TOTAL_CATCH) | CATCH > 0]
+
+              output_data$TOTAL_CATCH = NULL # Not required anymore
             }
 
             return(output_data)
