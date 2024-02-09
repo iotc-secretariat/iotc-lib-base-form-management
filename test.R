@@ -42,6 +42,10 @@ FORM_1RC =
 
 summary = validation_summary(FORM_1RC)
 
+write.table(summary$validation_messages,
+            file = "./test/sample_forms/Form-1RC - interim_summary.csv",
+            sep = ",", row.names = FALSE)
+
 out_1RC      = extract_output(FORM_1RC, wide = FALSE)
 out_1RC_wide = extract_output(FORM_1RC, wide = TRUE)
 
@@ -52,6 +56,10 @@ FORM_1DI =
   )
 
 summary = validation_summary(FORM_1DI)
+
+write.table(summary$validation_messages,
+            file = "./test/sample_forms/Form-1DI - interim_summary.csv",
+            sep = ",", row.names = FALSE)
 
 out_1DI      = extract_output(FORM_1DI, wide = FALSE)
 out_1DI_wide = extract_output(FORM_1DI, wide = TRUE)
@@ -64,6 +72,10 @@ FORM_3CE =
 
 summary = validation_summary(FORM_3CE)
 
+write.table(summary$validation_messages,
+            file = "./test/sample_forms/Form-3CE - interim_summary.csv",
+            sep = ",", row.names = FALSE)
+
 out_3CE      = extract_output(FORM_3CE, wide = FALSE)
 out_3CE_wide = extract_output(FORM_3CE, wide = TRUE)
 
@@ -74,6 +86,10 @@ FORM_3CE_MUL =
   )
 
 summary = validation_summary(FORM_3CE_MUL)
+
+write.table(summary$validation_messages,
+            file = "./test/sample_forms/Form-3CE-multiple - interim_summary.csv",
+            sep = ",", row.names = FALSE)
 
 out_3CE_MUL      = extract_output(FORM_3CE_MUL, wide = FALSE)
 out_3CE_MUL_wide = extract_output(FORM_3CE_MUL, wide = TRUE)
@@ -86,6 +102,10 @@ FORM_4SF =
 
 summary = validation_summary(FORM_4SF)
 
+write.table(summary$validation_messages,
+            file = "./test/sample_forms/Form-4SF - interim_summary.csv",
+            sep = ",", row.names = FALSE)
+
 out_4SF      = extract_output(FORM_4SF, wide = FALSE)
 out_4SF_wide = extract_output(FORM_4SF, wide = TRUE)
 
@@ -96,6 +116,10 @@ FORM_4SF_MUL =
   )
 
 summary = validation_summary(FORM_4SF_MUL)
+
+write.table(summary$validation_messages,
+            file = "./test/sample_forms/Form-4SF-multiple - interim_summary.csv",
+            sep = ",", row.names = FALSE)
 
 out_4SF_MUL      = extract_output(FORM_4SF_MUL, wide = FALSE)
 out_4SF_MUL_wide = extract_output(FORM_4SF_MUL, wide = TRUE)

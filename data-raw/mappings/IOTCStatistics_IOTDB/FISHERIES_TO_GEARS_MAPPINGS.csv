@@ -67,5 +67,5 @@ TLNM,TROLN,TROLN,,Trolling (non-mechanized boats)
 TP,TRAP,TRAP,,Trap
 TR,TRAW,TRAW,,Trawl
 RR,RR,RR,,Rod and Reel
-,TROT,TROT,,Trotline
-,HOOK,HOOK,,Hook and line
+TROT,TROT,TROT,,Trotline
+HOOK,HOOK,HOOK,,Hook and line

@@ -646,9 +646,9 @@ setMethod("extract_output", list(form = "IOTCForm3CE", wide = "logical"),
                                                                             PRIMARY_EFFORT_CODE, PRIMARY_EFFORT, SECONDARY_EFFORT_CODE, SECONDARY_EFFORT, TERTIARY_EFFORT_CODE, TERTIARY_EFFORT)]
 
               output_data = unique(output_data)[is.na(TOTAL_CATCH) | CATCH > 0]
-            }
 
-            output_data$TOTAL_CATCH = NULL # Not required anymore
+              output_data$TOTAL_CATCH = NULL # Not required anymore
+            }
 
             return(output_data)
           }

@@ -19,7 +19,7 @@ setMethod("validate_type_and_version", "IOTCForm", function(form) {
   form_type    = form@metadata$form_details$type
   form_version = form@metadata$form_details$version
 
-  if(check_mandatory(form_type, "Form type") != form_type(form))
+  if(!check_mandatory(form_type, "Form type") %in% form_type(form))
     stop(call. = FALSE, paste0("File format error: please provide a valid form ", form_type(form), " (current form type: ", form_type, " - required: ", form_type(form), ")"))
 
   if(check_mandatory(form_version, "Form version") != form_version(form))
