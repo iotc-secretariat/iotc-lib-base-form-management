@@ -484,7 +484,7 @@ report_effort_multiple = function(message_list, effort_validation, type = "prima
   }
 
   if(effort_validation$code$invalid$number > 0) {
-    if(effort_validation$value$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column_code, text = paste0(effort_validation$code$missing$number, " invalid ", type, " effort codes. Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
+    if(effort_validation$value$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column_code, text = paste0(effort_validation$code$invalid$number, " invalid ", type, " effort codes. Please refer to ", reference_codes("fishery", "effortUnits"), " for a list of valid effort unit codes")))
 
     for(row in effort_validation$code$invalid$row_indexes) {
       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column_code, text = paste0("Invalid ", type, " effort code '", effort_validation$code$invalid$values[which(effort_validation$code$invalid$row_indexes == row)], "' in row #", row)))
