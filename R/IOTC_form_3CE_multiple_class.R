@@ -175,13 +175,13 @@ setMethod("validate_data", list(form = "IOTCForm3CEMultiple", metadata_validatio
     )
   }
 
-  # Merges the fishery codes in the strata with the LEGACY_FISHERIES table in order to recover - when possible - the fishery category
-  fishery_categories = merge(strata, iotc.data.reference.codelists::LEGACY_FISHERIES[, .(CODE, FISHERY_CATEGORY)],
+  # Merges the fishery codes in the strata with the FISHERIES table in order to recover the fishery category
+  fishery_categories = merge(strata, iotc.data.reference.codelists::FISHERIES[, .(CODE, FISHERY_CATEGORY_CODE)],
                              by.x = "FISHERY_CODE", by.y = "CODE",
                              sort = FALSE)
 
   grid_status    = data.table(FISHERY_CODE = fishery_categories$FISHERY_CODE,
-                              FISHERY_CATEGORY_CODE = fishery_categories$FISHERY_CATEGORY,
+                              FISHERY_CATEGORY_CODE = fishery_categories$FISHERY_CATEGORY_CODE,
                               GRID_CODE = strata$GRID_CODE,
                               MISSING   = is.na(strata$GRID_CODE),
                               VALID     = grid_validator(form)(strata$GRID_CODE),
