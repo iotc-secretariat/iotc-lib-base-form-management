@@ -598,7 +598,7 @@ report_measure_type = function(message_list, measure_type_validation, column = "
   }
 
   if(measure_type_validation$invalid$number > 0) {
-    if(measure_type_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(measure_type_validation$invalid$number, " invalid measure type(s). Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure type codes")))
+    if(measure_type_validation$invalid$number > 1) message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(measure_type_validation$invalid$number, " invalid measure type(s). Please refer to ", reference_codes("biological", "allMeasurements"), " for a list of valid measure type codes")))
 
     for(row in measure_type_validation$invalid$row_indexes)
       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", row = row, column = column, text = paste0("Invalid measure type '", measure_type_validation$invalid$codes[which(measure_type_validation$invalid$row_indexes == row)], "' in row #", row)))
