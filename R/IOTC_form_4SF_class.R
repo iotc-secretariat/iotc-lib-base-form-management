@@ -17,16 +17,24 @@ setMethod("form_dataset_code", "IOTCForm4SF", function(form) {
   return("SF")
 })
 
-setMethod("allow_empty_data", "IOTCForm4SF", function(form) {
+setMethod("grid_validator", "IOTCForm4SF", function(form) {
+  return(is_grid_CE_SF_valid)
+})
+
+setMethod("allow_empty_data_multiple", "IOTCForm4SF", function(form) {
   return(FALSE)
 })
 
 setMethod("estimation_column", "IOTCForm4SF", function(form) {
-  return("E")
+  return("J")
+})
+
+setMethod("optional_strata_columns", "IOTCForm4SF", function(form) {
+  return(c()) # None
 })
 
 setMethod("first_data_column", "IOTCForm4SF", function(form) {
-  return(which(EXCEL_COLUMNS == "G"))
+  return(which(EXCEL_COLUMNS == "U"))
 })
 
 setMethod("first_data_row", "IOTCForm4SF", function(form) {
@@ -38,18 +46,27 @@ setMethod("first_strata_column", "IOTCForm4SF", function(form) {
 })
 
 setMethod("last_strata_column", "IOTCForm4SF", function(form) {
-  return(which(EXCEL_COLUMNS == "F"))
+  return(which(EXCEL_COLUMNS == "T"))
 })
 
-setMethod("validate_months", list(form = "IOTCForm4SF", strata = "data.table"), function(form, strata) {
+setMethod("validate_months_multiple", list(form = "IOTCForm4SF", strata = "data.table"), function(form, strata) {
+  start = Sys.time()
   l_info("IOTCForm4SF.validate_months")
 
-  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE, SEX_CODE)]
+# valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
+#                                                                               DATA_SOURCE_CODE, DATA_PROCESSING_CODE,
+#                                                                               MEASUREMENT_TYPE_CODE, MEASURE_CODE,
+#                                                                               SIZE_CLASS_LOW, SIZE_CLASS_HIGH)]
+
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, SPECIES_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("GRID_CODE", "SEX_CODE"))
+# incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "GRID_CODE", "SPECIES_CODE", "SEX_CODE", "FATE_TYPE_CODE", "FATE_CODE",
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "SPECIES_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
+
+  l_debug(paste0("IOTCForm4SF.validate_months: ", Sys.time() - start))
 
   return(
     list(
@@ -58,194 +75,8 @@ setMethod("validate_months", list(form = "IOTCForm4SF", strata = "data.table"), 
   )
 })
 
-setMethod("extract_metadata", list(form = "IOTCForm4SF", common_metadata = "list"), function(form, common_metadata) {
-  l_info("IOTCForm4SF.extract_metadata")
-
-  custom_metadata = callNextMethod(form, common_metadata)
-
-  metadata_sheet = form@original_metadata
-
-  custom_metadata$general_information$species = trim(as.character(metadata_sheet[18, 7]))
-
-  custom_metadata$data_specifications$measurements = list(
-    type     = trim(as.character(metadata_sheet[23, 7])),
-    measure  = trim(as.character(metadata_sheet[24, 7])),
-    tool     = trim(as.character(metadata_sheet[25, 7])),
-    interval = trim(as.character(metadata_sheet[26, 7]))
-  )
-
-  custom_metadata$data_specifications$fate = list(
-    type = trim(as.character(metadata_sheet[28, 7])),
-    fate = trim(as.character(metadata_sheet[29, 7]))
-  )
-
-  return(custom_metadata)
-})
-
-setMethod("validate_metadata", list(form = "IOTCForm4SF", common_metadata_validation_results = "list"), function(form, common_metadata_validation_results) {
-  l_info("IOTCForm4SF.validate_metadata")
-
-  common_metadata_validation_results = callNextMethod(form, common_metadata_validation_results)
-
-  general_information = form@metadata$general_information
-
-  species_available = is_provided(general_information$species)
-  species_valid     = species_available && is_species_valid(general_information$species)
-  species_multiple  = species_valid && is_species_aggregate(general_information$species)
-
-  common_metadata_validation_results$general_information$species =
-    list(
-      available = species_available,
-      code      = general_information$species,
-      multiple  = species_multiple,
-      valid     = species_valid
-    )
-
-  data_specifications = form@metadata$data_specifications
-
-  type_of_measurement_available   = is_provided(data_specifications$measurements$type)
-  type_of_measurement_valid       = type_of_measurement_available && is_measurement_type_valid(data_specifications$measurements$type)
-
-  measurement_available   = is_provided(data_specifications$measurements$measure)
-  measurement_valid       = measurement_available && type_of_measurement_valid && is_measurement_valid(data_specifications$measurements$type,
-                                                                                                       data_specifications$measurements$measure)
-
-  measuring_tool_available   = is_provided(data_specifications$measurements$type)
-  measuring_tool_valid       = measuring_tool_available && type_of_measurement_valid && is_measuring_tool_valid(data_specifications$measurements$type,
-                                                                                                                data_specifications$measurements$tool)
-
-  size_interval_available = is_provided(data_specifications$measurements$interval)
-  size_interval_valid     = size_interval_available &&
-                            is_numeric(data_specifications$measurements$interval) &&
-                            as.numeric(data_specifications$measurements$interval) > 0
-
-  custom_metadata_validation_results = common_metadata_validation_results
-
-  custom_metadata_validation_results$data_specifications$measurements =
-    list(
-      type =  list(
-        available = type_of_measurement_available,
-        code      = data_specifications$measurements$type,
-        valid     = type_of_measurement_valid
-      ),
-      measure = list(
-        available = measurement_available,
-        code      = data_specifications$measurements$measure,
-        valid     = measurement_valid
-      ),
-      tool = list(
-        available = measuring_tool_available,
-        code      = data_specifications$measurements$tool,
-        valid     = measuring_tool_valid
-      ),
-      interval = list(
-        available = size_interval_available,
-        value     = ifelse(size_interval_valid, as.numeric(data_specifications$measurements$interval), NA),
-        valid     = size_interval_valid
-      )
-    )
-
-  type_of_fate_available   = is_provided(data_specifications$fate$type)
-  type_of_fate_valid       = type_of_fate_available && is_fate_type_valid(data_specifications$fate$type)
-
-  fate_available   = is_provided(data_specifications$fate$fate)
-  fate_valid       = fate_available && type_of_fate_valid && is_fate_valid(data_specifications$fate$type,
-                                                                           data_specifications$fate$fate)
-
-  custom_metadata_validation_results$data_specifications$fate = list(
-    type = list(
-      available = type_of_fate_available,
-      code      = data_specifications$fate$type,
-      valid     = type_of_fate_valid
-    ),
-    fate = list(
-      available = fate_available,
-      code      = data_specifications$fate$fate,
-      valid     = fate_valid
-    )
-  )
-
-  return(custom_metadata_validation_results)
-})
-
-setMethod("metadata_validation_summary", list(form = "IOTCForm4SF", metadata_validation_results = "list"), function(form, metadata_validation_results) {
-  l_info("IOTCForm4SF.metadata_validation_summary")
-
-  validation_messages = callNextMethod(form, metadata_validation_results) #new("MessageList")
-
-  general_information    = metadata_validation_results$general_information
-  data_specifications    = metadata_validation_results$data_specifications
-
-  measurements           = data_specifications$measurements
-  fate                   = data_specifications$fate
-
-  # Data specifications
-
-  ## Species
-
-  if(!general_information$species$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = "The species is mandatory"))
-  else if(!general_information$species$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$species$code, ") is not valid. Please refer to ", reference_codes("biological", "species"), " for a list of valid species codes")))
-  else if(general_information$species$multiple)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 20, column = "G", text = paste0("The provided species (", general_information$species$code, ") correspond to a species aggregate. Please refer to ", reference_codes("biological", "species"), " for a list of valid, distinct species codes")))
-
-  ## Measurements
-
-  ### Type
-
-  if(!measurements$type$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "G", text = "The measurement type is mandatory"))
-  else if(!measurements$type$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "G", text = paste0("The provided measurement type (", measurements$type$code, ") is not valid. Please refer to ", reference_codes("biological", "typesOfMeasurement"), " for a list of valid measurement type codes")))
-
-  if(measurements$type$valid && measurements$type$code == "LN")
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", row = 25, column = "G", text = paste0("The provided measurement type (", measurements$type$code, ") refers to individual lengths: the measurement unit will be assumed to be centimeters (cm)")))
-
-  if(measurements$type$valid && measurements$type$code == "WG")
-    validation_messages = add(validation_messages, new("Message", level = "INFO", source = "Metadata", row = 25, column = "G", text = paste0("The provided measurement type (", measurements$type$code, ") refers to individual weights: the measurement unit will be assumed to be kilograms (kg)")))
-
-  ### Measure
-
-  if(!measurements$measure$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = "The measure is mandatory"))
-  else if(!measurements$measure$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 26, column = "G", text = paste0("The provided measure (", measurements$measure$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTypes"), " for a list of valid measure codes")))
-
-  ### Measuring tool
-
-  if(!measurements$tool$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "G", text = "The measuring tool is mandatory"))
-  else if(!measurements$tool$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 27, column = "G", text = paste0("The provided measuring tool (", measurements$tool$code, ") is not valid. Please refer to ", reference_codes("biological", "allMeasurementTools"), " for a list of valid measuring tool codes")))
-
-  ### Size interval
-
-  if(!measurements$interval$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 28, column = "G", text = "The size interval is mandatory"))
-  else if(!measurements$interval$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 28, column = "G", text = paste0("The provided size interval (", measurements$interval$value, ") is not valid. Please ensure to provide a numeric value greater than zero")))
-
-  ## Fate
-
-  ### Type
-
-  if(!fate$type$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 30, column = "G", text = "The type of fate is mandatory"))
-  else if(!fate$type$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 30, column = "G", text = paste0("The provided type of fate (", fate$fate$code, ") is not valid. Please refer to ", reference_codes("biological", "typesOfFate"), " for a list of valid fate type codes")))
-
-  ### Code
-
-  if(!fate$fate$available)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 31, column = "G", text = "The fate is mandatory"))
-  else if(!fate$fate$valid)
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 31, column = "G", text = paste0("The provided fate (", fate$fate$code, ") is not valid. Please refer to ", reference_codes("biological", "fates"), " for a list of valid fate codes")))
-
-  return(validation_messages)
-})
-
 setMethod("extract_data", "IOTCForm4SF", function(form) {
+  start = Sys.time()
   l_info("IOTCForm4SF.extract_data")
 
   form_metadata = form@original_metadata
@@ -259,9 +90,14 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
     strata = as.data.table(matrix(nrow = 0, ncol = length(colnames(strata))))
   }
 
-  colnames(strata) = c("MONTH", "GRID_CODE", "SEX_CODE", "ESTIMATION_CODE", "SIZE_CLASS_LOW")
+  colnames(strata) = c("MONTH", "FISHERY_CODE", "GRID_CODE", "SPECIES_CODE", "SEX_CODE", "FATE_TYPE_CODE", "FATE_CODE", "ESTIMATION_CODE",
+                       "DATA_TYPE_CODE", "DATA_SOURCE_CODE", "DATA_PROCESSING_CODE", "DATA_RAISING_CODE",
+                       "COVERAGE_TYPE_CODE", "COVERAGE",
+                       "MEASUREMENT_TYPE_CODE", "MEASURE_CODE", "MEASURING_TOOL_CODE",
+                       "SIZE_CLASS_LOW", "SIZE_CLASS_HIGH")
 
   strata[, SIZE_CLASS_LOW  := floor(as.numeric(SIZE_CLASS_LOW))]
+  strata[, SIZE_CLASS_HIGH := floor(as.numeric(SIZE_CLASS_HIGH))]
 
   strata[, MONTH_ORIGINAL := MONTH]
   strata[, MONTH          := as.integer(MONTH)]
@@ -279,14 +115,16 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
     records = records_original
   }
 
+  l_debug(paste0("IOTCForm4SF.extract_data: ", Sys.time() - start))
+
   return(
     list(
       strata = strata,
       records =
         list(
           data = list(
-            CE_SF_data_original = records_original,
-            CE_SF_data          = records
+            CE_SF_data_original  = records_original,
+            CE_SF_data           = records
           )
         )
     )
@@ -294,31 +132,77 @@ setMethod("extract_data", "IOTCForm4SF", function(form) {
 })
 
 setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_results = "list"), function(form, metadata_validation_results) {
+  start = Sys.time()
   l_info("IOTCForm4SF.validate_data")
 
   data_validation_results = callNextMethod(form, metadata_validation_results)
 
+  l_debug(paste0("IOTCForm4SF.validate_data (I): ", Sys.time() - start))
+  start = Sys.time()
+
   strata  = form@data$strata
-  strata$IS_EMPTY = NULL
+  strata$IS_EMPTY = NULL # Otherwise the 'find_empty_rows' call below will never return anything meaningful...
 
-  strata_orig = form@data$strata
-  strata_orig$MONTH = strata_orig$MONTH_ORIGINAL
-  strata_orig$MONTH_ORIGINAL  = NULL
-  strata_orig$IS_EMPTY = NULL # Otherwise the 'find_empty_rows' call below will never return anything meaningful...
+  strata_empty_rows    = find_empty_rows(strata)
+  strata_empty_columns = find_empty_columns(strata[, 1:3]) # Effort values shall not be considered, as some of them (either secondary, or tertiary, or both) might be left all empty
 
-  strata_empty_rows    = find_empty_rows(strata_orig)
-  strata_empty_columns = find_empty_columns(strata_orig[, c(1:3, 5)])
+  l_debug(paste0("IOTCForm4SF.validate_data (II): ", Sys.time() - start))
+  start = Sys.time()
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
-  strata[, OCCURRENCES := .N, by = .(MONTH, GRID_CODE, SEX_CODE, SIZE_CLASS_LOW)]
+  strata[, OCCURRENCES := .N, by = .(MONTH, FISHERY_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
+                                     DATA_SOURCE_CODE, DATA_PROCESSING_CODE,
+                                     MEASUREMENT_TYPE_CODE, MEASURE_CODE,
+                                     SIZE_CLASS_LOW, SIZE_CLASS_HIGH)]
 
-  # If all months are provided and valid, we check that they're also consistent...
-  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE, SEX_CODE)]
+  valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, SPECIES_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("GRID_CODE", "SEX_CODE"))
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "SPECIES_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
+
+  l_debug(paste0("IOTCForm4SF.validate_data (III): ", Sys.time() - start))
+  start = Sys.time()
+
+  grid_size = function(code) {
+    return(
+      fifelse(is.na(code) | code == "",
+              "OTHER",
+              fifelse(str_sub(code, 1, 1) == "5",
+                      "1_DEG",
+                      fifelse(str_sub(code, 1, 1) == "6",
+                              "5_DEG",
+                              "OTHER"
+                      )
+              )
+      )
+    )
+  }
+
+  # Merges the fishery codes in the strata with the FISHERIES table in order to recover - when possible - the fishery category
+  fishery_categories = merge(strata, iotc.data.reference.codelists::FISHERIES[, .(CODE, FISHERY_CATEGORY_CODE)],
+                             by.x = "FISHERY_CODE", by.y = "CODE")$FISHERY_CATEGORY_CODE
+
+  grid_status    = data.table(FISHERY_CATEGORY_CODE = fishery_categories,
+                              GRID_CODE = strata$GRID_CODE,
+                              MISSING   = is.na(strata$GRID_CODE),
+                              VALID     = grid_validator(form)(strata$GRID_CODE),
+                              SIZE      = grid_size(strata$GRID_CODE))
+
+  grid_status[, WRONG_GRID_TYPE := SIZE == "OTHER"]
+
+  wrong_grid_types = which(grid_status$WRONG_GRID_TYPE == TRUE)
+
+  data_validation_results$strata$checks$main$grids$wrong = list(
+    number       = length(wrong_grid_types),
+    row_indexes  = wrong_grid_types,
+    codes        = strata$GRID_CODE[wrong_grid_types],
+    codes_unique = unique(strata$GRID_CODE[wrong_grid_types])
+  )
+
+  l_debug(paste0("IOTCForm4SF.validate_data (IV): ", Sys.time() - start))
+  start = Sys.time()
 
   non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
   duplicate_strata = which(strata$OCCURRENCES > 1)   #which(strata_duplicated$COUNT > 1)
@@ -337,73 +221,221 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
       row_indexes = spreadsheet_rows_for(form, unique_strata)
     )
 
-  grid_size = function(code) {
-    return(
-      fifelse(is.na(code) | code == "",
-              "OTHER",
-              fifelse(str_sub(code, 1, 1) == "5",
-                      "1_DEG",
-                      fifelse(str_sub(code, 1, 1) == "6",
-                              "5_DEG",
-                              "OTHER"
-                      )
-              )
-      )
-    )
-  }
+  l_debug(paste0("IOTCForm4SF.validate_data (V): ", Sys.time() - start))
+  start = Sys.time()
 
-  grid_status    = data.table(GRID_CODE = strata$GRID_CODE,
-                              MISSING   = is.na(strata$GRID_CODE),
-                              VALID     = is_grid_CE_SF_valid(strata$GRID_CODE),
-                              SIZE      = grid_size(strata$GRID_CODE))
+  ### Species code
 
-  wrong_grid_types = which(grid_status$SIZE == "OTHER")
-  wrong_grid_types = wrong_grid_types[ which(wrong_grid_types %in% which(grid_status$VALID)) ]
+  missing_species  = which( is.na(strata$SPECIES_CODE))
+  invalid_species  = which(!is_species_valid(strata$SPECIES_CODE))
+  invalid_species  = invalid_species[ ! invalid_species %in% missing_species ]
+  missing_species  = missing_species[ ! missing_species %in% strata_empty_rows ]
 
-  data_validation_results$strata$checks$main$grids$wrong = list(
-    number       = length(wrong_grid_types),
-    row_indexes  = spreadsheet_rows_for(form, wrong_grid_types),
-    codes        = strata$GRID_CODE[wrong_grid_types],
-    codes_unique = unique(strata$GRID_CODE[wrong_grid_types])
-  )
+  species_aggregates     = which(is_species_aggregate(strata$SPECIES_CODE))
+  species_aggregates     = species_aggregates[ ! species_aggregates %in% missing_species ]
+
+  l_debug(paste0("IOTCForm4SF.validate_data (VI): ", Sys.time() - start))
+  start = Sys.time()
+
+  ### Sex code
 
   missing_sex = which( is.na(strata$SEX_CODE))
   invalid_sex = which(!is_sex_valid(strata$SEX_CODE))
   invalid_sex = invalid_sex[ ! invalid_sex %in% missing_sex ]
   missing_sex = missing_sex[ ! missing_sex %in% strata_empty_rows ]
 
-  data_validation_results$strata$checks$sex = list(
+  l_debug(paste0("IOTCForm4SF.validate_data (VII): ", Sys.time() - start))
+  start = Sys.time()
+
+  ### Type of fate / fate code
+
+  missing_fate_type = which( is.na(strata$FATE_TYPE_CODE))
+  invalid_fate_type = which(!is_fate_type_valid(strata$FATE_TYPE_CODE))
+  invalid_fate_type = invalid_fate_type[ ! invalid_fate_type %in% missing_fate_type ]
+  missing_fate_type = missing_fate_type[ ! missing_fate_type %in% strata_empty_rows ]
+
+  missing_fate = which( is.na(strata$FATE_CODE))
+  invalid_fate = which(!is.na(strata$FATE_CODE) & !is_fate_valid(strata$FATE_TYPE_CODE, strata$FATE_CODE))
+  invalid_fate = invalid_fate[ ! invalid_fate %in% missing_fate ]
+  missing_fate = missing_fate[ ! missing_fate %in% strata_empty_rows ]
+
+  l_debug(paste0("IOTCForm4SF.validate_data (VIII): ", Sys.time() - start))
+  start = Sys.time()
+
+  ### Measurement type / measure / tool code
+
+  missing_measurement_type = which( is.na(strata$MEASUREMENT_TYPE_CODE))
+  invalid_measurement_type = which(!is.na(strata$MEASUREMENT_TYPE_CODE) & !is_measurement_type_valid(strata$MEASUREMENT_TYPE_CODE))
+  invalid_measurement_type = invalid_measurement_type[ ! invalid_measurement_type %in% missing_measurement_type ]
+  missing_measurement_type = missing_measurement_type[ ! missing_measurement_type %in% strata_empty_rows ]
+
+  missing_measure = which( is.na(strata$MEASURE_CODE))
+  invalid_measure = which(!is.na(strata$MEASURE_CODE) & !is_measurement_valid(strata$MEASUREMENT_TYPE_CODE, strata$MEASURE_CODE))
+  invalid_measure = invalid_measure[ ! invalid_measure %in% missing_measure ]
+  missing_measure = missing_measure[ ! missing_measure %in% strata_empty_rows ]
+
+  missing_measuring_tool = which( is.na(strata$MEASURING_TOOL_CODE))
+  invalid_measuring_tool = which(!is.na(strata$MEASURING_TOOL_CODE) & !is_measuring_tool_valid(strata$MEASUREMENT_TYPE_CODE, strata$MEASURING_TOOL_CODE))
+  invalid_measuring_tool = invalid_measuring_tool[ ! invalid_measuring_tool %in% missing_measuring_tool ]
+  missing_measuring_tool = missing_measuring_tool[ ! missing_measuring_tool %in% strata_empty_rows ]
+
+  l_debug(paste0("IOTCForm4SF.validate_data (IX): ", Sys.time() - start))
+  start = Sys.time()
+
+  ### Class low / high
+
+  missing_size_class_low = which( is.na(strata$SIZE_CLASS_LOW))
+  invalid_size_class_low = which(!is_value_positive(strata$SIZE_CLASS_LOW))
+  invalid_size_class_low = invalid_size_class_low[ ! invalid_size_class_low %in% missing_size_class_low ]
+  missing_size_class_low = missing_size_class_low[ ! missing_size_class_low %in% strata_empty_rows ]
+
+  missing_size_class_high = which( is.na(strata$SIZE_CLASS_HIGH))
+  invalid_size_class_high = which(!is_value_positive(strata$SIZE_CLASS_HIGH))
+  invalid_size_class_high = invalid_size_class_low[ ! invalid_size_class_high %in% missing_size_class_high ]
+  missing_size_class_high = missing_size_class_low[ ! missing_size_class_high %in% strata_empty_rows ]
+
+  l_debug(paste0("IOTCForm4SF.validate_data (X): ", Sys.time() - start))
+  start = Sys.time()
+
+  check_size_classes = function(low, high) { return(low < high) }
+
+  invalid_size_classes = which(!mapply(check_size_classes, strata$SIZE_CLASS_LOW, strata$SIZE_CLASS_HIGH))
+  invalid_size_classes = invalid_size_classes[ ! invalid_size_classes %in% missing_size_class_low &
+                                               ! invalid_size_classes %in% missing_size_class_high ]
+
+  l_debug(paste0("IOTCForm4SF.validate_data (XI): ", Sys.time() - start))
+  start = Sys.time()
+
+  ### TODO: add a check that the size bin is not >> than what expected for the class
+
+  data_validation_results$strata$checks$main$species = list(
+    invalid = list(
+      number       = length(invalid_species),
+      row_indexes  = spreadsheet_rows_for(form, invalid_species),
+      codes        = strata$SPECIES_CODE[invalid_species],
+      codes_unique = unique(strata$SPECIES_CODE[invalid_species])
+    ),
+    missing = list(
+      number      = length(missing_species),
+      row_indexes = spreadsheet_rows_for(form, missing_species)
+    ),
+    aggregates = list(
+      number       = length(species_aggregates),
+      row_indexes  = spreadsheet_rows_for(form, species_aggregates),
+      codes        = strata[species_aggregates]$SPECIES_CODE,
+      codes_unique = unique(strata[species_aggregates]$SPECIES_CODE)
+    )
+  )
+
+  data_validation_results$strata$checks$main$sex = list(
+    invalid = list(
+      number       = length(invalid_sex),
+      row_indexes  = spreadsheet_rows_for(form, invalid_sex),
+      codes        = strata$SEX_CODE[invalid_sex],
+      codes_unique = unique(strata$SEX_CODE[invalid_sex])
+    ),
     missing = list(
       number      = length(missing_sex),
       row_indexes = spreadsheet_rows_for(form, missing_sex)
-    ),
-    invalid = list(
-      number        = length(invalid_sex),
-      row_indexes   = spreadsheet_rows_for(form, invalid_sex),
-      values        = strata$SEX_CODE[invalid_sex],
-      values_unique = unique(strata$SEX_CODE[invalid_sex])
     )
   )
 
-  missing_size_class = which( is.na(strata$SIZE_CLASS_LOW))
-  invalid_size_class = which(!is_value_positive(strata$SIZE_CLASS_LOW))
-  invalid_size_class = invalid_size_class[ ! invalid_size_class %in% missing_size_class ]
-  missing_size_class = missing_size_class[ ! missing_size_class %in% strata_empty_rows ]
-
-  data_validation_results$strata$checks$size_class = list(
-    missing = list(
-      number      = length(missing_size_class),
-      row_indexes = spreadsheet_rows_for(form, missing_size_class)
+  data_validation_results$strata$checks$main$fate = list(
+    type = list(
+      invalid = list(
+        number       = length(invalid_fate_type),
+        row_indexes  = spreadsheet_rows_for(form, invalid_fate_type),
+        codes        = strata$FATE_TYPE_CODE[invalid_fate_type],
+        codes_unique = unique(strata$FATE_TYPE_CODE[invalid_fate_type])
+      ),
+      missing = list(
+        number      = length(missing_fate_type),
+        row_indexes = spreadsheet_rows_for(form, missing_fate_type)
+      )
     ),
-    invalid = list(
-      number        = length(invalid_size_class),
-      row_indexes   = spreadsheet_rows_for(form, invalid_size_class),
-      values        = strata$SIZE_CLASS_LOW[invalid_size_class],
-      values_unique = unique(strata$SIZE_CLASS_LOW[invalid_size_class])
+    fate = list(
+      invalid = list(
+        number       = length(invalid_fate),
+        row_indexes  = spreadsheet_rows_for(form, invalid_fate),
+        codes        = strata$FATE_CODE[invalid_fate],
+        codes_unique = unique(strata$FATE_CODEv[invalid_fate])
+      ),
+      missing = list(
+        number      = length(missing_fate),
+        row_indexes = spreadsheet_rows_for(form, missing_fate)
+      )
     )
   )
 
-  records = form@data$records
+  data_validation_results$strata$checks$measurement = list(
+    type = list(
+      invalid = list(
+        number       = length(invalid_measurement_type),
+        row_indexes  = spreadsheet_rows_for(form, invalid_measurement_type),
+        codes        = strata$MEASUREMENT_TYPE_CODE[invalid_measurement_type],
+        codes_unique = unique(strata$MEASUREMENT_TYPE_CODE[invalid_measurement_type])
+      ),
+      missing = list(
+        number      = length(missing_measurement_type),
+        row_indexes = spreadsheet_rows_for(form, missing_measurement_type)
+      )
+    ),
+    measure = list(
+      invalid = list(
+        number       = length(invalid_measure),
+        row_indexes  = spreadsheet_rows_for(form, invalid_measure),
+        codes        = strata$MEASURE_CODE[invalid_measure],
+        codes_unique = unique(strata$MEASURE_CODE[invalid_measure])
+      ),
+      missing = list(
+        number      = length(missing_measure),
+        row_indexes = spreadsheet_rows_for(form, missing_measure)
+      )
+    ),
+    measuring_tool = list(
+      invalid = list(
+        number       = length(invalid_measuring_tool),
+        row_indexes  = spreadsheet_rows_for(form, invalid_measuring_tool),
+        codes        = strata$MEASURING_TOOL_CODE[invalid_measuring_tool],
+        codes_unique = unique(strata$MEASURING_TOOL_CODE[invalid_measuring_tool])
+      ),
+      missing = list(
+        number      = length(missing_measuring_tool),
+        row_indexes = spreadsheet_rows_for(form, missing_measuring_tool)
+      )
+    )
+  )
+
+  data_validation_results$strata$checks$size_classes = list(
+    low = list(
+      missing = list(
+        number       = length(missing_size_class_low),
+        row_indexes  = spreadsheet_rows_for(form, missing_size_class_low)
+      ),
+      invalid = list(
+        number       = length(invalid_size_class_low),
+        row_indexes  = spreadsheet_rows_for(form, invalid_size_class_low)
+      )
+    ),
+    high = list(
+      missing = list(
+        number       = length(missing_size_class_high),
+        row_indexes  = spreadsheet_rows_for(form, missing_size_class_high)
+      ),
+      invalid = list(
+        number       = length(invalid_size_class_high),
+        row_indexes  = spreadsheet_rows_for(form, invalid_size_class_high)
+      )
+    ),
+    invalid = list(
+      number      = length(invalid_size_classes),
+      row_indexes = spreadsheet_rows_for(form, invalid_size_classes)
+    )
+  )
+
+  start = Sys.time()
+
+  records = form@data$records$data
 
   sizes_original = records$data$CE_SF_data_original
   sizes          = records$data$CE_SF_data
@@ -422,6 +454,8 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
   zero_fish     = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH == 0, arr.ind = TRUE)
   positive_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  > 0, arr.ind = TRUE)
   negative_fish = which(numeric_sizes$NUM_FISH == TRUE & sizes$NUM_FISH  < 0, arr.ind = TRUE)
+
+  l_debug(paste0("IOTCForm4SF.validate_data (XII): ", Sys.time() - start))
 
   data_validation_results$records$checks = list(
     samples = list(
@@ -470,10 +504,13 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
     )
   )
 
+  l_debug(paste0("IOTCForm4SF.validate_data: ", Sys.time() - start))
+
   return(data_validation_results)
 })
 
 setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validation_results = "list", data_validation_results = "list"), function(form, metadata_validation_results, data_validation_results) {
+  start = Sys.time()
   l_info("IOTCForm4SF.data_validation_summary")
 
   validation_messages = common_data_validation_summary(form,
@@ -481,6 +518,10 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
                                                        data_validation_results)
 
   ### STRATA AND RECORDS
+
+  # This is only true for 3CE / surface
+
+  fishery_info        = metadata_validation_results$general_information$fishery
 
   strata  = data_validation_results$strata
   records = data_validation_results$records
@@ -496,40 +537,59 @@ setMethod("data_validation_summary", list(form = "IOTCForm4SF", metadata_validat
 
   ## Main strata
 
-  if(strata$checks$main$grids$invalid$number > 0) {
-    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(strata$checks$main$grids$invalid$number, " invalid grid code(s) reported. Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes for this dataset")))
+  if(checks_strata$main$grids$invalid$number > 0) {
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D", text = paste0(checks_strata$main$grids$invalid$number, " invalid grid code(s) reported. Please refer to ", reference_codes("admin", "IOTCgridsCESF"), " for a list of valid grid codes for this dataset")))
 
-    for(row in strata$checks$main$grids$invalid$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Invalid grid code in row #", row)))
+    for(row in checks_strata$main$grids$invalid$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Invalid grid code in row #", row)))
   }
 
-  if(strata$checks$main$grids$wrong$number > 0) {
-    if(strata$checks$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "C", text = paste0(strata$checks$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
+  if(checks_strata$main$grids$wrong$number > 0) {
+    if(checks_strata$main$grids$wrong$number > 1) validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", column = "D", text = paste0(checks_strata$main$grids$wrong$number, " grid codes refer to the wrong type of grid for the fishery")))
 
-    for(row in strata$checks$main$grids$wrong$row_indexes)
-      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "C", text = paste0("Wrong type of grid for the fishery in row #", row)))
+    for(row in checks_strata$main$grids$wrong$row_indexes)
+      validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Data", row = row, column = "D", text = paste0("Wrong type of grid for the fishery in row #", row)))
   }
 
-  if(strata$duplicate$number > 0)
-    validation_messages = add(validation_messages, new("Message", level = "FATAL", source = "Data", text = paste0(strata$duplicate$number, " duplicate strata detected: see row(s) #", paste0(strata$duplicate$row_indexes, collapse = ", "))))
+  ## Species
+
+  validation_messages = report_species_column(validation_messages, checks_strata$main$species)
 
   ## Sex
 
-  validation_messages = report_sex(validation_messages, checks_strata$sex)
+  validation_messages = report_sex(validation_messages, checks_strata$main$sex)
 
-  ## Size class
+  ## Fate type
 
-  validation_messages = report_size_class(validation_messages, checks_strata$size_class)
+  validation_messages = report_type_of_fate(validation_messages, checks_strata$main$fate$type)
+
+  ## Fate
+
+  validation_messages = report_fate(validation_messages, checks_strata$main$fate$fate)
+
+  ## Measurement type
+
+  validation_messages = report_type_of_measure(validation_messages, checks_strata$measurement$type)
+
+  ## Measure
+
+  validation_messages = report_measure_type(validation_messages, checks_strata$measurement$measure)
+
+  ## Measuring tool
+
+  validation_messages = report_measuring_tool(validation_messages, checks_strata$measurement$measuring_tool)
 
   # Data issues / summary
 
   ## Number of samples
 
-  validation_messages = report_number_of_samples(validation_messages, checks_records$samples)
+  validation_messages = report_number_of_samples(validation_messages, checks_records$samples, column = "U")
 
   ## Number of fish
 
-  validation_messages = report_number_of_fish(validation_messages, checks_records$fish)
+  validation_messages = report_number_of_fish(validation_messages, checks_records$fish, column = "V")
+
+  l_debug(paste0("IOTCForm4SF.data_validation_summary: ", Sys.time() - start))
 
   return(validation_messages)
 })
@@ -555,24 +615,6 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
             strata$FLAG_COUNTRY_CODE     = form_metadata$general_information$flag_country
             strata$FLEET_CODE            = fleet$FLEET_CODE
 
-            strata$FISHERY_CODE          = form_metadata$general_information$fishery
-            strata$SPECIES_CODE          = form_metadata$general_information$species
-
-            strata$DATA_TYPE_CODE        = form_metadata$data_specifications$type_of_data
-            strata$DATA_SOURCE_CODE      = form_metadata$data_specifications$data_source
-            strata$DATA_PROCESSING_CODE  = form_metadata$data_specifications$data_processing
-            strata$DATA_RAISING_CODE     = form_metadata$data_specifications$data_raising
-            strata$COVERAGE_TYPE_CODE    = form_metadata$data_specifications$coverage_type
-            strata$COVERAGE              = form_metadata$data_specifications$coverage_value
-
-            strata$MEASUREMENT_TYPE_CODE = form_metadata$data_specifications$measurements$type
-            strata$MEASURE_CODE          = form_metadata$data_specifications$measurements$measure
-            strata$MEASURING_TOOL_CODE   = form_metadata$data_specifications$measurements$tool
-            #strata$SIZE_INTERVAL         = form_metadata$data_specifications$measurements$interval
-
-            strata$FATE_TYPE_CODE        = form_metadata$data_specifications$fate$type
-            strata$FATE_CODE             = form_metadata$data_specifications$fate$fate
-
             # Not required when using the new fishery codes
             #strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
 
@@ -584,8 +626,7 @@ setMethod("extract_output", list(form = "IOTCForm4SF", wide = "logical"),
                                 GRID_CODE, ESTIMATION_CODE,
                                 SPECIES_CODE, MEASUREMENT_TYPE_CODE, MEASURE_CODE, MEASURING_TOOL_CODE,
                                 FATE_TYPE_CODE, FATE_CODE, SEX_CODE,
-                                SIZE_CLASS_LOW, SIZE_CLASS_HIGH = SIZE_CLASS_LOW + as.numeric(form_metadata$data_specifications$measurements$interval) - 1,
-                                NUM_SAMPLES_STRATA = NA_real_)]
+                                SIZE_CLASS_LOW, SIZE_CLASS_HIGH, NUM_SAMPLES_STRATA = NA_real_)]
 
             output_data = cbind(strata, data)
 
