@@ -58,4 +58,4 @@ CA_F =
 CE = merge(EF_F, CA_F, by = c("MONTH", "FISHERY_CODE", "TARGET_SPECIES_CODE", "GRID_CODE"), all.x = TRUE)
 CE[, PRIMARY_EFFORT := round(PRIMARY_EFFORT, 2)]
 
-write.table(CE, paste0("./test_produce_multiple/CE_", paste0(FLEET, collapse = "_"), "_", YEAR, ".csv"), na = "", sep = ",", row.names = FALSE)
+write.table(CE, paste0("./test_produce/CE_", paste0(FLEET, collapse = "_"), "_", YEAR, ".csv"), na = "", sep = ",", row.names = FALSE)

@@ -46,4 +46,4 @@ SF_ = SF_[, .(MONTH, FISHERY_CODE, TARGET_SPECIES_CODE, GRID_CODE, SPECIES_CODE,
               SIZE_CLASS_LOW, SIZE_CLASS_HIGH,
               NUM_SAMPLES, NUM_FISH)]
 
-write.table(SF_, paste0("./test_produce_multiple/SF_", paste0(FLEET, collapse = "_"), "_", YEAR, ".csv"), na = "", sep = ",", row.names = FALSE)
+write.table(SF_, paste0("./test_produce/SF_", paste0(FLEET, collapse = "_"), "_", YEAR, ".csv"), na = "", sep = ",", row.names = FALSE)
