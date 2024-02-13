@@ -21,7 +21,7 @@ setMethod("grid_validator", "IOTCForm4SF", function(form) {
   return(is_grid_CE_SF_valid)
 })
 
-setMethod("allow_empty_data_multiple", "IOTCForm4SF", function(form) {
+setMethod("allow_empty_data", "IOTCForm4SF", function(form) {
   return(FALSE)
 })
 
@@ -49,7 +49,7 @@ setMethod("last_strata_column", "IOTCForm4SF", function(form) {
   return(which(EXCEL_COLUMNS == "T"))
 })
 
-setMethod("validate_months_multiple", list(form = "IOTCForm4SF", strata = "data.table"), function(form, strata) {
+setMethod("validate_months", list(form = "IOTCForm4SF", strata = "data.table"), function(form, strata) {
   start = Sys.time()
   l_info("IOTCForm4SF.validate_months")
 

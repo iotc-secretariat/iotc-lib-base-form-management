@@ -9,8 +9,12 @@ setGeneric("grid_validator", function(form) {
   standardGeneric("grid_validator")
 })
 
-setGeneric("allow_empty_data_multiple", function(form) {
-  standardGeneric("allow_empty_data_multiple")
+setGeneric("allow_empty_data", function(form) {
+  standardGeneric("allow_empty_data")
+})
+
+setGeneric("estimation_column", function(form) {
+  standardGeneric("estimation_column")
 })
 
 setGeneric("optional_strata_columns", function(form) {
@@ -19,8 +23,8 @@ setGeneric("optional_strata_columns", function(form) {
 
 # Renamed to avoid (UNEXPLAINED!) issues with inheritance... Probably the same should happen for "allow_empty_data" and "grid_validator"
 # which have the same name as methods in IOTCFormCESF
-setGeneric("validate_months_multiple", function(form, strata) {
-  standardGeneric("validate_months_multiple")
+setGeneric("validate_months", function(form, strata) {
+  standardGeneric("validate_months")
 })
 
 setMethod("form_comment_cell_row", "IOTCFormCESF", function(form) {
@@ -87,7 +91,7 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
 
   # If all months are provided and valid, we check that they're also consistent...
 
-  months_check = validate_months_multiple(form, strata)
+  months_check = validate_months(form, strata)
 
   l_debug(paste0("IOTCFormCESF.validate_data (IV): ", Sys.time() - start_VD))
   start_VD = Sys.time()
@@ -514,7 +518,7 @@ setMethod("common_data_validation_summary", list(form = "IOTCFormCESF", metadata
     report_data(
       validation_messages,
       records,
-      allow_empty_data_multiple(form)
+      allow_empty_data(form)
     )
   )
 })

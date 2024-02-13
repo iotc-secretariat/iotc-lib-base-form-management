@@ -21,7 +21,7 @@ setMethod("grid_validator", "IOTCForm3CE", function(form) {
   return(is_grid_AR_valid)
 })
 
-setMethod("allow_empty_data_multiple", "IOTCForm3CE", function(form) {
+setMethod("allow_empty_data", "IOTCForm3CE", function(form) {
   return(TRUE)
 })
 
@@ -49,7 +49,7 @@ setMethod("last_strata_column", "IOTCForm3CE", function(form) {
   return(which(EXCEL_COLUMNS == "Q"))
 })
 
-setMethod("validate_months_multiple", list(form = "IOTCForm3CE", strata = "data.table"), function(form, strata) {
+setMethod("validate_months", list(form = "IOTCForm3CE", strata = "data.table"), function(form, strata) {
   start = Sys.time()
 
   l_info("IOTCForm3CE.validate_months")
