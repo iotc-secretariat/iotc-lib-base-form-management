@@ -44,11 +44,13 @@ setMethod("last_strata_column", "IOTCForm3CEUpdate", function(form) {
 setMethod("validate_months", list(form = "IOTCForm3CEUpdate", strata = "data.table"), function(form, strata) {
   l_info("IOTCForm3CEUpdate.validate_months")
 
-  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(GRID_CODE)]
+  # This form is used to provide updates for a given fishery only, so the provision of 'complete' month data \
+  # (i.e., for each and every month of the year) should be considered at the species / grid level rather than at the full stratum level
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(SPECIES_CODE, GRID_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("GRID_CODE"))
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("SPECIES_CODE", "GRID_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
   return(
