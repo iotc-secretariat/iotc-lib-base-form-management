@@ -58,9 +58,9 @@ setMethod("validate_months", list(form = "IOTCForm3CE", strata = "data.table"), 
   #valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, GRID_CODE, DATA_TYPE_CODE, DATA_SOURCE_CODE, DATA_PROCESSING_CODE)]
 
   # Now: (inspired by IOTC_form_4SF_class.R)
-  # It's more sensible to provide a warning when not all months are provided by ** FISHERY, SPECIES, and GRID ** only
+  # It's more sensible to provide a warning when not all months are provided by ** FISHERY and GRID ** only
   # rather than by the full stratum definition
-  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, SPECIES_CODE, GRID_CODE)]
+  valid_months_strata   = strata[!is.na(MONTH_ORIGINAL) & MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, GRID_CODE)]
 
   incomplete_months_strata  = valid_months_strata[NUM_MONTHS < 12]
 
@@ -69,7 +69,7 @@ setMethod("validate_months", list(form = "IOTCForm3CE", strata = "data.table"), 
 
   # Now: (inspired by IOTC_form_4SF_class.R)
   # See comment above
-  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "SPECIES_CODE", "GRID_CODE"))
+  incomplete_months  = merge(strata, incomplete_months_strata, all.x = TRUE, sort = FALSE, by = c("FISHERY_CODE", "GRID_CODE"))
   incomplete_months  = which(!is.na(incomplete_months$NUM_MONTHS))
 
   l_info(paste0("IOTCForm3CE.validate_months: ", Sys.time() - start))

@@ -61,6 +61,7 @@ setMethod("validate_data",
 
             strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
+            # Adds all other metadata associated to the fishery
             strata = merge(strata, iotc.data.reference.codelists::FISHERIES[, .(CODE, FISHERY_CATEGORY_CODE)],
                            by.x = "FISHERY_CODE", by.y = "CODE",
                            all.x = TRUE, sort = FALSE)

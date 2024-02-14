@@ -131,7 +131,7 @@ report_data_type = function(message_list, data_type_validation, column) {
   }
 
   if(data_type_validation$wrong$number > 0) {
-    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(data_type_validation$wrong$number, " wrong data type codes provided: only longline fisheries can report 'PR'eliminary data according to IOTC Res. 15/02")))
+    message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, text = paste0(data_type_validation$wrong$number, " unacceptable data type codes provided: only longline fisheries can report 'PR'eliminary data according to IOTC Res. 15/02")))
 
     for(row in data_type_validation$wrong$row_indexes) {
       message_list = add(message_list, new("Message", level = "ERROR", source = "Data", column = column, row = row, text = paste0("'PR'eliminary data type code explicitly reported for a non-longline fishery in row #", row)))

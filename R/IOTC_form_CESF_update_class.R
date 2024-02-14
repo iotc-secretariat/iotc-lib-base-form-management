@@ -75,12 +75,16 @@ setMethod("validate_metadata", list(form = "IOTCFormCESFUpdate", common_metadata
 
   data_type_available = is_provided(data_specifications$type_of_data)
   data_type_valid     = data_type_available && is_data_type_valid(data_specifications$type_of_data)
+  data_type_wrong     = data_type_valid && data_specifications$type_of_data == "PR" && fishery_category != "LONGLINE"
+  data_type_unknown   = !data_type_wrong && data_specifications$type_of_data == "UN"
 
   common_metadata_validation_results$data_specifications$type_of_data =
     list(
       available = data_type_available,
       code      = data_specifications$type_of_data,
-      valid     = data_type_valid
+      valid     = data_type_valid,
+      wrong     = data_type_wrong,
+      unknown   = data_type_unknown
     )
 
   data_source_available = is_provided(data_specifications$data_source)
@@ -173,6 +177,10 @@ setMethod("metadata_validation_summary", list(form = "IOTCFormCESFUpdate", metad
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = "The type of data is mandatory"))
   else if(!data_specifications$type_of_data$valid)
     validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = paste0("The provided type of data (", data_specifications$type_of_data$code, ") is not valid. Please refer to ", reference_codes("data", "types"), " for a list of valid data type codes")))
+  else if(data_specifications$type_of_data$wrong)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = "Unacceptable type of data provided: only longline fisheries can report 'PR'eliminary data according to IOTC Res. 15/02"))
+  else if(data_specifications$type_of_data$unknown)
+    validation_messages = add(validation_messages, new("Message", level = "ERROR", source = "Metadata", row = 25, column = "D", text = "'UN'known data type code explicitly reported"))
 
   ## Data source
 

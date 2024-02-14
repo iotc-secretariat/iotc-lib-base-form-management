@@ -68,6 +68,11 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
 
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
+  # Adds all other metadata associated to the fishery
+  strata = merge(strata, iotc.data.reference.codelists::FISHERIES[, .(CODE, FISHERY_CATEGORY_CODE)],
+                 by.x = "FISHERY_CODE", by.y = "CODE",
+                 all.x = TRUE, sort = FALSE)
+
   total_strata     = nrow(strata)
   non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
 
@@ -115,15 +120,6 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
 
   fishery_aggregates = which(is_multiple_gear_fishery(strata$FISHERY_CODE))
 
-  l_debug(paste0("IOTCFormCESF.validate_data (VIc): ", Sys.time() - start_VD))
-
-  start_VD = Sys.time()
-
-  missing_target_species = which( is.na(strata$TARGET_SPECIES_CODE))
-  invalid_target_species = which(!is_species_valid(strata$TARGET_SPECIES_CODE))
-  invalid_target_species = invalid_target_species[ ! invalid_target_species %in% missing_target_species ]
-  missing_target_species = missing_target_species[ ! missing_target_species %in% strata_empty_rows]
-
   l_debug(paste0("IOTCFormCESF.validate_data (VII): ", Sys.time() - start_VD))
   start_VD = Sys.time()
 
@@ -150,6 +146,13 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
   invalid_types_of_data    = which(!is_data_type_valid(strata$DATA_TYPE_CODE))
   invalid_types_of_data    = invalid_types_of_data[ ! invalid_types_of_data %in% missing_types_of_data ]
   missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
+
+  # 'PR'-eliminary data is only expected to be reported for LONGLINE fisheries
+  wrong_types_of_data      = which(is_data_type_valid(strata$DATA_TYPE_CODE) &
+                                   strata$FISHERY_CATEGORY_CODE != "LONGLINE" &
+                                   strata$DATA_TYPE_CODE == "PR")
+
+  unknown_types_of_data    = which(strata$DATA_TYPE_CODE == "UN")
 
   l_debug(paste0("IOTCFormCESF.validate_data (X): ", Sys.time() - start_VD))
   start_VD = Sys.time()
@@ -270,18 +273,6 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
                 )
               )
             ),
-            target_species = list(
-              invalid = list(
-                number       = length(invalid_target_species),
-                row_indexes  = spreadsheet_rows_for(form, invalid_target_species),
-                codes        = strata$TARGET_SPECIES_CODE[invalid_target_species],
-                codes_unique = unique(strata$TARGET_SPECIES_CODE[invalid_target_species])
-              ),
-              missing = list(
-                number      = length(missing_target_species),
-                row_indexes = spreadsheet_rows_for(form, missing_target_species)
-              )
-            ),
             grids = list(
               invalid = list(
                 number       = length(invalid_grids),
@@ -318,6 +309,14 @@ setMethod("validate_data", list(form = "IOTCFormCESF", metadata_validation_resul
               missing = list(
                 number      = length(missing_types_of_data),
                 row_indexes = spreadsheet_rows_for(form, missing_types_of_data)
+              ),
+              wrong = list(
+                number      = length(wrong_types_of_data),
+                row_indexes = spreadsheet_rows_for(form, wrong_types_of_data)
+              ),
+              unknown = list(
+                number      = length(unknown_types_of_data),
+                row_indexes = spreadsheet_rows_for(form, unknown_types_of_data)
               )
             ),
             source = list(

@@ -133,6 +133,12 @@ fishery_type_for = function(fishery_code) {
   )
 }
 
+fishery_category_for = function(fishery_code) {
+  return(
+    iotc.data.reference.codelists::FISHERIES[CODE == fishery_code]$FISHERY_CATEGORY_CODE
+  )
+}
+
 ## IOTC MAIN AREAS
 
 IOTC_main_areas_for = function(IOTC_main_area_code) {
