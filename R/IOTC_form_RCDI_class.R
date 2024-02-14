@@ -61,6 +61,10 @@ setMethod("validate_data",
 
             strata[, IS_EMPTY := .I %in% strata_empty_rows]
 
+            strata = merge(strata, iotc.data.reference.codelists::FISHERIES[, .(CODE, FISHERY_CATEGORY_CODE)],
+                           by.x = "FISHERY_CODE", by.y = "CODE",
+                           all.x = TRUE, sort = FALSE)
+
             total_strata     = nrow(strata)
             non_empty_strata = which(strata$IS_EMPTY == FALSE) #strata[ !1:.N %in% strata_empty_rows ]
 
@@ -96,6 +100,13 @@ setMethod("validate_data",
             invalid_types_of_data    = which(!is_data_type_valid(strata$DATA_TYPE_CODE))
             invalid_types_of_data    = invalid_types_of_data[ ! invalid_types_of_data %in% missing_types_of_data ]
             missing_types_of_data    = missing_types_of_data[ ! missing_types_of_data %in% strata_empty_rows ]
+
+            # 'PR'-eliminary data is only expected to be reported for LONGLINE fisheries
+            wrong_types_of_data      = which(is_data_type_valid(strata$DATA_TYPE_CODE) &
+                                             strata$FISHERY_CATEGORY_CODE != "LONGLINE" &
+                                             strata$DATA_TYPE_CODE == "PR")
+
+            unknown_types_of_data    = which(strata$DATA_TYPE_CODE == "UN")
 
             missing_data_sources     = which( is.na(strata$DATA_SOURCE_CODE))
             invalid_data_sources     = which(!is.na(strata$DATA_SOURCE_CODE) & !is_data_source_valid(form_dataset_code(form), strata$DATA_SOURCE_CODE))
@@ -229,6 +240,14 @@ setMethod("validate_data",
                         missing = list(
                           number      = length(missing_types_of_data),
                           row_indexes = spreadsheet_rows_for(form, missing_types_of_data)
+                        ),
+                        wrong = list(
+                          number      = length(wrong_types_of_data),
+                          row_indexes = spreadsheet_rows_for(form, wrong_types_of_data)
+                        ),
+                        unknown = list(
+                          number      = length(unknown_types_of_data),
+                          row_indexes = spreadsheet_rows_for(form, unknown_types_of_data)
                         )
                       ),
                       source = list(
