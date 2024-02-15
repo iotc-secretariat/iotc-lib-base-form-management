@@ -51,7 +51,7 @@ out_1RC      = extract_output(FORM_1RC, wide = FALSE)
 out_1RC_wide = extract_output(FORM_1RC, wide = TRUE)
 
 # Converts the output in a format suitable for incorporation in the IOTDB
-out_1RC_IOTDB = convert_1RC("./test/sample_forms/Form-1RC.xlsx")
+out_1RC_IOTDB = do_convert_1RC(out_1RC, source = "FOO", quality = "BAR")
 
 FORM_1DI =
   new("IOTCForm1DI",
@@ -99,7 +99,7 @@ out_3CE      = extract_output(FORM_3CE, wide = FALSE)
 out_3CE_wide = extract_output(FORM_3CE, wide = TRUE)
 
 # Converts the output in a format suitable for incorporation in the IOTDB
-out_3CE_IOTDB = convert_3CE("./test/sample_forms/Form-3CE.xlsx")
+out_3CE_IOTDB = do_convert_3CE(out_3CE, source = "FOO", quality = "BAR")
 
 FORM_3CE_UPD =
   new("IOTCForm3CEUpdate",
@@ -117,7 +117,7 @@ out_3CE_UPD      = extract_output(FORM_3CE_UPD, wide = FALSE)
 out_3CE_UPD_wide = extract_output(FORM_3CE_UPD, wide = TRUE)
 
 # Converts the output in a format suitable for incorporation in the IOTDB
-out_3CE_UPD_IOTDB = convert_3CE_update("./test/sample_forms/Form-3CE-update.xlsx")
+out_3CE_UPD_IOTDB = do_convert_3CE(out_3CE_UPD, source = "FOO", quality = "BAR")
 
 FORM_4SF =
   new("IOTCForm4SF",
@@ -135,7 +135,7 @@ out_4SF      = extract_output(FORM_4SF, wide = FALSE)
 out_4SF_wide = extract_output(FORM_4SF, wide = TRUE)
 
 # Converts the output in a format suitable for incorporation in the IOTDB
-out_4SF_IOTDB = convert_4SF("./test/sample_forms/Form-4SF.xlsx")
+out_4SF_IOTDB = do_convert_4SF(out_4SF, source = "FOO", quality = "BAR")
 
 FORM_4SF_UPD =
   new("IOTCForm4SFUpdate",
@@ -153,4 +153,4 @@ out_4SF_UPD      = extract_output(FORM_4SF_UPD, wide = FALSE)
 out_4SF_UPD_wide = extract_output(FORM_4SF_UPD, wide = TRUE)
 
 # Converts the output in a format suitable for incorporation in the IOTDB
-out_4SF_UPD_IOTDB = convert_4SF_update("./test/sample_forms/Form-4SF-update.xlsx")
+out_4SF_UPD_IOTDB = do_convert_4SF(out_4SF_UPD, source = "FOO", quality = "BAR")
