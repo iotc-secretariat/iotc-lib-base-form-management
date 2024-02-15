@@ -43,8 +43,8 @@ do_convert_1RC = function(output, source_code, quality_code) {
                CatchUnit = convert_catch_unit(CATCH_UNIT_CODE),
                Source = source_code,
                QualityCode = quality_code,
-               EComments = NA,
-               FComments = NA)]
+               EComments = "<NA>",
+               FComments = "<NA>")]
   )
 }
 
@@ -62,8 +62,8 @@ convert_3CE = function(filename, source_code = "LO", quality_code = "GOOD") {
 }
 
 #' @export
-convert_3CE_multiple = function(filename, source_code = "LO", quality_code = "GOOD") {
-  form = new("IOTCForm3CEMultiple", path_to_file = filename)
+convert_3CE_update = function(filename, source_code = "LO", quality_code = "GOOD") {
+  form = new("IOTCForm3CEUpdate", path_to_file = filename)
 
   return(
     do_convert_3CE(
@@ -132,8 +132,8 @@ convert_4SF = function(filename, source_code = "LO", quality_code = "GOOD") {
 }
 
 #' @export
-convert_4SF_multiple = function(filename, source_code = "LO", quality_code = "GOOD") {
-  form = new("IOTCForm4SFMultiple", path_to_file = filename)
+convert_4SF_update = function(filename, source_code = "LO", quality_code = "GOOD") {
+  form = new("IOTCForm4SFUpdate", path_to_file = filename)
 
   return(
     do_convert_4SF(
@@ -163,7 +163,7 @@ do_convert_4SF = function(output, source_code, quality_code) {
                SchoolType = SCHOOL_TYPE_CODE,
                Source = source_code,
                MeasType = MEASURE_TYPE_CODE,
-               RaisingCode = DATA_RAISING_CODE,
+               RaisingCode = ifelse(is.na(DATA_RAISING_CODE) | DATA_RAISING_CODE == "UN", "UNCL", ifelse(DATA_RAISING_CODE == "NR", "OS", "SD")),
                #SampleSize = round(as.numeric(NUM_SAMPLES), 2),
                SampleSize = round(as.numeric(NUM_SAMPLES_STRATA), 2),
                QualityCode = quality_code,
