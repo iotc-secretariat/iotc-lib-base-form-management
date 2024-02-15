@@ -1,27 +1,28 @@
-TYPE_OF_MEASUREMENT_CODE,CODE,MEASURE_TYPE_CODE,NAME_EN
-LN,CF,CF,Cleithrum-fork of the tail length
-LN,CK,CKL,Cleithrum-keel length
-LN,CL,CL,Carapace Length (total carapace length - notch to notch)
-LN,DF,LDF,Dorsal fork length (anterior insertion of the dorsal fin to the fork of the tail)
-LN,EF,EFL,Eye to fork length (caudal margin of eye to the fork of the tail)
-LN,FD,MLD,First dorsal length also called pre-dorsal length (tip of the upper jaw to the insertion of the first dorsal spine)
-LN,FL,FL,Tip of snout-fork of the tail length
-LN,JF,,Upper jaw to the fork of the tail length (tip of upper jaw to fork of tail)
-LN,PA,PAL,Pectoral-anal length (anterior insertion of pectoral fin to posterior rim of the anal fin);
-LN,PC,PCL,Precaudal Length (tip of head to anterior portion of the caudal keel)
-LN,PD,PDUL,Pectoral-dorsal length (anterior insertion of the pectoral fin to the anterior insertion of the second dorsal fin)
-LN,PF,PCL,Pectoral fork length (anterior insertion of pectoral fin to the fork of the tail)
-LN,TL,TL,"Total length (for sharks: from tip of snout to extreme end of tail in a straight line, for seabirds: tip of bill to tip of tail)"
-LN,TW,TW,Total width (total disc width)
-LN,UN,UNCL,Unknown
-LN,WL,,Wing length (bend of the wing to the tip of the longest primary feathers)
-WG,GG,GGT,Gilled-and-gutted (bill-off)
-WG,GO,,Gutted only (gills left)
-WG,GT,,"Gilled, gutted and tailed"
-WG,HD,HDD,Headed-and-gutted
-WG,HG,,"Headed, gutted and tailed"
-WG,HT,,Headed and tailed
-WG,PD,PPD,Headed and caudal peduncle-off
-WG,PR,,Processed (unspecified)
-WG,RD,RND,Unprocessed (round)
-WG,UN,UNCL,Unknown
+TYPE_OF_MEASUREMENT_CODE,TYPE_OF_MEASUREMENT_CODE,CODE,MEASURE_TYPE_CODE,NAME_EN
+LN,LN,CF,CF,Cleithrum-fork length
+LN,LN,CK,CKL,Cleithrum-keel length
+LN,LN,CL,CL,Carapace length
+LN,LN,DF,LDF,Dorsal fork length
+LN,LN,DW,TW,Disc width
+LN,LN,EF,EFL,Eye-to-fork length
+LN,LN,FD,MLD,First dorsal length (predorsal length)
+LN,LN,LJ,FL,Lower-jaw fork length
+LN,LN,PA,PAL,Pectoral-anal length
+LN,LN,PC,PCL,Precaudal length
+LN,LN,PD,PDUL,Pectoral-dorsal length
+LN,LN,PF,PCL,Pectoral fork length
+LN,LN,SL,,Standard length
+LN,LN,TL,TL,Total length
+LN,LN,UJ,FL,Upper-jaw fork length
+LN,LN,UN,UNCL,Unknown length measurement
+WG,LN,WL,,Wing length
+WG,WG,GG,GGT,Gilled-and-gutted weight
+WG,WG,GO,,Gutted only weight
+WG,WG,GT,,"Gilled, gutted and tailed weight"
+WG,WG,HD,HDD,Headed-and-gutted weight
+WG,WG,HG,,"Headed, gutted and tailed weight"
+WG,WG,HT,,Headed and tailed weight
+WG,WG,PD,PPD,Headed and caudal peduncle-off weight
+WG,WG,PR,,Processed weight
+WG,WG,RD,RND,Round weight
+WG,WG,UN,UNCL,Unknown length measurement

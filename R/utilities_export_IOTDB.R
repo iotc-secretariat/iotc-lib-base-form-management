@@ -31,20 +31,37 @@ do_convert_1RC = function(output, source_code, quality_code) {
     output[, `:=`(START_DATE = quarter_to_date_start(YEAR, QUARTER),
                   END_DATE   = quarter_to_date_end  (YEAR, QUARTER))]
 
+  # Merges the output with the FISHERIES reference codelist to get the IOTDB codes
+  output = merge(output, iotc.data.reference.codelists::FISHERIES,
+                 by.x = "FISHERY_CODE", by.y = "CODE",
+                 all.x = TRUE, sort = FALSE)
   return(
     output[, .(Country = FLAG_COUNTRY_CODE,
                ReportingCountry = REPORTING_ENTITY_CODE,
                TimeIntervalStart = START_DATE,
                TimeIntervalEnd = END_DATE,
                Grid = convert_area(IOTC_MAIN_AREA_CODE),
-               Gear = MAIN_GEAR_CODE,
+               Gear = IOTDB_GEAR_CODE, #MAIN_GEAR_CODE,
                Species = SPECIES_CODE,
                Catch = CATCH,
                CatchUnit = convert_catch_unit(CATCH_UNIT_CODE),
                Source = source_code,
                QualityCode = quality_code,
-               EComments = NA,
-               FComments = NA)]
+               EComments = "<NA>",
+               FComments = "<NA>")]
+  )
+}
+
+#' @export
+convert_3CE_update = function(filename, source_code = "LO", quality_code = "GOOD") {
+  form = new("IOTCForm3CEUpdate", path_to_file = filename)
+
+  return(
+    do_convert_3CE(
+      extract_output(form, FALSE),
+      source_code,
+      quality_code
+    )
   )
 }
 
@@ -62,30 +79,21 @@ convert_3CE = function(filename, source_code = "LO", quality_code = "GOOD") {
 }
 
 #' @export
-convert_3CE_multiple = function(filename, source_code = "LO", quality_code = "GOOD") {
-  form = new("IOTCForm3CEMultiple", path_to_file = filename)
-
-  return(
-    do_convert_3CE(
-      extract_output(form, FALSE),
-      source_code,
-      quality_code
-    )
-  )
-}
-
-#' @export
 do_convert_3CE = function(output, source_code, quality_code) {
   output =
     output[, `:=`(START_DATE = month_to_date_start(YEAR, MONTH),
                   END_DATE   = month_to_date_end  (YEAR, MONTH))]
 
+  # Merges the output with the FISHERIES reference codelist to get the IOTDB codes
+  output = merge(output, iotc.data.reference.codelists::FISHERIES,
+                 by.x = "FISHERY_CODE", by.y = "CODE",
+                 all.x = TRUE, sort = FALSE)
   output =
     output[, .(CO = FLAG_COUNTRY_CODE,
-               GEAR = MAIN_GEAR_CODE,
+               GEAR = IOTDB_GEAR_CODE, #MAIN_GEAR_CODE,
                YEAR = YEAR,
                MONTH = month(ymd(START_DATE)),
-               SCHOOLTYPE = SCHOOL_TYPE_CODE,
+               SCHOOLTYPE = ifelse(is.na(FISHING_MODE_CODE), NA, ifelse(FISHING_MODE_CODE != "FS", "LS", "FS")),
                SIZE = str_sub(GRID_CODE, 1, 1),
                Q    = str_sub(GRID_CODE, 2, 2),
                LAT  = as.integer(str_sub(GRID_CODE, 3, 4)),
@@ -119,8 +127,8 @@ do_convert_3CE = function(output, source_code, quality_code) {
 }
 
 #' @export
-convert_4SF = function(filename, source_code = "LO", quality_code = "GOOD") {
-  form = new("IOTCForm4SF", path_to_file = filename)
+convert_4SF_update = function(filename, source_code = "LO", quality_code = "GOOD") {
+  form = new("IOTCForm4SFUpdate", path_to_file = filename)
 
   return(
     do_convert_4SF(
@@ -132,8 +140,8 @@ convert_4SF = function(filename, source_code = "LO", quality_code = "GOOD") {
 }
 
 #' @export
-convert_4SF_multiple = function(filename, source_code = "LO", quality_code = "GOOD") {
-  form = new("IOTCForm4SFMultiple", path_to_file = filename)
+convert_4SF = function(filename, source_code = "LO", quality_code = "GOOD") {
+  form = new("IOTCForm4SF", path_to_file = filename)
 
   return(
     do_convert_4SF(
@@ -150,6 +158,8 @@ do_convert_4SF = function(output, source_code, quality_code) {
     output[, `:=`(START_DATE = month_to_date_start(YEAR, MONTH),
                   END_DATE   = month_to_date_end  (YEAR, MONTH))]
 
+  # Merges the output with the FISHERIES reference codelist to get the IOTDB codes
+  output = merge(output, iotc.data.reference.codelists::FISHERIES, by.x = "FISHERY_CODE", by.y = "CODE", all.x = TRUE, sort = FALSE)
   output = merge(output, MEASURE_MAPPINGS, by.x = "MEASURE_CODE", by.y = "CODE", all.x = TRUE)
 
   return(
@@ -158,12 +168,12 @@ do_convert_4SF = function(output, source_code, quality_code) {
                TimeIntervalStart = START_DATE,
                TimeIntervalEnd = END_DATE,
                Grid = GRID_CODE,
-               Gear = ifelse(GEAR_CODE %in% c("ELLOB", "FLLOB", "LLOB", "PSOB"), GEAR_CODE, MAIN_GEAR_CODE),
+               Gear = IOTDB_GEAR_CODE, #ifelse(GEAR_CODE %in% c("ELLOB", "FLLOB", "LLOB", "PSOB"), GEAR_CODE, MAIN_GEAR_CODE),
                Species = SPECIES_CODE,
-               SchoolType = SCHOOL_TYPE_CODE,
+               SchoolType = ifelse(is.na(FISHING_MODE_CODE), NA, ifelse(FISHING_MODE_CODE != "FS", "LS", "FS")),
                Source = source_code,
                MeasType = MEASURE_TYPE_CODE,
-               RaisingCode = DATA_RAISING_CODE,
+               RaisingCode = ifelse(is.na(DATA_RAISING_CODE) | DATA_RAISING_CODE == "UN", "UNCL", ifelse(DATA_RAISING_CODE == "NR", "OS", "SD")),
                #SampleSize = round(as.numeric(NUM_SAMPLES), 2),
                SampleSize = round(as.numeric(NUM_SAMPLES_STRATA), 2),
                QualityCode = quality_code,

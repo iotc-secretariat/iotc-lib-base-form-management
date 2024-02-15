@@ -302,8 +302,9 @@ setMethod("extract_output", list(form = "IOTCForm1RC", wide = "logical"),
     strata$FLAG_COUNTRY_CODE      = form_metadata$general_information$flag_country
     strata$FLEET_CODE             = fleet$FLEET_CODE
 
-    # Not required when using the new fishery codes
-    #strata = merge(strata, FISHERY_MAPPINGS, by = "FISHERY_CODE", all.x = TRUE, sort = FALSE)
+    #strata = merge(strata, iotc.data.reference.codelists::FISHERIES,
+    #               by.x = "FISHERY_CODE", by.y = "CODE",
+    #               all.x = TRUE, sort = FALSE)
 
     strata = strata[, .(REPORTING_ENTITY_CODE, FLAG_COUNTRY_CODE, FLEET_CODE,
                         YEAR, QUARTER,

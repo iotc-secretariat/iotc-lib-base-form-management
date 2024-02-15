@@ -12,17 +12,6 @@
 #' @source <https://iotc.org/vessels/date>
 "RAV"
 
-#' Fishery mappings
-#' @format
-#' \describe{
-#'    \item{FISHERY_CODE}{The IOTCStatistics (legacy) fishery code}
-#'    \item{GEAR_CODE}{The IOTDB (legacy) gear code}
-#'    \item{MAIN_GEAR_CODE}{The IOTDB (legacy) main gear code}
-#'    \item{SCHOOL_TYPE_CODE}{The IOTDB (legacy) school type code}
-#'    \item{NAME_EN}{A description of the fishery}
-#' }
-"FISHERY_MAPPINGS"
-
 #' Effort unit mappings
 #' @format
 #' \describe{

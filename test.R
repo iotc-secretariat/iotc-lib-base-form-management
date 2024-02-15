@@ -7,7 +7,7 @@ library(iotc.core.db.data)
 library(iotc.data.reference.codelists)
 
 source("./data-raw/LOAD_RAV.R")
-source("./data-raw/READ_FISHERY_MAPPINGS.R")
+#source("./data-raw/READ_FISHERY_MAPPINGS.R")
 source("./data-raw/READ_EFFORT_MAPPINGS.R")
 source("./data-raw/READ_MEASURE_MAPPINGS.R")
 
@@ -49,6 +49,9 @@ write.table(summary$validation_messages,
 
 out_1RC      = extract_output(FORM_1RC, wide = FALSE)
 out_1RC_wide = extract_output(FORM_1RC, wide = TRUE)
+
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_1RC_IOTDB = convert_1RC("./test/sample_forms/Form-1RC.xlsx")
 
 FORM_1DI =
   new("IOTCForm1DI",
@@ -95,6 +98,9 @@ write.table(summary$validation_messages,
 out_3CE      = extract_output(FORM_3CE, wide = FALSE)
 out_3CE_wide = extract_output(FORM_3CE, wide = TRUE)
 
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_3CE_IOTDB = convert_3CE("./test/sample_forms/Form-3CE.xlsx")
+
 FORM_3CE_UPD =
   new("IOTCForm3CEUpdate",
       path_to_file  = "./test/sample_forms/Form-3CE-update.xlsx",
@@ -109,6 +115,9 @@ write.table(summary$validation_messages,
 
 out_3CE_UPD      = extract_output(FORM_3CE_UPD, wide = FALSE)
 out_3CE_UPD_wide = extract_output(FORM_3CE_UPD, wide = TRUE)
+
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_3CE_UPD_IOTDB = convert_3CE_update("./test/sample_forms/Form-3CE-update.xlsx")
 
 FORM_4SF =
   new("IOTCForm4SF",
@@ -125,6 +134,9 @@ write.table(summary$validation_messages,
 out_4SF      = extract_output(FORM_4SF, wide = FALSE)
 out_4SF_wide = extract_output(FORM_4SF, wide = TRUE)
 
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_4SF_IOTDB = convert_4SF("./test/sample_forms/Form-4SF.xlsx")
+
 FORM_4SF_UPD =
   new("IOTCForm4SFUpdate",
       path_to_file  = "./test/sample_forms/Form-4SF-update.xlsx",
@@ -139,3 +151,6 @@ write.table(summary$validation_messages,
 
 out_4SF_UPD      = extract_output(FORM_4SF_UPD, wide = FALSE)
 out_4SF_UPD_wide = extract_output(FORM_4SF_UPD, wide = TRUE)
+
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_4SF_UPD_IOTDB = convert_4SF_update("./test/sample_forms/Form-4SF-update.xlsx")
