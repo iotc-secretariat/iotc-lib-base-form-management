@@ -49,6 +49,9 @@ write.table(summary$validation_messages,
 out_1RC      = extract_output(FORM_1RC, wide = FALSE)
 out_1RC_wide = extract_output(FORM_1RC, wide = TRUE)
 
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_1RC_IOTDB = do_convert_1RC(out_1RC, source_code = "FOO", quality_code = "BAR")
+
 FORM_1DI =
   new("IOTCForm1DI",
       path_to_file  = "./test/sample_forms/Form-1DI - interim.xlsx",
@@ -79,6 +82,9 @@ write.table(summary$validation_messages,
 out_3CE      = extract_output(FORM_3CE, wide = FALSE)
 out_3CE_wide = extract_output(FORM_3CE, wide = TRUE)
 
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_3CE_IOTDB = do_convert_3CE(out_3CE, source_code = "FOO", quality_code = "BAR")
+
 FORM_3CE_UPD =
   new("IOTCForm3CEUpdate",
       path_to_file  = "./test/sample_forms/Form-3CE-update - interim.xlsx",
@@ -93,6 +99,9 @@ write.table(summary$validation_messages,
 
 out_3CE_UPD      = extract_output(FORM_3CE_UPD, wide = FALSE)
 out_3CE_UPD_wide = extract_output(FORM_3CE_UPD, wide = TRUE)
+
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_3CE_UPD_IOTDB = do_convert_3CE_update(out_3CE_UPD, source_code = "FOO", quality_code = "BAR")
 
 FORM_4SF =
   new("IOTCForm4SF",
@@ -109,6 +118,9 @@ write.table(summary$validation_messages,
 out_4SF      = extract_output(FORM_4SF, wide = FALSE)
 out_4SF_wide = extract_output(FORM_4SF, wide = TRUE)
 
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_4SF_IOTDB = do_convert_4SF(out_4SF, source_code = "FOO", quality_code = "BAR")
+
 FORM_4SF_UPD =
   new("IOTCForm4SFUpdate",
       path_to_file  = "./test/sample_forms/Form-4SF-update - interim.xlsx",
@@ -123,3 +135,6 @@ write.table(summary$validation_messages,
 
 out_4SF_UPD      = extract_output(FORM_4SF_UPD, wide = FALSE)
 out_4SF_UPD_wide = extract_output(FORM_4SF_UPD, wide = TRUE)
+
+# Converts the output in a format suitable for incorporation in the IOTDB
+out_4SF_UPD_IOTDB = do_convert_4SF_update(out_4SF_UPD, source_code = "FOO", quality_code = "BAR")
