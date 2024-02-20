@@ -6,7 +6,7 @@ library(stringr)
 library(iotc.core.db.data)
 library(iotc.data.reference.codelists)
 
-source("./data-raw/LOAD_RAV.R")
+#source("./data-raw/LOAD_RAV.R")
 #source("./data-raw/READ_FISHERY_MAPPINGS.R")
 source("./data-raw/READ_EFFORT_MAPPINGS.R")
 source("./data-raw/READ_MEASURE_MAPPINGS.R")

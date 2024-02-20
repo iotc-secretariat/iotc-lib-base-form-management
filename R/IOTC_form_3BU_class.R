@@ -145,24 +145,58 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
   # Checks if vessel is mapped to the RAV via its IOTC number / VRVesselKey
 
-  vessel_mapped = !is.na(vessel_ID_VRKey) && nrow(RAV[IOTC_NUMBER == vessel_ID_VRKey]) > 0
-                  #(query(DB_RAV(), paste0("SELECT COUNT(*) FROM [IOTCVessels].[dbo].V_RAV WHERE VRVesselKey = ", vessel_ID_VRKey)) > 0)[[1]] # TRUE / FALSE
+  vessel_data = NULL
 
-  if(vessel_mapped) {
-    # Retrieves historical vessel data (name / flag / current) from the RAV
+  if(!is.na(vessel_ID_VRKey)) {
+    vessel_data =
+      query(connection = DB_RAV(),
+            query = paste0("
+            WITH LAST_UPDATE_DATE AS (
+          	  SELECT
+          		  VRVesselKey AS IOTC_NUMBER,
+          		  MAX(DateUpdated) AS LAST_UPDATE
+          	  FROM
+          		  [IOTCVessels].[dbo].V_RAV
+          		WHERE
+          		  VRVesselKey = '", vessel_ID_VRKey, "'
+          	  GROUP BY VRVesselKey
+            )
+            SELECT DISTINCT
+                VRVesselKey AS IOTC_NUMBER,
+                LTRIM(RTRIM(VesselName)) AS NAME,
+                LTRIM(RTRIM(Flag)) AS FLAG_CODE,
+                LTRIM(RTRIM(GearType)) AS GEAR_CODE,
+                VesselCurrent AS [CURRENT],
+    		        LAST_UPDATE
+            FROM [IOTCVessels].[dbo].V_RAV R
+            INNER JOIN  LAST_UPDATE_DATE U
+            ON
+            	R.VRVesselKey = U.IOTC_NUMBER AND
+            	R.DateUpdated = U.LAST_UPDATE
+            ORDER BY R.VRVesselKey ASC, 3, 2")
+      )
+  }
 
-    vessel_data = RAV[IOTC_NUMBER == vessel_ID_VRKey]
+  vessel_mapped = FALSE
 
-    #vessel_data_current = vessel_data[CURRENT == TRUE]
+  current = FALSE
+  current_flag = NA
+  current_name = NA
+  current_gear = NA
 
-    #current = nrow(vessel_data_current) == 1
-    current = vessel_data$CURRENT
+  if(!is.null(vessel_data)) {
+    if(nrow(vessel_data) == 1) {
+      vessel_mapped = TRUE
 
-    #current_flag = vessel_data_current$FLAG_CODE
-    #current_name = vessel_data_current$NAME
-    current_flag = vessel_data$FLAG_CODE
-    current_name = vessel_data$NAME
-    current_gear = vessel_data$GEAR_CODE
+      current = vessel_data$CURRENT
+      current_flag = vessel_data$FLAG_CODE
+      current_name = vessel_data$NAME
+      current_gear = vessel_data$GEAR_CODE
+    } else {
+      l_warn(paste0(nrow(vessel_data), " vessel records mapped to IOTC ID ", vessel_ID_VRKey, "..."))
+    }
+  } else {
+    l_warn(paste0("Unable to map IOTC ID ", vessel_ID_VRKey, " to any RAV vessel..."))
   }
 
   common_metadata_validation_results$general_information$vessel =
