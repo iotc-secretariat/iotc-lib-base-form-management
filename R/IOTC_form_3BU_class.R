@@ -149,6 +149,13 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
   if(!is.na(vessel_ID_VRKey)) {
     vessel_data =
+      # This should change to:"
+      #query(connection = DB_RAV_NEW(server   = Sys.getEnv("RAV_NEW_DB_SERVER"),
+      #                              port     = Sys.getEnv("RAV_NEW_DB_PORT"),
+      #                              database = Sys.getEnv("RAV_NEW_DB"),
+      #                              username = Sys.getEnv("RAV_NEW_DB_USER"),
+      #                              password = Sys.getEnv("RAV_NEW_DB_PASSWORD")),
+      #      query = ...
       query(connection = DB_RAV(),
             query = paste0("
             WITH LAST_UPDATE_DATE AS (
@@ -158,7 +165,7 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
           	  FROM
           		  [IOTCVessels].[dbo].V_RAV
           		WHERE
-          		  VRVesselKey = '", vessel_ID_VRKey, "'
+          		  VRVesselKey = ", vessel_ID_VRKey, "
           	  GROUP BY VRVesselKey
             )
             SELECT DISTINCT
