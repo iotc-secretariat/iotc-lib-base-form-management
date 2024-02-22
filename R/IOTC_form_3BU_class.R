@@ -152,44 +152,84 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
     if(!is.na(vessel_ID_VRKey)) {
       vessel_data =
-        # This should change to:"
-        #query(connection = DB_RAV_NEW(server   = Sys.getEnv("RAV_NEW_DB_SERVER"),
-        #                              port     = Sys.getEnv("RAV_NEW_DB_PORT"),
-        #                              database = Sys.getEnv("RAV_NEW_DB"),
-        #                              username = Sys.getEnv("RAV_NEW_DB_USER"),
-        #                              password = Sys.getEnv("RAV_NEW_DB_PASSWORD")),
-        #      query = ...
-        query(connection = DB_RAV(),
-              query = paste0("
-                -- Records of the vessels being authorised during the month of concern
-                WITH AUTHORISED AS (
-                	SELECT *
-                	FROM [IOTCVessels].[dbo].[V_RAV]
-                	WHERE
-                		VRVesselKey = '", vessel_ID_VRKey, "' AND
-                		'", reference_date, "' BETWEEN AuthorizedFrom AND AuthorizedTo -- This should be the start of the month for which we get 3BU info
-                ),
-                -- Last recorded date among the above
-                LAST_RECORDED AS (
-                	SELECT MAX(DateRecorded) AS LAST_RECORDED
-                	FROM AUTHORISED
-                	WHERE
-                		DateRecorded <= '", reference_date, "' -- This should be the start of the month for which we get 3BU info
-                )
-                -- Retrieves vessel status at the last recorded date above
-                SELECT
-                	R.VRVesselKey AS IOTC_NUMBER,
-                  LTRIM(RTRIM(R.VesselName)) AS NAME,
-                	LTRIM(RTRIM(R.Flag)) AS FLAG_CODE,
-                	LTRIM(RTRIM(R.GearType)) AS GEAR_CODE,
-                	R.VesselCurrent AS [CURRENT]
-                FROM [IOTCVessels].[dbo].[V_RAV] R
-                INNER JOIN AUTHORISED A
-                ON R.ID = A.ID
-                INNER JOIN LAST_RECORDED L
-                ON R.DateRecorded = LAST_RECORDED
-              ")
-        )
+# ERAV
+      query(connection = DB_E_RAV(),
+            query = paste0("
+            -- Identify current records
+            WITH current_ids AS (
+            SELECT DISTINCT id, 1 AS current
+            FROM rav.record
+            ),
+
+            -- Add gear code and status (current/past) to all RAV records
+            ERAV AS (
+            SELECT rh.*, rg.gear_id, COALESCE(r.current, 0) AS current_authorisation,
+            CAST(REPLACE(iotc_no, 'IOTC', '') AS INT) AS iotc_number
+            FROM rav.record_history rh
+            LEFT JOIN rav.record_history_to_gear rg ON (rh.id = rg.record_id)
+            LEFT JOIN current_ids r ON (rh.id = r.id)
+            ),
+
+            -- Records of the vessels being authorised during the month of concern
+authorised_records AS (
+            SELECT *
+            FROM erav WHERE iotc_number = '", vessel_ID_VRKey, "' AND
+            '", reference_date, "' BETWEEN authorized_from AND authorized_to
+            ),
+
+            -- Last recorded date among the above
+            last_recorded AS (
+            SELECT MAX(date_reported) AS date_last_record
+            FROM authorised_records
+            WHERE date_reported <= '", reference_date, "' -- This should be the start of the month for which we get 3BU info
+)
+
+            -- Retrieves vessel status at the last recorded date above
+            SELECT DISTINCT
+            erav.iotc_number AS "IOTC_NUMBER",
+            LTRIM(RTRIM(erav.vessel_name)) AS "NAME",
+            LTRIM(RTRIM(erav.flag_country)) AS "FLAG_CODE",
+            LTRIM(RTRIM(erav.gear_id)) AS "GEAR_CODE",
+            erav.current_authorisation AS "CURRENT"
+            FROM erav
+            INNER JOIN authorised_records ar  ON (erav.iotc_number = ar.iotc_number)
+            INNER JOIN last_recorded lr ON (erav.date_reported = lr.date_last_record)
+            ORDER BY 1, 3, 2;")
+            )
+
+# RAV
+      # vessel_data =
+      #   query(connection = DB_RAV(),
+      #         query = paste0("
+      #           -- Records of the vessels being authorised during the month of concern
+      #           WITH AUTHORISED AS (
+      #           	SELECT *
+      #           	FROM [IOTCVessels].[dbo].[V_RAV]
+      #           	WHERE
+      #           		VRVesselKey = '", vessel_ID_VRKey, "' AND
+      #           		'", reference_date, "' BETWEEN AuthorizedFrom AND AuthorizedTo -- This should be the start of the month for which we get 3BU info
+      #           ),
+      #           -- Last recorded date among the above
+      #           LAST_RECORDED AS (
+      #           	SELECT MAX(DateRecorded) AS LAST_RECORDED
+      #           	FROM AUTHORISED
+      #           	WHERE
+      #           		DateRecorded <= '", reference_date, "' -- This should be the start of the month for which we get 3BU info
+      #           )
+      #           -- Retrieves vessel status at the last recorded date above
+      #           SELECT
+      #           	R.VRVesselKey AS IOTC_NUMBER,
+      #             LTRIM(RTRIM(R.VesselName)) AS NAME,
+      #           	LTRIM(RTRIM(R.Flag)) AS FLAG_CODE,
+      #           	LTRIM(RTRIM(R.GearType)) AS GEAR_CODE,
+      #           	R.VesselCurrent AS [CURRENT]
+      #           FROM [IOTCVessels].[dbo].[V_RAV] R
+      #           INNER JOIN AUTHORISED A
+      #           ON R.ID = A.ID
+      #           INNER JOIN LAST_RECORDED L
+      #           ON R.DateRecorded = LAST_RECORDED
+      #         ")
+      #   )
     }
 
   vessel_mapped = FALSE
