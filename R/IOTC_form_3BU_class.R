@@ -152,7 +152,7 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
     if(!is.na(vessel_ID_VRKey)) {
       vessel_data =
-# ERAV
+      # ERAV
       query(connection = DB_E_RAV(),
             query = paste0("
             -- Identify current records
@@ -171,7 +171,7 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
             ),
 
             -- Records of the vessels being authorised during the month of concern
-authorised_records AS (
+            authorised_records AS (
             SELECT *
             FROM erav WHERE iotc_number = '", vessel_ID_VRKey, "' AND
             '", reference_date, "' BETWEEN authorized_from AND authorized_to
@@ -182,20 +182,20 @@ authorised_records AS (
             SELECT MAX(date_reported) AS date_last_record
             FROM authorised_records
             WHERE date_reported <= '", reference_date, "' -- This should be the start of the month for which we get 3BU info
-)
+            )
 
             -- Retrieves vessel status at the last recorded date above
             SELECT DISTINCT
-            erav.iotc_number AS "IOTC_NUMBER",
-            LTRIM(RTRIM(erav.vessel_name)) AS "NAME",
-            LTRIM(RTRIM(erav.flag_country)) AS "FLAG_CODE",
-            LTRIM(RTRIM(erav.gear_id)) AS "GEAR_CODE",
-            erav.current_authorisation AS "CURRENT"
+            erav.iotc_number AS \"IOTC_NUMBER\",
+            LTRIM(RTRIM(erav.vessel_name)) AS \"NAME\",
+            LTRIM(RTRIM(erav.flag_country)) AS \"FLAG_CODE\",
+            LTRIM(RTRIM(erav.gear_id)) AS \"GEAR_CODE\",
+            erav.current_authorisation AS \"CURRENT\"
             FROM erav
             INNER JOIN authorised_records ar  ON (erav.iotc_number = ar.iotc_number)
             INNER JOIN last_recorded lr ON (erav.date_reported = lr.date_last_record)
             ORDER BY 1, 3, 2;")
-            )
+          )
 
 # RAV
       # vessel_data =
@@ -231,6 +231,7 @@ authorised_records AS (
       #         ")
       #   )
     }
+  }
 
   vessel_mapped = FALSE
 
