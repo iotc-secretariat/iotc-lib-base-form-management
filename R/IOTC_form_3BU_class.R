@@ -183,7 +183,7 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
                 	LTRIM(RTRIM(R.Flag)) AS FLAG_CODE,
                 	LTRIM(RTRIM(R.GearType)) AS GEAR_CODE,
                 	R.VesselCurrent AS [CURRENT]
-                FROM V_RAV R
+                FROM [IOTCVessels].[dbo].[V_RAV] R
                 INNER JOIN AUTHORISED A
                 ON R.ID = A.ID
                 INNER JOIN LAST_RECORDED L
