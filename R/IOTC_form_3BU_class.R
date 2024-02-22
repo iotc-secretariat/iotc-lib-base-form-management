@@ -147,42 +147,50 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
   vessel_data = NULL
 
-  if(!is.na(vessel_ID_VRKey)) {
-    vessel_data =
-      # This should change to:"
-      #query(connection = DB_RAV_NEW(server   = Sys.getEnv("RAV_NEW_DB_SERVER"),
-      #                              port     = Sys.getEnv("RAV_NEW_DB_PORT"),
-      #                              database = Sys.getEnv("RAV_NEW_DB"),
-      #                              username = Sys.getEnv("RAV_NEW_DB_USER"),
-      #                              password = Sys.getEnv("RAV_NEW_DB_PASSWORD")),
-      #      query = ...
-      query(connection = DB_RAV(),
-            query = paste0("
-            WITH LAST_UPDATE_DATE AS (
-          	  SELECT
-          		  VRVesselKey AS IOTC_NUMBER,
-          		  MAX(DateUpdated) AS LAST_UPDATE
-          	  FROM
-          		  [IOTCVessels].[dbo].V_RAV
-          		WHERE
-          		  VRVesselKey = ", vessel_ID_VRKey, "
-          	  GROUP BY VRVesselKey
-            )
-            SELECT DISTINCT
-                VRVesselKey AS IOTC_NUMBER,
-                LTRIM(RTRIM(VesselName)) AS NAME,
-                LTRIM(RTRIM(Flag)) AS FLAG_CODE,
-                LTRIM(RTRIM(GearType)) AS GEAR_CODE,
-                VesselCurrent AS [CURRENT],
-    		        LAST_UPDATE
-            FROM [IOTCVessels].[dbo].V_RAV R
-            INNER JOIN  LAST_UPDATE_DATE U
-            ON
-            	R.VRVesselKey = U.IOTC_NUMBER AND
-            	R.DateUpdated = U.LAST_UPDATE
-            ORDER BY R.VRVesselKey ASC, 3, 2")
-      )
-  }
+  if(general_information$reporting_year$valid && reporting_month_valid) {
+    reference_date = paste0(general_information$reporting_year, "-", paste0(ifelse(reporting_month < 10, "0", ""), reporting_month), "-01")
+
+    if(!is.na(vessel_ID_VRKey)) {
+      vessel_data =
+        # This should change to:"
+        #query(connection = DB_RAV_NEW(server   = Sys.getEnv("RAV_NEW_DB_SERVER"),
+        #                              port     = Sys.getEnv("RAV_NEW_DB_PORT"),
+        #                              database = Sys.getEnv("RAV_NEW_DB"),
+        #                              username = Sys.getEnv("RAV_NEW_DB_USER"),
+        #                              password = Sys.getEnv("RAV_NEW_DB_PASSWORD")),
+        #      query = ...
+        query(connection = DB_RAV(),
+              query = paste0("
+                -- Records of the vessels being authorised during the month of concern
+                WITH AUTHORISED AS (
+                	SELECT *
+                	FROM [IOTCVessels].[dbo].[V_RAV]
+                	WHERE
+                		VRVesselKey = '", vessel_ID_VRKey, "' AND
+                		'", reference_date, "' BETWEEN AuthorizedFrom AND AuthorizedTo -- This should be the start of the month for which we get 3BU info
+                ),
+                -- Last recorded date among the above
+                LAST_RECORDED AS (
+                	SELECT MAX(DateRecorded) AS LAST_RECORDED
+                	FROM AUTHORISED
+                	WHERE
+                		DateRecorded <= '", reference_date, "' -- This should be the start of the month for which we get 3BU info
+                )
+                -- Retrieves vessel status at the last recorded date above
+                SELECT
+                	R.VRVesselKey AS IOTC_NUMBER,
+                  LTRIM(RTRIM(R.VesselName)) AS NAME,
+                	LTRIM(RTRIM(R.Flag)) AS FLAG_CODE,
+                	LTRIM(RTRIM(R.GearType)) AS GEAR_CODE,
+                	R.VesselCurrent AS [CURRENT]
+                FROM V_RAV R
+                INNER JOIN AUTHORISED A
+                ON R.ID = A.ID
+                INNER JOIN LAST_RECORDED L
+                ON R.DateRecorded = LAST_RECORDED
+              ")
+        )
+    }
 
   vessel_mapped = FALSE
 
