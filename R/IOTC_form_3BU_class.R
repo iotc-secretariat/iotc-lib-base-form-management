@@ -147,8 +147,8 @@ setMethod("validate_metadata", list(form = "IOTCForm3BU", common_metadata_valida
 
   vessel_data = NULL
 
-  if(general_information$reporting_year$valid && reporting_month_valid) {
-    reference_date = paste0(general_information$reporting_year, "-", paste0(ifelse(reporting_month < 10, "0", ""), reporting_month), "-01")
+  if(common_metadata_validation_results$general_information$reporting_year$valid && reporting_month_valid) {
+    reference_date = paste0(general_information$reporting_year, "-", paste0(ifelse(general_information$reporting_month < 10, "0", ""), general_information$reporting_month), "-01")
 
     if(!is.na(vessel_ID_VRKey)) {
       vessel_data =
