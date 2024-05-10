@@ -15,8 +15,7 @@ Depends:
     stringr,
     iotc.core.utils.misc,
     iotc.data.reference.codelists,
-    iotc.core.db.connections (>= 0.2.3),
-    R (>= 2.10)
+   R (>= 2.10)
 RoxygenNote: 7.2.3
 Collate: 
     'Message_class.R'
