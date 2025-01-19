@@ -49,9 +49,11 @@ setMethod("last_strata_column", "IOTCForm4SF", function(form) {
   return(which(EXCEL_COLUMNS == "T"))
 })
 
-setMethod("validate_months", list(form = "IOTCForm4SF", strata = "data.table"), function(form, strata) {
+setMethod("validate_months", "IOTCForm4SF", function(form) {
   start = Sys.time()
   l_info("IOTCForm4SF.validate_months")
+
+  strata = form@data$processed_strata
 
 # valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
 #                                                                               DATA_SOURCE_CODE, DATA_PROCESSING_CODE,

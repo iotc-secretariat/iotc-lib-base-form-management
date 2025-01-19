@@ -168,6 +168,34 @@ setMethod("validate_common_metadata", "IOTCForm", function(form) {
   )
 })
 
+#'@export
+setGeneric("allow_empty_data", function(form) {
+  standardGeneric("allow_empty_data")
+})
+
+setMethod("allow_empty_data", "IOTCForm", function(form){
+  stop("Abstract method in IOTCForm")
+})
+
+
+#'@export
+setGeneric("estimation_column", function(form) {
+  standardGeneric("estimation_column")
+})
+
+setMethod("estimation_column", "IOTCForm", function(form){
+  stop("Abstract method in IOTCForm")
+})
+
+#'@export
+setGeneric("validate_months", function(form) {
+  standardGeneric("validate_months")
+})
+
+setMethod("validate_months", "IOTCForm", function(form){
+  stop("Abstract method in IOTCForm")
+})
+
 setGeneric("validate", function(form) {
   standardGeneric("validate")
 })

@@ -49,8 +49,10 @@ setMethod("last_strata_column", "IOTCForm3CE", function(form) {
   return(which(EXCEL_COLUMNS == "Q"))
 })
 
-setMethod("validate_months", list(form = "IOTCForm3CE", strata = "data.table"), function(form, strata) {
+setMethod("validate_months", "IOTCForm3CE", function(form) {
   start = Sys.time()
+
+  strata = form@data$processed_strata
 
   l_info("IOTCForm3CE.validate_months")
 

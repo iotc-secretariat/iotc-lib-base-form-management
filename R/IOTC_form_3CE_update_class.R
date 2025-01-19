@@ -41,8 +41,10 @@ setMethod("last_strata_column", "IOTCForm3CEUpdate", function(form) {
   return(which(EXCEL_COLUMNS == "G"))
 })
 
-setMethod("validate_months", list(form = "IOTCForm3CEUpdate", strata = "data.table"), function(form, strata) {
+setMethod("validate_months", "IOTCForm3CEUpdate", function(form) {
   l_info("IOTCForm3CEUpdate.validate_months")
+
+  strata = form@data$processed_strata
 
   # This form is used to provide updates for a given fishery only, so the provision of 'complete' month data \
   # (i.e., for each and every month of the year) should be considered at the grid level rather than at the full stratum level

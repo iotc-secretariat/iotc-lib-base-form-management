@@ -5,18 +5,6 @@ IOTCFormCESFUpdate = setClass(
   contains = "IOTCForm"
 )
 
-setGeneric("validate_months", function(form, strata) {
-  standardGeneric("validate_months")
-})
-
-setGeneric("allow_empty_data", function(form) {
-  standardGeneric("allow_empty_data")
-})
-
-setGeneric("estimation_column", function(form) {
-  standardGeneric("estimation_column")
-})
-
 setMethod("form_comment_cell_row", "IOTCFormCESFUpdate", function(form) {
   return(34) #Default for CE / SF
 })
@@ -250,7 +238,8 @@ setMethod("validate_data", list(form = "IOTCFormCESFUpdate", metadata_validation
   missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
 
   # If all months are provided and valid, we check that they're also consistent...
-  months_check = validate_months(form, strata)
+  form@data$processed_data = strata
+  months_check = validate_months(form)
 
   missing_grids  = which( is.na(strata$GRID_CODE))
   invalid_grids  = which(!is_grid_AR_valid(strata$GRID_CODE))
