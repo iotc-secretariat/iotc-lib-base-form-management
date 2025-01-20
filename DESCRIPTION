@@ -1,7 +1,8 @@
 Package: iotc.base.form.management
 Type: Package
 Title: IOTC form management libraries
-Version: 1.0.0
+Version: 1.0.1
+Date: 2025-01-19
 Author: Fabio Fiorellato
 Maintainer: Fabio Fiorellato <fabio.fiorellato@fao.org>
 Description: The IOTC base package to implement the data import and validation workflow for the standard data sets
