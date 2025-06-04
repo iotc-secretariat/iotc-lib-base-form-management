@@ -238,7 +238,7 @@ setMethod("validate_data", list(form = "IOTCFormCESFUpdate", metadata_validation
   missing_months   = missing_months[ ! missing_months %in% strata_empty_rows]
 
   # If all months are provided and valid, we check that they're also consistent...
-  form@data$processed_data = strata
+  form@data$processed_strata = strata
   months_check = validate_months(form)
 
   missing_grids  = which( is.na(strata$GRID_CODE))
