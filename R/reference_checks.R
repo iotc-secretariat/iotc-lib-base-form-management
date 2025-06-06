@@ -193,13 +193,13 @@ validate_grid_CE_SF = function(grid_code, field = "Grid") {
 
 grids_AR_for = function(grid_code) {
   return(
-    iotc.data.reference.codelists::IOTC_GRIDS_AR[CODE %in% trim(grid_code)]
+    iotc.data.reference.codelists::IOTC_GRIDS_CE_SF_AR[CODE %in% trim(grid_code)]
   )
 }
 
 is_grid_AR_valid = function(grid_code) {
   return(
-    trim(grid_code) %in% iotc.data.reference.codelists::IOTC_GRIDS_AR$CODE
+    trim(grid_code) %in% iotc.data.reference.codelists::IOTC_GRIDS_CE_SF_AR$CODE
   )
 }
 
