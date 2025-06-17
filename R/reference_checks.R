@@ -636,13 +636,13 @@ measurement_for = function(measurement_type_code, measurement_code) {
   measurement_code      = trim(measurement_code)
 
   return(
-    iotc.data.reference.codelists::MEASUREMENT_TYPES[paste0(measurement_type_code, "-", measurement_code) %in% paste0(TYPE_OF_MEASUREMENT_CODE, "-", CODE)]
+    iotc.data.reference.codelists::MEASUREMENTS[paste0(measurement_type_code, "-", measurement_code) %in% paste0(TYPE_OF_MEASUREMENT_CODE, "-", CODE)]
   )
 }
 
 is_measurement_valid = function(measurement_type_code, measurement_code) {
   return(
-    paste0(trim(measurement_type_code), "-", trim(measurement_code)) %in% paste0(iotc.data.reference.codelists::MEASUREMENT_TYPES$TYPE_OF_MEASUREMENT_CODE, "-", iotc.data.reference.codelists::MEASUREMENT_TYPES$CODE)
+    paste0(trim(measurement_type_code), "-", trim(measurement_code)) %in% paste0(iotc.data.reference.codelists::MEASUREMENTS$TYPE_OF_MEASUREMENT_CODE, "-", iotc.data.reference.codelists::MEASUREMENT_TYPES$CODE)
   )
 }
 
