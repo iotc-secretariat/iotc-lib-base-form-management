@@ -222,7 +222,7 @@ species_for = function(species_code, reference_species_list = iotc.data.referenc
   )
 }
 
-is_species_valid = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES) {
+is_species_valid = function(species_code, reference_species_list = iotc.data.reference.codelists::SPECIES) {
   return(
     trim(species_code) %in% reference_species_list$CODE
   )
