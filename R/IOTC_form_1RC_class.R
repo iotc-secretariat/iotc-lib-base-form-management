@@ -125,7 +125,7 @@ setMethod("get_all_species_references_domain_and_codelist", "IOTCForm1RC", funct
 
 setMethod("get_all_species_references", "IOTCForm1RC", function(form) {
   l_debug("1-RC.get_all_species_references")
-  return(iotc.data.reference.codelists::LEGACY_SPECIES)
+  return(iotc.data.reference.codelists::SPECIES)
 })
 
 setMethod("validate_data",
