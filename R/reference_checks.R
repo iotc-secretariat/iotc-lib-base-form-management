@@ -52,7 +52,7 @@ validate_country = function(country_code, field = "Flag country") {
 
 ## FLEETS
 
-fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::LEGACY_FLEETS) {
+fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS) {
   valid_fleets = unique(valid_fleets[, .(FLAG_CODE, REPORTING_ENTITY_CODE, FLEET_CODE, NAME_EN, NAME_FR)])
 
   reporting_entity_code = trim(reporting_entity_code)
@@ -64,13 +64,13 @@ fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = i
   return(fleets)
 }
 
-is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::LEGACY_FLEETS) {
+is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS) {
   fleets = fleets_for(reporting_entity_code, flag_country_code, valid_fleets)
 
   return(nrow(fleets) == 1 && is_available(fleets))
 }
 
-validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::LEGACY_FLEETS) {
+validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS) {
   reporting_entity_code = validate_entity(reporting_entity_code)$CODE
   flag_country_code     = validate_country(flag_country_code)$CODE
 
@@ -216,7 +216,7 @@ validate_grid_AR = function(grid_code, field = "Grid") {
 
 ## SPECIES
 
-species_for = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES) {
+species_for = function(species_code, reference_species_list = iotc.data.reference.codelists::SPECIES) {
   return(
     reference_species_list[CODE %in% trim(species_code)]
   )
@@ -228,7 +228,7 @@ is_species_valid = function(species_code, reference_species_list = iotc.data.ref
   )
 }
 
-validate_species = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES, field = "Species") {
+validate_species = function(species_code, reference_species_list = iotc.data.reference.codelists::SPECIES, field = "Species") {
   species_code = check_mandatory(trim(species_code), field)
 
   species = species_for(species_code, reference_species_list)
@@ -239,7 +239,7 @@ validate_species = function(species_code, reference_species_list = iotc.data.ref
   return(species)
 }
 
-is_species_aggregate = function(species_code, reference_species_list = iotc.data.reference.codelists::LEGACY_SPECIES) {
+is_species_aggregate = function(species_code, reference_species_list = iotc.data.reference.codelists::SPECIES) {
   species = data.table(CODE = species_code)
   species = merge(species,
                   reference_species_list[, .(CODE, IS_AGGREGATE)],
