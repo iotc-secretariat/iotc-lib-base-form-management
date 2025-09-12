@@ -53,13 +53,13 @@ validate_country = function(country_code, field = "Flag country") {
 ## FLEETS
 
 fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc.data.reference.codelists::FLEETS) {
-  valid_fleets = unique(valid_fleets[, .(FLAG_CODE, REPORTING_ENTITY_CODE, FLEET_CODE, NAME_EN, NAME_FR)])
+  valid_fleets = unique(valid_fleets[, .(CODE, REPORTING_ENTITY_CODE, FLEET_CODE, NAME_EN, NAME_FR)])
 
   reporting_entity_code = trim(reporting_entity_code)
   flag_country_code     = trim(flag_country_code)
 
   fleets = valid_fleets[REPORTING_ENTITY_CODE == reporting_entity_code &
-                        FLAG_CODE             == flag_country_code]
+                        CODE             == flag_country_code]
 
   return(fleets)
 }
