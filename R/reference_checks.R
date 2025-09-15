@@ -52,9 +52,9 @@ validate_country = function(country_code, field = "Flag country") {
 
 ## FLEETS
 
-iotc_valid_fleets = unique(iotc.data.reference.codelists::FLEETS_FLAGS[!REPORTING_ENTITY_CODE %in% c("IOTC", "NEI") & FLAG_CODE != "NEI"])
+#unique(iotc.data.reference.codelists::FLEETS_FLAGS[!REPORTING_ENTITY_CODE %in% c("IOTC", "NEI") & FLAG_CODE != "NEI"])
 
-fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = iotc_valid_fleets) {
+fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = FLEETS_FLAGS) {
   valid_fleets = unique(valid_fleets[, .(FLAG_CODE, REPORTING_ENTITY_CODE, FLEET_CODE, NAME_EN, NAME_FR)])
 
   reporting_entity_code = trim(reporting_entity_code)
@@ -66,13 +66,13 @@ fleets_for = function(reporting_entity_code, flag_country_code, valid_fleets = i
   return(fleets)
 }
 
-is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = iotc_valid_fleets) {
+is_fleet_valid = function(reporting_entity_code, flag_country_code, valid_fleets = FLEETS_FLAGS) {
   fleets = fleets_for(reporting_entity_code, flag_country_code, valid_fleets)
 
   return(nrow(fleets) == 1 && is_available(fleets))
 }
 
-validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = iotc_valid_fleets) {
+validate_fleet = function(reporting_entity_code, flag_country_code, valid_fleets = FLEETS_FLAGS) {
   reporting_entity_code = validate_entity(reporting_entity_code)$CODE
   flag_country_code     = validate_country(flag_country_code)$CODE
 
