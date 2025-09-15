@@ -250,7 +250,7 @@ is_species_aggregate = function(species_code, reference_species_list = iotc.data
                   sort = FALSE)
 
   return(
-    species$IS_AGGREGATE
+    as.logical(species$IS_AGGREGATE)
   )
 }
 

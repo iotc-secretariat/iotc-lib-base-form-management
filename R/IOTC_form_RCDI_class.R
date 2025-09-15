@@ -133,8 +133,7 @@ setMethod("validate_data",
             invalid_species    = which(!is_species_valid(records$codes$species, get_all_species_references(form))) # Checks target species against the specific codelist for 1RC and 1DI
             invalid_species    = invalid_species[ ! invalid_species %in% missing_species ]
 
-            #species_aggregates = which(is_species_aggregate(records$codes$species, get_all_species_references(form)))
-            species_aggregates = which(as.logical(is_species_aggregate(records$codes$species, get_all_species_references(form)))) # test by manu as which function does not seem to work anymore
+            species_aggregates = which(is_species_aggregate(records$codes$species, get_all_species_references(form)))
 
             numeric_catch_data =
               catch_data_original[, lapply(.SD, function(value) { lapply(value, function(v) { is.na(v) | is_numeric(v) }) })]
