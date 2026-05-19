@@ -342,7 +342,7 @@ setMethod("validate_data", list(form = "IOTCForm3CEUpdate", metadata_validation_
       row_indexes = spreadsheet_rows_for(form, unique_strata)
     )
 
-  is_effort_valid = function(value) { return(!is.na(value) & is_numeric(value) & value > 0) }
+  is_effort_valid = function(value) { return(!is.na(value) & is_numeric(value) & value >= 0) }
 
   # Check that effort values are > 0 when provided, and that if there's an effort, then the corresponding code is
   # set in the metadata

@@ -248,7 +248,7 @@ setMethod("validate_data", list(form = "IOTCForm3CE", metadata_validation_result
   l_info(paste0("IOTCForm3CE.validate_data (II.c): ", Sys.time() - start))
   start = Sys.time()
 
-  is_effort_valid = function(value) { return(!is.na(value) & is_numeric(value) & value > 0) }
+  is_effort_valid = function(value) { return(!is.na(value) & is_numeric(value) & value >= 0) }
 
   ### Primary effort code + value
 
