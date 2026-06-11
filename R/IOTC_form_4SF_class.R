@@ -158,7 +158,7 @@ setMethod("validate_data", list(form = "IOTCForm4SF", metadata_validation_result
   strata[, IS_EMPTY := .I %in% strata_empty_rows]
   strata[, OCCURRENCES := .N, by = .(MONTH, FISHERY_CODE, GRID_CODE, SPECIES_CODE, SEX_CODE, FATE_TYPE_CODE, FATE_CODE,
                                      DATA_SOURCE_CODE, DATA_PROCESSING_CODE,
-                                     MEASUREMENT_TYPE_CODE, MEASURE_CODE,
+                                     MEASUREMENT_TYPE_CODE, MEASURE_CODE, MEASURING_TOOL_CODE,
                                      SIZE_CLASS_LOW, SIZE_CLASS_HIGH)]
 
   valid_months_strata   = strata[MONTH %in% 1:12, .(NUM_MONTHS = .N), keyby = .(FISHERY_CODE, SPECIES_CODE)]
